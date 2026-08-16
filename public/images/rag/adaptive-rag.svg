@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" role="img" aria-label="Adaptive RAG: a Question is classified, then routed to one of three difficulty-based branches — no_retrieval answers directly, single_hop retrieves k=3 then generates, multi_hop retrieves k=8 and reasons iteratively before answering">
+  <title>Adaptive RAG</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --edge-color:#5b616c;
+      --accent-color:#0368FF;
+      --branch-1:#0368FF;
+      --branch-2:#B44BFF;
+      --branch-3:#FF7A59;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+    }
+    .adapt-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .adapt-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .adapt-label{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .adapt-label2{font:600 11.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .adapt-route{font:700 11px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.01em;}
+    .adapt-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .adapt-edge{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .adapt-flow{fill:none;stroke-width:2;stroke-dasharray:5 11;stroke-linecap:round;animation:adapt-dash .9s linear infinite;}
+    .adapt-fc1{stroke:var(--branch-1);}
+    .adapt-fc2{stroke:var(--branch-2);}
+    .adapt-fc3{stroke:var(--branch-3);}
+    @keyframes adapt-dash{to{stroke-dashoffset:-16;}}
+
+    .adapt-glow1{opacity:0;animation:adapt-glow1 12s ease-in-out infinite;}
+    .adapt-glow2{opacity:0;animation:adapt-glow2 12s ease-in-out infinite;}
+    .adapt-glow3{opacity:0;animation:adapt-glow3 12s ease-in-out infinite;}
+    @keyframes adapt-glow1{0%{opacity:0}1.5%{opacity:1}31%{opacity:1}33%{opacity:0}100%{opacity:0}}
+    @keyframes adapt-glow2{0%{opacity:0}33%{opacity:0}34.5%{opacity:1}64%{opacity:1}66%{opacity:0}100%{opacity:0}}
+    @keyframes adapt-glow3{0%{opacity:0}66%{opacity:0}67.5%{opacity:1}98%{opacity:1}99.5%{opacity:0}100%{opacity:0}}
+
+    .adapt-p1{animation:adapt-p1 12s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes adapt-p1{
+      0%{transform:translate(0,0);opacity:0}
+      1.5%{opacity:1}
+      8%{transform:translate(118px,0)}
+      11%{transform:translate(118px,0)}
+      21%{transform:translate(298px,-140px)}
+      25%{transform:translate(298px,-140px)}
+      30%{transform:translate(418px,-140px);opacity:1}
+      32%{transform:translate(418px,-140px);opacity:0}
+      100%{transform:translate(418px,-140px);opacity:0}
+    }
+    .adapt-p2{animation:adapt-p2 12s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes adapt-p2{
+      0%{transform:translate(0,0);opacity:0}
+      33%{transform:translate(0,0);opacity:0}
+      34.5%{opacity:1}
+      41%{transform:translate(118px,0)}
+      44%{transform:translate(118px,0)}
+      50%{transform:translate(298px,0)}
+      53%{transform:translate(298px,0)}
+      59%{transform:translate(438px,0)}
+      61%{transform:translate(438px,0)}
+      65%{transform:translate(578px,0);opacity:1}
+      66.5%{transform:translate(578px,0);opacity:0}
+      100%{transform:translate(578px,0);opacity:0}
+    }
+    .adapt-p3{animation:adapt-p3 12s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes adapt-p3{
+      0%{transform:translate(0,0);opacity:0}
+      66%{transform:translate(0,0);opacity:0}
+      67.5%{opacity:1}
+      73%{transform:translate(118px,0)}
+      76%{transform:translate(118px,0)}
+      82%{transform:translate(278px,145px)}
+      85%{transform:translate(278px,145px)}
+      89%{transform:translate(458px,145px)}
+      93%{transform:translate(458px,145px)}
+      98%{transform:translate(698px,145px);opacity:1}
+      99.5%{transform:translate(698px,145px);opacity:0}
+      100%{transform:translate(698px,145px);opacity:0}
+    }
+    .adapt-pulse{transform-box:fill-box;transform-origin:center;animation:adapt-pulse 1.5s ease-out infinite;}
+    @keyframes adapt-pulse{0%{opacity:.5;transform:scale(.6)}70%{opacity:0;transform:scale(2.2)}100%{opacity:0;transform:scale(2.2)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .adapt-glow1,.adapt-glow2,.adapt-glow3,.adapt-p1,.adapt-p2,.adapt-p3,.adapt-pulse,.adapt-flow{animation:none !important;}
+      .adapt-glow1,.adapt-glow2,.adapt-glow3{opacity:1;}
+      .adapt-p1,.adapt-p2,.adapt-p3{opacity:0;}
+      .adapt-pulse{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="adapt-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="adapt-am" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+    <marker id="adapt-a1" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-1)"/></marker>
+    <marker id="adapt-a2" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-2)"/></marker>
+    <marker id="adapt-a3" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-3)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="440" fill="var(--diagram-bg)"/>
+
+  <text class="adapt-sub" x="40" y="52">DIFFICULTY-ROUTED RAG</text>
+  <text class="adapt-title" x="40" y="84" fill="url(#adapt-grad)">Adaptive RAG</text>
+
+  <!-- Gray base structure -->
+  <line class="adapt-edge" x1="108" y1="250" x2="128" y2="250" marker-end="url(#adapt-am)"/>
+  <path class="adapt-edge" d="M226,238 C 258,120 258,120 306,111" marker-end="url(#adapt-am)"/>
+  <line class="adapt-edge" x1="410" y1="110" x2="438" y2="110" marker-end="url(#adapt-am)"/>
+  <line class="adapt-edge" x1="230" y1="250" x2="304" y2="250" marker-end="url(#adapt-am)"/>
+  <line class="adapt-edge" x1="414" y1="250" x2="450" y2="250" marker-end="url(#adapt-am)"/>
+  <line class="adapt-edge" x1="548" y1="250" x2="594" y2="250" marker-end="url(#adapt-am)"/>
+  <path class="adapt-edge" d="M226,262 C 258,394 258,394 284,394" marker-end="url(#adapt-am)"/>
+  <line class="adapt-edge" x1="394" y1="395" x2="450" y2="395" marker-end="url(#adapt-am)"/>
+  <path class="adapt-edge" d="M486,373 C 486,344 554,344 554,371" marker-end="url(#adapt-am)"/>
+  <line class="adapt-edge" x1="588" y1="395" x2="714" y2="395" marker-end="url(#adapt-am)"/>
+
+  <!-- Route labels -->
+  <text class="adapt-route" x="250" y="182" text-anchor="middle" fill="var(--muted-text)">no_retrieval</text>
+  <text class="adapt-route" x="266" y="240" text-anchor="middle" fill="var(--muted-text)">single_hop</text>
+  <text class="adapt-route" x="250" y="326" text-anchor="middle" fill="var(--muted-text)">multi_hop</text>
+
+  <!-- Colored glow overlays -->
+  <g class="adapt-glow1">
+    <path class="adapt-flow adapt-fc1" d="M226,238 C 258,120 258,120 305,111" marker-end="url(#adapt-a1)"/>
+    <line class="adapt-flow adapt-fc1" x1="410" y1="110" x2="437" y2="110" marker-end="url(#adapt-a1)"/>
+    <rect x="310" y="88" width="100" height="44" rx="10" fill="none" stroke="var(--branch-1)" stroke-width="1.5"/>
+    <rect x="438" y="88" width="80" height="44" rx="10" fill="none" stroke="var(--branch-1)" stroke-width="1.5"/>
+    <text class="adapt-route" x="250" y="182" text-anchor="middle" fill="var(--branch-1)">no_retrieval</text>
+  </g>
+  <g class="adapt-glow2">
+    <line class="adapt-flow adapt-fc2" x1="230" y1="250" x2="303" y2="250" marker-end="url(#adapt-a2)"/>
+    <line class="adapt-flow adapt-fc2" x1="414" y1="250" x2="449" y2="250" marker-end="url(#adapt-a2)"/>
+    <line class="adapt-flow adapt-fc2" x1="548" y1="250" x2="593" y2="250" marker-end="url(#adapt-a2)"/>
+    <rect x="306" y="228" width="108" height="44" rx="10" fill="none" stroke="var(--branch-2)" stroke-width="1.5"/>
+    <rect x="452" y="228" width="96" height="44" rx="10" fill="none" stroke="var(--branch-2)" stroke-width="1.5"/>
+    <rect x="596" y="228" width="88" height="44" rx="10" fill="none" stroke="var(--branch-2)" stroke-width="1.5"/>
+    <text class="adapt-route" x="266" y="240" text-anchor="middle" fill="var(--branch-2)">single_hop</text>
+  </g>
+  <g class="adapt-glow3">
+    <path class="adapt-flow adapt-fc3" d="M226,262 C 258,394 258,394 283,394" marker-end="url(#adapt-a3)"/>
+    <line class="adapt-flow adapt-fc3" x1="394" y1="395" x2="449" y2="395" marker-end="url(#adapt-a3)"/>
+    <path class="adapt-flow adapt-fc3" d="M486,373 C 486,344 554,344 554,370" marker-end="url(#adapt-a3)"/>
+    <line class="adapt-flow adapt-fc3" x1="588" y1="395" x2="713" y2="395" marker-end="url(#adapt-a3)"/>
+    <rect x="286" y="373" width="108" height="44" rx="10" fill="none" stroke="var(--branch-3)" stroke-width="1.5"/>
+    <rect x="452" y="373" width="136" height="44" rx="10" fill="none" stroke="var(--branch-3)" stroke-width="1.5"/>
+    <rect x="716" y="373" width="88" height="44" rx="10" fill="none" stroke="var(--branch-3)" stroke-width="1.5"/>
+    <text class="adapt-route" x="250" y="326" text-anchor="middle" fill="var(--branch-3)">multi_hop</text>
+    <text class="adapt-label2" x="520" y="336" text-anchor="middle" fill="var(--branch-3)">iterate</text>
+  </g>
+
+  <!-- Nodes -->
+  <rect class="adapt-nodebox" x="16" y="224" width="92" height="52" rx="12"/>
+  <text class="adapt-label" x="62" y="250" text-anchor="middle" dominant-baseline="middle">Question</text>
+
+  <polygon class="adapt-nodebox" points="130,250 180,214 230,250 180,286"/>
+  <text class="adapt-label" x="180" y="250" text-anchor="middle" dominant-baseline="middle">Classify</text>
+
+  <rect class="adapt-nodebox" x="310" y="88" width="100" height="44" rx="10"/>
+  <text class="adapt-label2" x="360" y="110" text-anchor="middle" dominant-baseline="middle">Answer Directly</text>
+  <rect class="adapt-nodebox" x="438" y="88" width="80" height="44" rx="10"/>
+  <text class="adapt-label2" x="478" y="110" text-anchor="middle" dominant-baseline="middle">Answer</text>
+
+  <rect class="adapt-nodebox" x="306" y="228" width="108" height="44" rx="10"/>
+  <text class="adapt-label2" x="360" y="250" text-anchor="middle" dominant-baseline="middle">Retrieve (k=3)</text>
+  <rect class="adapt-nodebox" x="452" y="228" width="96" height="44" rx="10"/>
+  <text class="adapt-label2" x="500" y="250" text-anchor="middle" dominant-baseline="middle">Generate</text>
+  <rect class="adapt-nodebox" x="596" y="228" width="88" height="44" rx="10"/>
+  <text class="adapt-label2" x="640" y="250" text-anchor="middle" dominant-baseline="middle">Answer</text>
+
+  <rect class="adapt-nodebox" x="286" y="373" width="108" height="44" rx="10"/>
+  <text class="adapt-label2" x="340" y="395" text-anchor="middle" dominant-baseline="middle">Retrieve (k=8)</text>
+  <rect class="adapt-nodebox" x="452" y="373" width="136" height="44" rx="10"/>
+  <text class="adapt-label2" x="520" y="395" text-anchor="middle" dominant-baseline="middle">Reasoning Generate</text>
+  <rect class="adapt-nodebox" x="716" y="373" width="88" height="44" rx="10"/>
+  <text class="adapt-label2" x="760" y="395" text-anchor="middle" dominant-baseline="middle">Answer</text>
+
+  <!-- Packets -->
+  <g class="adapt-p1">
+    <circle class="adapt-pulse" cx="62" cy="250" r="8" fill="none" stroke="var(--branch-1)" stroke-width="2"/>
+    <circle cx="62" cy="250" r="10" fill="var(--branch-1)" opacity="0.22"/>
+    <circle cx="62" cy="250" r="5" fill="var(--branch-1)"/>
+    <circle cx="60.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="adapt-p2">
+    <circle class="adapt-pulse" cx="62" cy="250" r="8" fill="none" stroke="var(--branch-2)" stroke-width="2"/>
+    <circle cx="62" cy="250" r="10" fill="var(--branch-2)" opacity="0.22"/>
+    <circle cx="62" cy="250" r="5" fill="var(--branch-2)"/>
+    <circle cx="60.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="adapt-p3">
+    <circle class="adapt-pulse" cx="62" cy="250" r="8" fill="none" stroke="var(--branch-3)" stroke-width="2"/>
+    <circle cx="62" cy="250" r="10" fill="var(--branch-3)" opacity="0.22"/>
+    <circle cx="62" cy="250" r="5" fill="var(--branch-3)"/>
+    <circle cx="60.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>

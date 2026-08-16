@@ -2,7 +2,7 @@
 
 Have you ever needed multiple perspectives on the same task, but couldn't predict in advance which perspectives would be most valuable? That's the problem orchestrator-workers solves: a central LLM (the orchestrator) dynamically breaks down a task into subtasks, delegates each to a worker LLM, and synthesizes their results into a final answer.
 
-![Orchestrator-Workers workflow: a Task goes to a central Orchestrator that dynamically decides how many workers to spawn, delegates to a variable set of workers (Worker 1, Worker 2, and further ghosted workers), which feed back into Orchestrator Synthesize and then Output](../../public/images/orchestrator-workers.svg)
+![Orchestrator-Workers workflow: a Task goes to a central Orchestrator that dynamically decides how many workers to spawn, delegates to a variable set of workers (Worker 1, Worker 2, and further ghosted workers), which feed back into Orchestrator Synthesize and then Output](../../../public/images/agent/orchestrator-workers.svg)
 
 > **Note:**
 > This is a boundary case in Anthropic's own taxonomy. Orchestrate → workers → synthesize is a fixed high-level shape, so it's still framed as a workflow — but it's genuinely different from [Prompt Chaining](./prompt-chaining), [Routing](./routing), and [Parallelization](./parallelization): the *number and nature* of subtasks is decided by the orchestrator LLM at runtime, not fixed in code. Per [Anthropic's own framing](https://www.anthropic.com/engineering/building-effective-agents): *"the key difference from parallelization is its flexibility—subtasks aren't pre-defined, but determined by the orchestrator based on the specific input."*

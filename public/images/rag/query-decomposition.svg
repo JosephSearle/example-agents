@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" role="img" aria-label="Query Decomposition pipeline: a Complex Question is decomposed into three parallel sub-question branches, each retrieved and answered independently, then converged into a Synthesize node producing the Final Answer">
+  <title>Query Decomposition</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --edge-color:#6b7280;
+      --accent-color:#0368FF;
+      --branch-1:#0368FF;
+      --branch-2:#B44BFF;
+      --branch-3:#FF7A59;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+    }
+    .qdecomp-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .qdecomp-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .qdecomp-label{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .qdecomp-label2{font:600 11.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .qdecomp-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .qdecomp-edge{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .qdecomp-flow{fill:none;stroke-width:2;stroke-dasharray:5 11;stroke-linecap:round;opacity:.7;animation:qdecomp-dash .9s linear infinite;}
+    .qdecomp-f1{stroke:var(--branch-1);}
+    .qdecomp-f2{stroke:var(--branch-2);}
+    .qdecomp-f3{stroke:var(--branch-3);}
+    .qdecomp-fa{stroke:var(--accent-color);}
+    @keyframes qdecomp-dash{to{stroke-dashoffset:-16;}}
+
+    .qdecomp-packet{animation:qdecomp-run 4.5s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes qdecomp-run{
+      0%{transform:translate(0,0);opacity:0}
+      4%{transform:translate(0,0);opacity:1}
+      11%{transform:translate(0,0)}
+      24%{transform:translate(114px,var(--dy))}
+      30%{transform:translate(114px,var(--dy))}
+      41%{transform:translate(222px,var(--dy))}
+      47%{transform:translate(222px,var(--dy))}
+      58%{transform:translate(336px,var(--dy))}
+      64%{transform:translate(336px,var(--dy))}
+      77%{transform:translate(470px,0)}
+      80%{transform:translate(470px,0);opacity:1}
+      82%{transform:translate(470px,0);opacity:0}
+      100%{transform:translate(470px,0);opacity:0}
+    }
+    .qdecomp-merge{animation:qdecomp-mrun 4.5s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes qdecomp-mrun{
+      0%{transform:translate(0,0);opacity:0}
+      79%{transform:translate(0,0);opacity:0}
+      82%{transform:translate(0,0);opacity:1}
+      94%{transform:translate(124px,0);opacity:1}
+      98%{transform:translate(124px,0);opacity:0}
+      100%{transform:translate(124px,0);opacity:0}
+    }
+    .qdecomp-pulse{transform-box:fill-box;transform-origin:center;animation:qdecomp-pulse 1.5s ease-out infinite;}
+    @keyframes qdecomp-pulse{0%{opacity:.5;transform:scale(.6)}70%{opacity:0;transform:scale(2.2)}100%{opacity:0;transform:scale(2.2)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .qdecomp-packet,.qdecomp-merge,.qdecomp-pulse,.qdecomp-flow{animation:none !important;}
+      .qdecomp-packet{opacity:1;}
+      .qdecomp-merge{opacity:0;}
+      .qdecomp-pulse{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="qdecomp-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="qdecomp-a1" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-1)"/></marker>
+    <marker id="qdecomp-a2" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-2)"/></marker>
+    <marker id="qdecomp-a3" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-3)"/></marker>
+    <marker id="qdecomp-aa" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--accent-color)"/></marker>
+    <marker id="qdecomp-am" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="430" fill="var(--diagram-bg)"/>
+
+  <text class="qdecomp-sub" x="40" y="52">MULTI-QUERY RAG</text>
+  <text class="qdecomp-title" x="40" y="84" fill="url(#qdecomp-grad)">Query Decomposition</text>
+
+  <!-- Base gray connectors -->
+  <line class="qdecomp-edge" x1="120" y1="250" x2="136" y2="250" marker-end="url(#qdecomp-am)"/>
+  <path class="qdecomp-edge" d="M234,236 C 250,140 250,140 256,122" marker-end="url(#qdecomp-am)"/>
+  <line class="qdecomp-edge" x1="234" y1="250" x2="256" y2="250" marker-end="url(#qdecomp-am)"/>
+  <path class="qdecomp-edge" d="M234,264 C 250,360 250,360 256,378" marker-end="url(#qdecomp-am)"/>
+  <line class="qdecomp-edge" x1="342" y1="122" x2="366" y2="122" marker-end="url(#qdecomp-am)"/>
+  <line class="qdecomp-edge" x1="342" y1="250" x2="366" y2="250" marker-end="url(#qdecomp-am)"/>
+  <line class="qdecomp-edge" x1="342" y1="378" x2="366" y2="378" marker-end="url(#qdecomp-am)"/>
+  <line class="qdecomp-edge" x1="450" y1="122" x2="474" y2="122" marker-end="url(#qdecomp-am)"/>
+  <line class="qdecomp-edge" x1="450" y1="250" x2="474" y2="250" marker-end="url(#qdecomp-am)"/>
+  <line class="qdecomp-edge" x1="450" y1="378" x2="474" y2="378" marker-end="url(#qdecomp-am)"/>
+  <path class="qdecomp-edge" d="M570,122 C 590,140 588,232 604,238" marker-end="url(#qdecomp-am)"/>
+  <line class="qdecomp-edge" x1="570" y1="250" x2="604" y2="250" marker-end="url(#qdecomp-am)"/>
+  <path class="qdecomp-edge" d="M570,378 C 590,360 588,268 604,262" marker-end="url(#qdecomp-am)"/>
+  <line class="qdecomp-edge" x1="706" y1="250" x2="730" y2="250" marker-end="url(#qdecomp-am)"/>
+
+  <!-- Colored animated flow overlays -->
+  <line class="qdecomp-flow qdecomp-fa" x1="120" y1="250" x2="135" y2="250" marker-end="url(#qdecomp-aa)"/>
+  <path class="qdecomp-flow qdecomp-f1" d="M234,236 C 250,140 250,140 255,122" marker-end="url(#qdecomp-a1)"/>
+  <line class="qdecomp-flow qdecomp-f2" x1="234" y1="250" x2="255" y2="250" marker-end="url(#qdecomp-a2)"/>
+  <path class="qdecomp-flow qdecomp-f3" d="M234,264 C 250,360 250,360 255,378" marker-end="url(#qdecomp-a3)"/>
+  <line class="qdecomp-flow qdecomp-f1" x1="342" y1="122" x2="365" y2="122" marker-end="url(#qdecomp-a1)"/>
+  <line class="qdecomp-flow qdecomp-f2" x1="342" y1="250" x2="365" y2="250" marker-end="url(#qdecomp-a2)"/>
+  <line class="qdecomp-flow qdecomp-f3" x1="342" y1="378" x2="365" y2="378" marker-end="url(#qdecomp-a3)"/>
+  <line class="qdecomp-flow qdecomp-f1" x1="450" y1="122" x2="473" y2="122" marker-end="url(#qdecomp-a1)"/>
+  <line class="qdecomp-flow qdecomp-f2" x1="450" y1="250" x2="473" y2="250" marker-end="url(#qdecomp-a2)"/>
+  <line class="qdecomp-flow qdecomp-f3" x1="450" y1="378" x2="473" y2="378" marker-end="url(#qdecomp-a3)"/>
+  <path class="qdecomp-flow qdecomp-f1" d="M570,122 C 590,140 588,232 603,238" marker-end="url(#qdecomp-a1)"/>
+  <line class="qdecomp-flow qdecomp-f2" x1="570" y1="250" x2="603" y2="250" marker-end="url(#qdecomp-a2)"/>
+  <path class="qdecomp-flow qdecomp-f3" d="M570,378 C 590,360 588,268 603,262" marker-end="url(#qdecomp-a3)"/>
+  <line class="qdecomp-flow qdecomp-fa" x1="706" y1="250" x2="729" y2="250" marker-end="url(#qdecomp-aa)"/>
+
+  <!-- Nodes -->
+  <rect class="qdecomp-nodebox" x="16" y="222" width="104" height="56" rx="12"/>
+  <text class="qdecomp-label2" x="68" y="250" text-anchor="middle" dominant-baseline="middle"><tspan x="68" dy="-0.35em">Complex</tspan><tspan x="68" dy="1.2em">Question</tspan></text>
+
+  <rect class="qdecomp-nodebox" x="138" y="226" width="96" height="48" rx="12"/>
+  <text class="qdecomp-label" x="186" y="250" text-anchor="middle" dominant-baseline="middle">Decompose</text>
+
+  <rect class="qdecomp-nodebox" x="258" y="100" width="84" height="44" rx="10"/>
+  <text class="qdecomp-label2" x="300" y="122" text-anchor="middle" dominant-baseline="middle">Sub-Q 1</text>
+  <rect class="qdecomp-nodebox" x="366" y="100" width="84" height="44" rx="10"/>
+  <text class="qdecomp-label2" x="408" y="122" text-anchor="middle" dominant-baseline="middle">Retrieve 1</text>
+  <rect class="qdecomp-nodebox" x="474" y="100" width="96" height="44" rx="10"/>
+  <text class="qdecomp-label2" x="522" y="122" text-anchor="middle" dominant-baseline="middle">Sub-Answer 1</text>
+
+  <rect class="qdecomp-nodebox" x="258" y="228" width="84" height="44" rx="10"/>
+  <text class="qdecomp-label2" x="300" y="250" text-anchor="middle" dominant-baseline="middle">Sub-Q 2</text>
+  <rect class="qdecomp-nodebox" x="366" y="228" width="84" height="44" rx="10"/>
+  <text class="qdecomp-label2" x="408" y="250" text-anchor="middle" dominant-baseline="middle">Retrieve 2</text>
+  <rect class="qdecomp-nodebox" x="474" y="228" width="96" height="44" rx="10"/>
+  <text class="qdecomp-label2" x="522" y="250" text-anchor="middle" dominant-baseline="middle">Sub-Answer 2</text>
+
+  <rect class="qdecomp-nodebox" x="258" y="356" width="84" height="44" rx="10"/>
+  <text class="qdecomp-label2" x="300" y="378" text-anchor="middle" dominant-baseline="middle">Sub-Q 3</text>
+  <rect class="qdecomp-nodebox" x="366" y="356" width="84" height="44" rx="10"/>
+  <text class="qdecomp-label2" x="408" y="378" text-anchor="middle" dominant-baseline="middle">Retrieve 3</text>
+  <rect class="qdecomp-nodebox" x="474" y="356" width="96" height="44" rx="10"/>
+  <text class="qdecomp-label2" x="522" y="378" text-anchor="middle" dominant-baseline="middle">Sub-Answer 3</text>
+
+  <rect class="qdecomp-nodebox" x="606" y="222" width="100" height="56" rx="12"/>
+  <text class="qdecomp-label" x="656" y="250" text-anchor="middle" dominant-baseline="middle">Synthesize</text>
+
+  <rect class="qdecomp-nodebox" x="730" y="222" width="98" height="56" rx="12"/>
+  <text class="qdecomp-label2" x="779" y="250" text-anchor="middle" dominant-baseline="middle"><tspan x="779" dy="-0.35em">Final</tspan><tspan x="779" dy="1.2em">Answer</tspan></text>
+
+  <!-- Packets: launch simultaneously from Decompose -->
+  <g class="qdecomp-packet" style="--dy:-128px;">
+    <circle class="qdecomp-pulse" cx="186" cy="250" r="8" fill="none" stroke="var(--branch-1)" stroke-width="2"/>
+    <circle cx="186" cy="250" r="10" fill="var(--branch-1)" opacity="0.22"/>
+    <circle cx="186" cy="250" r="5" fill="var(--branch-1)"/>
+    <circle cx="184.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="qdecomp-packet" style="--dy:0px;">
+    <circle class="qdecomp-pulse" cx="186" cy="250" r="8" fill="none" stroke="var(--branch-2)" stroke-width="2"/>
+    <circle cx="186" cy="250" r="10" fill="var(--branch-2)" opacity="0.22"/>
+    <circle cx="186" cy="250" r="5" fill="var(--branch-2)"/>
+    <circle cx="184.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="qdecomp-packet" style="--dy:128px;">
+    <circle class="qdecomp-pulse" cx="186" cy="250" r="8" fill="none" stroke="var(--branch-3)" stroke-width="2"/>
+    <circle cx="186" cy="250" r="10" fill="var(--branch-3)" opacity="0.22"/>
+    <circle cx="186" cy="250" r="5" fill="var(--branch-3)"/>
+    <circle cx="184.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+
+  <!-- Merged packet: Synthesize -> Final Answer -->
+  <g class="qdecomp-merge">
+    <circle class="qdecomp-pulse" cx="656" cy="250" r="9" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="656" cy="250" r="11" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="656" cy="250" r="5.5" fill="var(--accent-color)"/>
+    <circle cx="654" cy="248" r="2" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>

@@ -2,7 +2,7 @@
 
 Agents that can all talk to each other, many-to-many, with no fixed hierarchy — any agent can decide which agent to call next.
 
-![Network / Mesh topology: five agents (Planner, Executor, Reviewer, Researcher, Validator) scattered in a loose non-symmetric layout with non-uniform connections including a route-back edge; any agent can route to any other, and the traversal path is decided at runtime rather than by a fixed graph shape](../../public/images/network-mesh.svg)
+![Network / Mesh topology: five agents (Planner, Executor, Reviewer, Researcher, Validator) scattered in a loose non-symmetric layout with non-uniform connections including a route-back edge; any agent can route to any other, and the traversal path is decided at runtime rather than by a fixed graph shape](../../../public/images/agent/network-mesh.svg)
 
 > **Warning:**
 > **Honest framing up front.** Of the four multi-agent topologies in this series ([Supervisor](./supervisor), [Swarm / Handoffs](./swarm-handoffs), [Map-Reduce](./map-reduce), and this one), Network/Mesh is the only one without a dedicated, actively-maintained first-party doc page or standalone library. It shows up mostly in archived tutorials and third-party content. That's a real signal about the pattern's actual industry standing, not a gap in research — and it's itself a reason to reach for this pattern last, only once Supervisor's hierarchy and Swarm's peer-handoff both genuinely don't fit.

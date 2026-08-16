@@ -2,7 +2,7 @@
 
 This pattern's name is borrowed wholesale from 2000s-era distributed data processing, not from any LLM or agent research. [Dean & Ghemawat's "MapReduce: Simplified Data Processing on Large Clusters" (OSDI 2004)](https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/) describes it plainly: *"Users specify a map function that processes a key/value pair to generate a set of intermediate key/value pairs, and a reduce function that merges all intermediate values associated with the same intermediate key."* Split work into independent units, process each in parallel (map), then combine the outputs (reduce) — the exact same shape, just applied to LLM calls instead of data records across a cluster.
 
-![Map-Reduce pipeline: a Coordinator runs a Map step that fans out to four identical workers each processing a data chunk in parallel, then all four converge and combine into a single Reduce node producing the Merged Result](../../public/images/map-reduce.svg)
+![Map-Reduce pipeline: a Coordinator runs a Map step that fans out to four identical workers each processing a data chunk in parallel, then all four converge and combine into a single Reduce node producing the Merged Result](../../../public/images/agent/map-reduce.svg)
 
 > **Note:**
 > This is essentially [Parallelization](./parallelization)'s **Sectioning** variant, generalized: instead of a fixed set of subtasks written by the developer ahead of time, the number of parallel branches is determined **at runtime** by graph state. Same idea, now with unknown-in-advance fan-out.

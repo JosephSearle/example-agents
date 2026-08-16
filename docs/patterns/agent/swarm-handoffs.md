@@ -2,7 +2,7 @@
 
 Per [OpenAI's cookbook](https://developers.openai.com/cookbook/examples/orchestrating_agents), a handoff is *"an agent (or routine) handing off an active conversation to another agent, much like when you get transfered to someone else on a phone call. Except in this case, the agents have complete knowledge of your prior conversation!"* One agent, mid-conversation, transfers control to a specialist — who picks up with full context rather than starting cold.
 
-![Swarm / Handoffs topology: three peer agents (Agent A, Agent B, Agent C) arranged in a triangle with direct bidirectional handoff arrows between every pair and no central coordinator; control passes directly from peer to peer, with one agent active at a time](../../public/images/swarm-handoffs.svg)
+![Swarm / Handoffs topology: three peer agents (Agent A, Agent B, Agent C) arranged in a triangle with direct bidirectional handoff arrows between every pair and no central coordinator; control passes directly from peer to peer, with one agent active at a time](../../../public/images/agent/swarm-handoffs.svg)
 
 > **Note:**
 > Per the [current OpenAI Agents SDK orchestration guide](https://developers.openai.com/api/docs/guides/agents/orchestration): *"Start with one agent whenever you can. Add specialists only when they materially improve capability isolation, policy isolation, prompt clarity, or trace legibility."* Splitting too early just creates more prompts, more traces, and more approval surfaces — without necessarily making the workflow better.

@@ -2,7 +2,7 @@
 
 A central supervisor agent delegates to specialized sub-agents, each scoped to its own domain and tools, while the supervisor itself never touches low-level tools directly — it only calls sub-agents as tools and coordinates the overall workflow.
 
-![Supervisor topology: a central Supervisor coordinator connected by bidirectional arrows to three workers (Researcher, Analyst, Writer), with no direct links between the workers; all control flow returns through the Supervisor before reaching Output](../../public/images/supervisor.svg)
+![Supervisor topology: a central Supervisor coordinator connected by bidirectional arrows to three workers (Researcher, Analyst, Writer), with no direct links between the workers; all control flow returns through the Supervisor before reaching Output](../../../public/images/agent/supervisor.svg)
 
 > **Note:**
 > Per [LangChain's current guidance](https://docs.langchain.com/oss/python/langchain/multi-agent/subagents-personal-assistant): *"Use the supervisor pattern when you have multiple distinct domains (calendar, email, CRM, database), each domain has multiple tools or complex logic, you want centralized workflow control, and sub-agents don't need to converse directly with users."* For simpler cases with just a few tools, use a single agent instead. And critically: *"When agents need to have conversations with users, use handoffs instead."* See [Swarm / Handoffs](./swarm-handoffs) — the user ends up talking directly to a specialist rather than always through one orchestrator.

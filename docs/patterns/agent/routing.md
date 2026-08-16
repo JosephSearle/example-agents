@@ -2,7 +2,7 @@
 
 Routing classifies an input first, then sends it down whichever specialized path actually fits — rather than handling every input the same way. There are two distinct reasons to reach for this: routing to a *specialized* prompt/tool for a given category of task, or routing to a *cheaper or stronger model* purely for cost and performance reasons.
 
-![Routing workflow: an Input Query is classified, then sent down exactly one of three specialist paths (General Questions, Refund Requests, Technical Support), each leading to its own Response; only one path is active per query](../../public/images/routing.svg)
+![Routing workflow: an Input Query is classified, then sent down exactly one of three specialist paths (General Questions, Refund Requests, Technical Support), each leading to its own Response; only one path is active per query](../../../public/images/agent/routing.svg)
 
 > **Note:**
 > Like [Prompt Chaining](./prompt-chaining), this is a **workflow**, not an agent: the set of possible routes is fixed in code ahead of time. The classifier picks among predefined routes — it doesn't invent new ones at runtime.

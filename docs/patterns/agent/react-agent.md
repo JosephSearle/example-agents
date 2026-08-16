@@ -2,7 +2,7 @@
 
 ReAct interleaves reasoning ("thoughts") with actions (tool calls) in a loop: the model reasons about what to do next, acts, observes the result, and reasons again — continuing until the task is done. Unlike every pattern before it in this series, the loop's length and shape aren't fixed in code. The model decides.
 
-![ReAct Agent reason and act loop: a User Task enters the Thought node; the agent cycles clockwise through Thought, Action, and Observation repeatedly, and once it decides the task is done it exits from Thought to the Final Answer](../../public/images/react-agent.svg)
+![ReAct Agent reason and act loop: a User Task enters the Thought node; the agent cycles clockwise through Thought, Action, and Observation repeatedly, and once it decides the task is done it exits from Thought to the Final Answer](../../../public/images/agent/react-agent.svg)
 
 > **Note:**
 > Every prior doc in this series has been a **workflow** — chaining, routing, parallelization, orchestrator-workers, and evaluator-optimizer all follow a code path fixed in advance. This is the first genuine **agent**: the LLM dynamically directs its own process, deciding when to reason, when to act, and when to stop.
