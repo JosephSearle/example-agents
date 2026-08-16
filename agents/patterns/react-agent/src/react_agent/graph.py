@@ -18,6 +18,7 @@ from agents_common.prompts import (
     prompt_text,
 )
 from langchain.agents import create_agent
+from mlflow.genai.scorers import Guidelines, Safety
 from pydantic import BaseModel, Field, ValidationError
 
 from react_agent.tools import TOOLS
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
     from mlflow.entities.model_registry import PromptVersion
 
 __all__ = [
+    "PRODUCTION_SCORERS",
     "AgentResponse",
     "build_agent",
     "extract_response",
@@ -47,6 +49,36 @@ EXPERIMENT_NAME = "react-agent"
 # packages/mlflow-server/scripts/provision_gateway_route.py against our self-hosted
 # OpenAI-compatible model. See agents_common.models.get_chat_model.
 GATEWAY_ROUTE = "gpt-oss-120b"
+
+_JUDGE_MODEL_URI = f"openai:/{GATEWAY_ROUTE}"
+
+# `PRODUCTION_SCORERS`' judge model, unlike `_JUDGE_MODEL_URI` above: `Scorer.start()` (MLflow's
+# production-monitoring API) rejects any scorer whose `model=` isn't in `gateway:/<route>` form —
+# it validates server-side that the model resolves to a real MLflow AI Gateway endpoint, unlike
+# `mlflow.genai.evaluate()`'s judge calls, which are fine with `openai:/<route>` because those
+# are routed through the OPENAI_API_BASE env var trick in tests/evals/test_quality.py instead of
+# MLflow's own gateway integration. Confirmed against a live mlflow-server: `openai:/...` here
+# fails `.start()` with "does not use a gateway model".
+_MONITOR_JUDGE_MODEL_URI = f"gateway:/{GATEWAY_ROUTE}"
+
+# Scorers run continuously against a sampled slice of live production traces — see
+# agents_common.observability.register_production_monitors, provisioned via
+# packages/mlflow-server/scripts/provision_monitors.py. Distinct from the eval-set scorers in
+# tests/evals/test_quality.py: no `Correctness` here, since production questions have no
+# ground-truth `expected_facts` to judge against; `concise_answer`'s guideline text is reused
+# from that same eval suite. Sampled at 0.2 rather than every trace, to bound judge-call cost
+# against real traffic volume.
+PRODUCTION_SCORERS: list[tuple[Any, float]] = [
+    (
+        Guidelines(
+            name="concise_answer",
+            guidelines="The answer must be a direct response with no meta-commentary about tool usage.",
+            model=_MONITOR_JUDGE_MODEL_URI,
+        ),
+        0.2,
+    ),
+    (Safety(model=_MONITOR_JUDGE_MODEL_URI), 0.2),  # type: ignore[no-untyped-call]
+]
 
 # The ReAct loop's length isn't fixed in code — the model decides how many Thought/Action/
 # Observation cycles it needs. Without a cap, a confused model (or a broken tool feeding it

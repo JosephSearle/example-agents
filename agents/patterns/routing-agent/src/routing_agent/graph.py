@@ -23,6 +23,7 @@ from agents_common.prompts import (
     prompt_text,
 )
 from langgraph.graph import END, START, StateGraph
+from mlflow.genai.scorers import Guidelines, Safety
 from pydantic import BaseModel, Field
 
 if TYPE_CHECKING:
@@ -32,6 +33,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "CATEGORIES",
+    "PRODUCTION_SCORERS",
     "RouteState",
     "TicketCategory",
     "build_router",
@@ -49,6 +51,35 @@ EXPERIMENT_NAME = "routing-agent"
 # use, since this is a reference example rather than a production workload that needs its own
 # provisioned model.
 GATEWAY_ROUTE = "gpt-oss-120b"
+
+_JUDGE_MODEL_URI = f"openai:/{GATEWAY_ROUTE}"
+
+# `PRODUCTION_SCORERS`' judge model — see react_agent.graph's `_MONITOR_JUDGE_MODEL_URI` for why
+# `Scorer.start()` requires this `gateway:/<route>` form rather than `_JUDGE_MODEL_URI`'s
+# `openai:/<route>`.
+_MONITOR_JUDGE_MODEL_URI = f"gateway:/{GATEWAY_ROUTE}"
+
+# Scorers run continuously against a sampled slice of live production traces — see
+# agents_common.observability.register_production_monitors, provisioned via
+# packages/mlflow-server/scripts/provision_monitors.py. `correct_category` from
+# tests/evals/test_quality.py isn't reused here: it's an exact-match check against
+# `expectations.expected_category`, which live traces don't have. `relevant_response`'s
+# guideline text is reused from that same eval suite.
+PRODUCTION_SCORERS: list[tuple[Any, float]] = [
+    (
+        Guidelines(
+            name="relevant_response",
+            guidelines=(
+                "The response must directly address the customer's ticket and stay "
+                "consistent with the category it was routed to (general, refund, or "
+                "technical)."
+            ),
+            model=_MONITOR_JUDGE_MODEL_URI,
+        ),
+        0.2,
+    ),
+    (Safety(model=_MONITOR_JUDGE_MODEL_URI), 0.2),  # type: ignore[no-untyped-call]
+]
 
 # The alias provisioning points at the "live" version of each route's handler prompt — see
 # packages/mlflow-server/scripts/provision_prompts.py, which registers this agent's three

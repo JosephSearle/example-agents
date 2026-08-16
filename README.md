@@ -109,7 +109,13 @@ make provision-gateway
 #    edit a dataset JSONL.
 make provision-datasets
 
-# 5. Run the reference agent
+# 5. One-off: register + start each agent's production quality monitors (PRODUCTION_SCORERS in
+#    its graph.py), so a sampled slice of live traces gets scored continuously — the "monitor"
+#    half of MLflow GenAI eval-monitor, complementing `make test-eval`'s fixed-dataset CI run.
+#    Safe to re-run any time you edit a PRODUCTION_SCORERS entry.
+make provision-monitors
+
+# 6. Run the reference agent
 make demo
 ```
 
@@ -128,6 +134,21 @@ make test-eval           # needs `make provision-datasets` to have been run once
                           # model via the gateway
 make test                # unit + integration together
 ```
+
+### Production quality monitoring
+
+`make test-eval` scores a fixed dataset in CI. For quality signal on *live* traffic, each agent
+also defines a `PRODUCTION_SCORERS` constant in its `graph.py` — scorers that run continuously
+against a sampled slice of real production traces once registered:
+
+```bash
+make provision-monitors   # registers + starts every agent's PRODUCTION_SCORERS; idempotent
+```
+
+See [`agents_common.observability.register_production_monitors`](packages/agents-common/src/agents_common/observability/__init__.py)
+and [`provision_monitors.py`](packages/mlflow-server/scripts/provision_monitors.py). Results show
+up under each agent's experiment in the MLflow UI as trace assessments, not as a pass/fail
+eval run.
 
 ### Run everything containerized
 
@@ -212,7 +233,8 @@ example-agents/
 ├── packages/
 │   ├── agents-common/                  # shared checkpointing/observability/config
 │   ├── mlflow-server/                  # self-hosted MLflow tracking server image
-│   │   ├── scripts/                    # provision_gateway_route.py, provision_datasets.py
+│   │   ├── scripts/                    # provision_gateway_route.py, provision_datasets.py,
+│   │   │                               # provision_monitors.py
 │   │   └── datasets/                   # git-tracked eval dataset seed JSONL, one per agent
 │   └── milvus/                         # self-hosted Milvus standalone + Attu (compose wiring)
 └── infra/postgres/
