@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" role="img" aria-label="Supervisor topology: a central Supervisor coordinator connected by bidirectional arrows to three workers (Researcher, Analyst, Writer), with no direct links between the workers; all control flow returns through the Supervisor before reaching Output">
+  <title>Supervisor</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --hub-fill:#181818;
+      --hub-stroke:rgba(3,104,255,0.55);
+      --edge-color:#5b616c;
+      --accent-color:#0368FF;
+      --worker-1:#0368FF;
+      --worker-2:#B44BFF;
+      --worker-3:#FF7A59;
+      --exit-color:#2FBF71;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+    }
+    .super-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .super-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .super-label{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .super-label2{font:600 11.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .super-hublabel{font:700 13.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .super-tag{font:600 10.5px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--muted-text);letter-spacing:.02em;}
+    .super-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .super-hubbox{fill:var(--hub-fill);stroke:var(--hub-stroke);stroke-width:1.5;}
+    .super-edge{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .super-flow{fill:none;stroke-width:2;stroke-dasharray:5 11;stroke-linecap:round;opacity:.5;stroke:var(--accent-color);animation:super-dash .9s linear infinite;}
+    .super-exit{stroke:var(--exit-color);stroke-width:2;fill:none;stroke-dasharray:5 11;stroke-linecap:round;animation:super-dash .9s linear infinite;}
+    @keyframes super-dash{to{stroke-dashoffset:-16;}}
+
+    .super-exitglow{opacity:0;animation:super-exitglow 13s ease-in-out infinite;}
+    @keyframes super-exitglow{0%{opacity:0}70%{opacity:0}74%{opacity:1}96%{opacity:1}98%{opacity:0}100%{opacity:0}}
+
+    .super-packet{animation:super-route 13s cubic-bezier(0.4,0,0.35,1) infinite;}
+    @keyframes super-route{
+      0%{transform:translate(0,0);opacity:0}
+      2%{transform:translate(0,0);opacity:1}
+      8%{transform:translate(0,-158px)}
+      12%{transform:translate(0,-158px)}
+      18%{transform:translate(0,0)}
+      21%{transform:translate(0,0)}
+      27%{transform:translate(-208px,120px)}
+      31%{transform:translate(-208px,120px)}
+      37%{transform:translate(0,0)}
+      40%{transform:translate(0,0)}
+      46%{transform:translate(208px,120px)}
+      50%{transform:translate(208px,120px)}
+      56%{transform:translate(0,0)}
+      59%{transform:translate(0,0)}
+      65%{transform:translate(0,-158px)}
+      68%{transform:translate(0,-158px)}
+      72%{transform:translate(0,0)}
+      75%{transform:translate(0,0)}
+      86%{transform:translate(340px,0);opacity:1}
+      96%{transform:translate(340px,0);opacity:1}
+      98%{transform:translate(340px,0);opacity:0}
+      100%{transform:translate(340px,0);opacity:0}
+    }
+
+    .super-hubpulse{transform-box:fill-box;transform-origin:center;opacity:0;animation:super-hubpulse 13s ease-out infinite;}
+    @keyframes super-hubpulse{
+      0%{opacity:.7;transform:scale(.7)}4%{opacity:0;transform:scale(1.8)}5%{opacity:0;transform:scale(.7)}
+      18%{opacity:.7;transform:scale(.7)}22%{opacity:0;transform:scale(1.8)}23%{opacity:0;transform:scale(.7)}
+      37%{opacity:.7;transform:scale(.7)}41%{opacity:0;transform:scale(1.8)}42%{opacity:0;transform:scale(.7)}
+      56%{opacity:.7;transform:scale(.7)}60%{opacity:0;transform:scale(1.8)}61%{opacity:0;transform:scale(.7)}
+      72%{opacity:.7;transform:scale(.7)}76%{opacity:0;transform:scale(1.8)}
+      100%{opacity:0;transform:scale(.7)}
+    }
+    .super-wpulse{transform-box:fill-box;transform-origin:center;opacity:0;}
+    .super-wp1{animation:super-wp1 13s ease-out infinite;}
+    @keyframes super-wp1{0%{opacity:0;transform:scale(.6)}8%{opacity:.75;transform:scale(.6)}13%{opacity:0;transform:scale(2)}14%{opacity:0;transform:scale(.6)}65%{opacity:.75;transform:scale(.6)}70%{opacity:0;transform:scale(2)}100%{opacity:0;transform:scale(.6)}}
+    .super-wp2{animation:super-wp2 13s ease-out infinite;}
+    @keyframes super-wp2{0%{opacity:0;transform:scale(.6)}27%{opacity:.75;transform:scale(.6)}32%{opacity:0;transform:scale(2)}100%{opacity:0;transform:scale(.6)}}
+    .super-wp3{animation:super-wp3 13s ease-out infinite;}
+    @keyframes super-wp3{0%{opacity:0;transform:scale(.6)}46%{opacity:.75;transform:scale(.6)}51%{opacity:0;transform:scale(2)}100%{opacity:0;transform:scale(.6)}}
+    .super-pulse{transform-box:fill-box;transform-origin:center;animation:super-pulse 1.4s ease-out infinite;}
+    @keyframes super-pulse{0%{opacity:.6;transform:scale(.6)}70%{opacity:0;transform:scale(2.2)}100%{opacity:0;transform:scale(2.2)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .super-flow,.super-exit,.super-exitglow,.super-packet,.super-hubpulse,.super-wp1,.super-wp2,.super-wp3,.super-pulse{animation:none !important;}
+      .super-packet{opacity:1;}
+      .super-exitglow{opacity:1;}
+      .super-hubpulse,.super-wp1,.super-wp2,.super-wp3,.super-pulse{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="super-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="super-am" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="7" refX="6.5" refY="3" orient="auto"><path d="M0,0 L6.5,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+    <marker id="super-ax" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--exit-color)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="470" fill="var(--diagram-bg)"/>
+
+  <text class="super-sub" x="40" y="52">MULTI-AGENT · CENTRAL COORDINATOR</text>
+  <text class="super-title" x="40" y="84" fill="url(#super-grad)">Supervisor</text>
+
+  <!-- Spokes (bidirectional, hub <-> each worker) -->
+  <line class="super-edge" x1="410" y1="234" x2="410" y2="150" marker-start="url(#super-am)" marker-end="url(#super-am)"/>
+  <line class="super-edge" x1="360" y1="300" x2="256" y2="366" marker-start="url(#super-am)" marker-end="url(#super-am)"/>
+  <line class="super-edge" x1="460" y1="300" x2="564" y2="366" marker-start="url(#super-am)" marker-end="url(#super-am)"/>
+
+  <line class="super-flow" x1="410" y1="232" x2="410" y2="152"/>
+  <line class="super-flow" x1="362" y1="298" x2="258" y2="364"/>
+  <line class="super-flow" x1="458" y1="298" x2="562" y2="364"/>
+
+  <!-- Supervisor -> Output (exit) -->
+  <line class="super-edge" x1="490" y1="270" x2="686" y2="270" marker-end="url(#super-am)"/>
+  <g class="super-exitglow">
+    <line class="super-exit" x1="490" y1="270" x2="685" y2="270" marker-end="url(#super-ax)"/>
+  </g>
+  <text class="super-tag" x="588" y="259" text-anchor="middle" fill="var(--exit-color)">done</text>
+
+  <!-- "no peer links" annotation between workers -->
+  <line x1="290" y1="416" x2="530" y2="416" stroke="var(--edge-color)" stroke-width="1.25" stroke-dasharray="2 7" opacity="0.5"/>
+  <text class="super-tag" x="410" y="440" text-anchor="middle" fill="var(--muted-text)">no direct worker-to-worker handoff</text>
+
+  <!-- Nodes -->
+  <rect class="super-nodebox" x="344" y="104" width="132" height="46" rx="11"/>
+  <text class="super-label2" x="410" y="127" text-anchor="middle" dominant-baseline="middle">Researcher</text>
+  <rect class="super-nodebox" x="150" y="366" width="120" height="46" rx="11"/>
+  <text class="super-label2" x="210" y="389" text-anchor="middle" dominant-baseline="middle">Analyst</text>
+  <rect class="super-nodebox" x="550" y="366" width="120" height="46" rx="11"/>
+  <text class="super-label2" x="610" y="389" text-anchor="middle" dominant-baseline="middle">Writer</text>
+
+  <rect class="super-hubbox" x="336" y="234" width="148" height="72" rx="16"/>
+  <text class="super-hublabel" x="410" y="264" text-anchor="middle" dominant-baseline="middle">Supervisor</text>
+  <text class="super-tag" x="410" y="285" text-anchor="middle" fill="var(--worker-1)">routes every step</text>
+
+  <rect class="super-nodebox" x="688" y="246" width="96" height="48" rx="12"/>
+  <text class="super-label2" x="736" y="270" text-anchor="middle" dominant-baseline="middle">Output</text>
+
+  <!-- Pulse rings -->
+  <rect class="super-hubpulse" x="336" y="234" width="148" height="72" rx="16" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+  <circle class="super-wpulse super-wp1" cx="410" cy="127" r="24" fill="none" stroke="var(--worker-1)" stroke-width="2"/>
+  <circle class="super-wpulse super-wp2" cx="210" cy="389" r="24" fill="none" stroke="var(--worker-2)" stroke-width="2"/>
+  <circle class="super-wpulse super-wp3" cx="610" cy="389" r="24" fill="none" stroke="var(--worker-3)" stroke-width="2"/>
+
+  <!-- Traveling packet (starts at Supervisor) -->
+  <g class="super-packet">
+    <circle class="super-pulse" cx="410" cy="270" r="9" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="410" cy="270" r="11" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="410" cy="270" r="5.5" fill="var(--accent-color)"/>
+    <circle cx="408" cy="268" r="2" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>

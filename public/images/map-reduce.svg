@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" role="img" aria-label="Map-Reduce pipeline: a Coordinator runs a Map step that fans out to four identical workers each processing a data chunk in parallel, then all four converge and combine into a single Reduce node producing the Merged Result">
+  <title>Map-Reduce</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --edge-color:#5b616c;
+      --accent-color:#0368FF;
+      --map-color:#0368FF;
+      --merge-color:#2FBF71;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+    }
+    .mapre-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .mapre-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .mapre-label{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .mapre-label2{font:600 11.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .mapre-tag{font:600 10.5px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--muted-text);letter-spacing:.02em;}
+    .mapre-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .mapre-flow{fill:none;stroke-width:2;stroke-dasharray:5 11;stroke-linecap:round;opacity:.65;stroke:var(--map-color);animation:mapre-dash .9s linear infinite;}
+    .mapre-flowm{fill:none;stroke-width:2;stroke-dasharray:5 11;stroke-linecap:round;opacity:.7;stroke:var(--merge-color);animation:mapre-dash .9s linear infinite;}
+    @keyframes mapre-dash{to{stroke-dashoffset:-16;}}
+
+    .mapre-packet{animation:mapre-run 4.5s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes mapre-run{
+      0%{transform:translate(0,0);opacity:0}
+      4%{transform:translate(0,0);opacity:1}
+      12%{transform:translate(0,0)}
+      34%{transform:translate(206px,var(--dy))}
+      44%{transform:translate(206px,var(--dy))}
+      66%{transform:translate(438px,0)}
+      72%{transform:translate(438px,0);opacity:1}
+      75%{transform:translate(438px,0);opacity:0}
+      100%{transform:translate(438px,0);opacity:0}
+    }
+    .mapre-merge{animation:mapre-mrun 4.5s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes mapre-mrun{
+      0%{transform:translate(0,0);opacity:0}
+      70%{transform:translate(0,0);opacity:0}
+      74%{transform:translate(0,0);opacity:1}
+      90%{transform:translate(128px,0);opacity:1}
+      95%{transform:translate(128px,0);opacity:0}
+      100%{transform:translate(128px,0);opacity:0}
+    }
+    .mapre-pulse{transform-box:fill-box;transform-origin:center;animation:mapre-pulse 1.5s ease-out infinite;}
+    @keyframes mapre-pulse{0%{opacity:.5;transform:scale(.6)}70%{opacity:0;transform:scale(2.2)}100%{opacity:0;transform:scale(2.2)}}
+    .mapre-combine{transform-box:fill-box;transform-origin:center;opacity:0;animation:mapre-combine 4.5s ease-out infinite;}
+    @keyframes mapre-combine{0%{opacity:0;transform:scale(.8)}64%{opacity:0;transform:scale(.8)}68%{opacity:.85;transform:scale(1)}72%{opacity:.5;transform:scale(1.05)}78%{opacity:0;transform:scale(1.15)}100%{opacity:0;transform:scale(.8)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .mapre-packet,.mapre-merge,.mapre-pulse,.mapre-flow,.mapre-flowm,.mapre-combine{animation:none !important;}
+      .mapre-packet{opacity:1;}
+      .mapre-merge,.mapre-pulse,.mapre-combine{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="mapre-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="mapre-am" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--map-color)"/></marker>
+    <marker id="mapre-amm" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--merge-color)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="420" fill="var(--diagram-bg)"/>
+
+  <text class="mapre-sub" x="40" y="52">DATA-PARALLEL · FAN-OUT / FAN-IN</text>
+  <text class="mapre-title" x="40" y="84" fill="url(#mapre-grad)">Map-Reduce</text>
+
+  <!-- Map fan-out (Map -> 4 workers) -->
+  <path class="mapre-flow" d="M256,236 C 300,146 300,146 340,140" marker-end="url(#mapre-am)"/>
+  <path class="mapre-flow" d="M256,244 C 300,204 300,204 340,200" marker-end="url(#mapre-am)"/>
+  <path class="mapre-flow" d="M256,256 C 300,296 300,296 340,300" marker-end="url(#mapre-am)"/>
+  <path class="mapre-flow" d="M256,264 C 300,354 300,354 340,360" marker-end="url(#mapre-am)"/>
+
+  <!-- Reduce fan-in (4 workers -> Reduce) -->
+  <path class="mapre-flow" d="M496,140 C 560,146 556,236 600,242" marker-end="url(#mapre-am)"/>
+  <path class="mapre-flow" d="M496,200 C 552,206 552,244 596,248" marker-end="url(#mapre-am)"/>
+  <path class="mapre-flow" d="M496,300 C 552,294 552,256 596,252" marker-end="url(#mapre-am)"/>
+  <path class="mapre-flow" d="M496,360 C 560,354 556,264 600,258" marker-end="url(#mapre-am)"/>
+
+  <!-- Reduce -> Merged Result -->
+  <line class="mapre-flowm" x1="698" y1="250" x2="734" y2="250" marker-end="url(#mapre-amm)"/>
+
+  <!-- Nodes -->
+  <rect class="mapre-nodebox" x="18" y="222" width="108" height="56" rx="12"/>
+  <text class="mapre-label2" x="72" y="250" text-anchor="middle" dominant-baseline="middle">Coordinator</text>
+
+  <rect class="mapre-nodebox" x="160" y="226" width="96" height="48" rx="12"/>
+  <text class="mapre-label" x="208" y="250" text-anchor="middle" dominant-baseline="middle">Map</text>
+
+  <rect class="mapre-nodebox" x="340" y="118" width="156" height="44" rx="11"/>
+  <text class="mapre-label2" x="418" y="140" text-anchor="middle" dominant-baseline="middle">Worker (chunk 1)</text>
+  <rect class="mapre-nodebox" x="340" y="178" width="156" height="44" rx="11"/>
+  <text class="mapre-label2" x="418" y="200" text-anchor="middle" dominant-baseline="middle">Worker (chunk 2)</text>
+  <rect class="mapre-nodebox" x="340" y="278" width="156" height="44" rx="11"/>
+  <text class="mapre-label2" x="418" y="300" text-anchor="middle" dominant-baseline="middle">Worker (chunk 3)</text>
+  <rect class="mapre-nodebox" x="340" y="338" width="156" height="44" rx="11"/>
+  <text class="mapre-label2" x="418" y="360" text-anchor="middle" dominant-baseline="middle">Worker (chunk 4)</text>
+
+  <!-- Reduce -->
+  <rect class="mapre-nodebox" x="600" y="222" width="98" height="56" rx="12"/>
+  <text class="mapre-label" x="649" y="250" text-anchor="middle" dominant-baseline="middle">Reduce</text>
+  <circle class="mapre-combine" cx="649" cy="250" r="34" fill="none" stroke="var(--merge-color)" stroke-width="2.5"/>
+
+  <!-- Merged Result -->
+  <rect class="mapre-nodebox" x="736" y="222" width="104" height="56" rx="12"/>
+  <text class="mapre-label2" x="788" y="250" text-anchor="middle" dominant-baseline="middle"><tspan x="788" dy="-0.35em">Merged</tspan><tspan x="788" dy="1.2em">Result</tspan></text>
+
+  <text class="mapre-tag" x="208" y="300" text-anchor="middle" fill="var(--map-color)">split into chunks</text>
+  <text class="mapre-tag" x="649" y="300" text-anchor="middle" fill="var(--merge-color)">combine</text>
+
+  <!-- Map packets (same color, launch simultaneously) -->
+  <g class="mapre-packet" style="--dy:-110px;">
+    <circle class="mapre-pulse" cx="208" cy="250" r="8" fill="none" stroke="var(--map-color)" stroke-width="2"/>
+    <circle cx="208" cy="250" r="10" fill="var(--map-color)" opacity="0.22"/>
+    <circle cx="208" cy="250" r="5" fill="var(--map-color)"/>
+    <circle cx="206.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="mapre-packet" style="--dy:-50px;">
+    <circle class="mapre-pulse" cx="208" cy="250" r="8" fill="none" stroke="var(--map-color)" stroke-width="2"/>
+    <circle cx="208" cy="250" r="10" fill="var(--map-color)" opacity="0.22"/>
+    <circle cx="208" cy="250" r="5" fill="var(--map-color)"/>
+    <circle cx="206.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="mapre-packet" style="--dy:50px;">
+    <circle class="mapre-pulse" cx="208" cy="250" r="8" fill="none" stroke="var(--map-color)" stroke-width="2"/>
+    <circle cx="208" cy="250" r="10" fill="var(--map-color)" opacity="0.22"/>
+    <circle cx="208" cy="250" r="5" fill="var(--map-color)"/>
+    <circle cx="206.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="mapre-packet" style="--dy:110px;">
+    <circle class="mapre-pulse" cx="208" cy="250" r="8" fill="none" stroke="var(--map-color)" stroke-width="2"/>
+    <circle cx="208" cy="250" r="10" fill="var(--map-color)" opacity="0.22"/>
+    <circle cx="208" cy="250" r="5" fill="var(--map-color)"/>
+    <circle cx="206.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+
+  <!-- Merged packet (Reduce -> Merged Result) -->
+  <g class="mapre-merge">
+    <circle class="mapre-pulse" cx="649" cy="250" r="10" fill="none" stroke="var(--merge-color)" stroke-width="2"/>
+    <circle cx="649" cy="250" r="12" fill="var(--merge-color)" opacity="0.22"/>
+    <circle cx="649" cy="250" r="6" fill="var(--merge-color)"/>
+    <circle cx="646.5" cy="247.5" r="2.2" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>

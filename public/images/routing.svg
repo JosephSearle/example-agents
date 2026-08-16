@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" role="img" aria-label="Routing workflow: an Input Query is classified, then sent down exactly one of three specialist paths (General Questions, Refund Requests, Technical Support), each leading to its own Response; only one path is active per query">
+  <title>Routing</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --edge-color:#5b616c;
+      --accent-color:#0368FF;
+      --branch-1:#0368FF;
+      --branch-2:#B44BFF;
+      --branch-3:#FF7A59;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+    }
+    .routing-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .routing-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .routing-label{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .routing-label2{font:600 11.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .routing-eg{font:500 10px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--muted-text);letter-spacing:.01em;}
+    .routing-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .routing-edge{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .routing-flow{fill:none;stroke-width:2;stroke-dasharray:5 11;stroke-linecap:round;animation:routing-dash .9s linear infinite;}
+    .routing-fc1{stroke:var(--branch-1);}
+    .routing-fc2{stroke:var(--branch-2);}
+    .routing-fc3{stroke:var(--branch-3);}
+    @keyframes routing-dash{to{stroke-dashoffset:-16;}}
+
+    .routing-glow1{opacity:0;animation:routing-glow1 12s ease-in-out infinite;}
+    .routing-glow2{opacity:0;animation:routing-glow2 12s ease-in-out infinite;}
+    .routing-glow3{opacity:0;animation:routing-glow3 12s ease-in-out infinite;}
+    @keyframes routing-glow1{0%{opacity:0}1.5%{opacity:1}31%{opacity:1}33%{opacity:0}100%{opacity:0}}
+    @keyframes routing-glow2{0%{opacity:0}33%{opacity:0}34.5%{opacity:1}64%{opacity:1}66%{opacity:0}100%{opacity:0}}
+    @keyframes routing-glow3{0%{opacity:0}66%{opacity:0}67.5%{opacity:1}98%{opacity:1}99.5%{opacity:0}100%{opacity:0}}
+
+    .routing-p1{animation:routing-p1 12s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes routing-p1{
+      0%{transform:translate(0,0);opacity:0}
+      1.5%{opacity:1}
+      8%{transform:translate(128px,0)}
+      11%{transform:translate(128px,0)}
+      21%{transform:translate(342px,-140px)}
+      25%{transform:translate(342px,-140px)}
+      30%{transform:translate(532px,-140px);opacity:1}
+      32%{transform:translate(532px,-140px);opacity:0}
+      100%{transform:translate(532px,-140px);opacity:0}
+    }
+    .routing-p2{animation:routing-p2 12s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes routing-p2{
+      0%{transform:translate(0,0);opacity:0}
+      33%{transform:translate(0,0);opacity:0}
+      34.5%{opacity:1}
+      41%{transform:translate(128px,0)}
+      44%{transform:translate(128px,0)}
+      51%{transform:translate(342px,0)}
+      55%{transform:translate(342px,0)}
+      63%{transform:translate(532px,0);opacity:1}
+      65%{transform:translate(532px,0);opacity:0}
+      100%{transform:translate(532px,0);opacity:0}
+    }
+    .routing-p3{animation:routing-p3 12s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes routing-p3{
+      0%{transform:translate(0,0);opacity:0}
+      66%{transform:translate(0,0);opacity:0}
+      67.5%{opacity:1}
+      74%{transform:translate(128px,0)}
+      77%{transform:translate(128px,0)}
+      84%{transform:translate(342px,140px)}
+      88%{transform:translate(342px,140px)}
+      97%{transform:translate(532px,140px);opacity:1}
+      99%{transform:translate(532px,140px);opacity:0}
+      100%{transform:translate(532px,140px);opacity:0}
+    }
+    .routing-pulse{transform-box:fill-box;transform-origin:center;animation:routing-pulse 1.5s ease-out infinite;}
+    @keyframes routing-pulse{0%{opacity:.5;transform:scale(.6)}70%{opacity:0;transform:scale(2.2)}100%{opacity:0;transform:scale(2.2)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .routing-glow1,.routing-glow2,.routing-glow3,.routing-p1,.routing-p2,.routing-p3,.routing-pulse,.routing-flow{animation:none !important;}
+      .routing-glow1,.routing-glow2,.routing-glow3{opacity:1;}
+      .routing-p1,.routing-p2,.routing-p3{opacity:0;}
+      .routing-pulse{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="routing-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="routing-am" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+    <marker id="routing-a1" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-1)"/></marker>
+    <marker id="routing-a2" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-2)"/></marker>
+    <marker id="routing-a3" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-3)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="440" fill="var(--diagram-bg)"/>
+
+  <text class="routing-sub" x="40" y="52">WORKFLOW · ONE PATH PER REQUEST</text>
+  <text class="routing-title" x="40" y="84" fill="url(#routing-grad)">Routing</text>
+
+  <!-- Gray base structure -->
+  <line class="routing-edge" x1="120" y1="250" x2="138" y2="250" marker-end="url(#routing-am)"/>
+  <path class="routing-edge" d="M244,238 C 286,120 286,120 318,111" marker-end="url(#routing-am)"/>
+  <line class="routing-edge" x1="252" y1="250" x2="318" y2="250" marker-end="url(#routing-am)"/>
+  <path class="routing-edge" d="M244,262 C 286,380 286,380 318,389" marker-end="url(#routing-am)"/>
+  <line class="routing-edge" x1="500" y1="110" x2="546" y2="110" marker-end="url(#routing-am)"/>
+  <line class="routing-edge" x1="500" y1="250" x2="546" y2="250" marker-end="url(#routing-am)"/>
+  <line class="routing-edge" x1="500" y1="390" x2="546" y2="390" marker-end="url(#routing-am)"/>
+
+  <!-- Colored glow overlays -->
+  <g class="routing-glow1">
+    <path class="routing-flow routing-fc1" d="M244,238 C 286,120 286,120 317,111" marker-end="url(#routing-a1)"/>
+    <line class="routing-flow routing-fc1" x1="500" y1="110" x2="545" y2="110" marker-end="url(#routing-a1)"/>
+    <rect x="320" y="86" width="180" height="48" rx="11" fill="none" stroke="var(--branch-1)" stroke-width="1.5"/>
+    <rect x="548" y="88" width="104" height="44" rx="10" fill="none" stroke="var(--branch-1)" stroke-width="1.5"/>
+  </g>
+  <g class="routing-glow2">
+    <line class="routing-flow routing-fc2" x1="252" y1="250" x2="317" y2="250" marker-end="url(#routing-a2)"/>
+    <line class="routing-flow routing-fc2" x1="500" y1="250" x2="545" y2="250" marker-end="url(#routing-a2)"/>
+    <rect x="320" y="226" width="180" height="48" rx="11" fill="none" stroke="var(--branch-2)" stroke-width="1.5"/>
+    <rect x="548" y="228" width="104" height="44" rx="10" fill="none" stroke="var(--branch-2)" stroke-width="1.5"/>
+  </g>
+  <g class="routing-glow3">
+    <path class="routing-flow routing-fc3" d="M244,262 C 286,380 286,380 317,389" marker-end="url(#routing-a3)"/>
+    <line class="routing-flow routing-fc3" x1="500" y1="390" x2="545" y2="390" marker-end="url(#routing-a3)"/>
+    <rect x="320" y="366" width="180" height="48" rx="11" fill="none" stroke="var(--branch-3)" stroke-width="1.5"/>
+    <rect x="548" y="368" width="104" height="44" rx="10" fill="none" stroke="var(--branch-3)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Nodes -->
+  <rect class="routing-nodebox" x="16" y="222" width="104" height="56" rx="12"/>
+  <text class="routing-label2" x="68" y="250" text-anchor="middle" dominant-baseline="middle"><tspan x="68" dy="-0.35em">Input</tspan><tspan x="68" dy="1.2em">Query</tspan></text>
+
+  <polygon class="routing-nodebox" points="140,250 196,208 252,250 196,292"/>
+  <text class="routing-label" x="196" y="250" text-anchor="middle" dominant-baseline="middle">Classifier</text>
+
+  <rect class="routing-nodebox" x="320" y="86" width="180" height="48" rx="11"/>
+  <text class="routing-label" x="336" y="105" dominant-baseline="middle">Specialist A</text>
+  <text class="routing-eg" x="336" y="122" dominant-baseline="middle">e.g. General Questions</text>
+  <rect class="routing-nodebox" x="548" y="88" width="104" height="44" rx="10"/>
+  <text class="routing-label2" x="600" y="110" text-anchor="middle" dominant-baseline="middle">Response</text>
+
+  <rect class="routing-nodebox" x="320" y="226" width="180" height="48" rx="11"/>
+  <text class="routing-label" x="336" y="245" dominant-baseline="middle">Specialist B</text>
+  <text class="routing-eg" x="336" y="262" dominant-baseline="middle">e.g. Refund Requests</text>
+  <rect class="routing-nodebox" x="548" y="228" width="104" height="44" rx="10"/>
+  <text class="routing-label2" x="600" y="250" text-anchor="middle" dominant-baseline="middle">Response</text>
+
+  <rect class="routing-nodebox" x="320" y="366" width="180" height="48" rx="11"/>
+  <text class="routing-label" x="336" y="385" dominant-baseline="middle">Specialist C</text>
+  <text class="routing-eg" x="336" y="402" dominant-baseline="middle">e.g. Technical Support</text>
+  <rect class="routing-nodebox" x="548" y="368" width="104" height="44" rx="10"/>
+  <text class="routing-label2" x="600" y="390" text-anchor="middle" dominant-baseline="middle">Response</text>
+
+  <!-- Packets -->
+  <g class="routing-p1">
+    <circle class="routing-pulse" cx="68" cy="250" r="8" fill="none" stroke="var(--branch-1)" stroke-width="2"/>
+    <circle cx="68" cy="250" r="10" fill="var(--branch-1)" opacity="0.22"/>
+    <circle cx="68" cy="250" r="5" fill="var(--branch-1)"/>
+    <circle cx="66.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="routing-p2">
+    <circle class="routing-pulse" cx="68" cy="250" r="8" fill="none" stroke="var(--branch-2)" stroke-width="2"/>
+    <circle cx="68" cy="250" r="10" fill="var(--branch-2)" opacity="0.22"/>
+    <circle cx="68" cy="250" r="5" fill="var(--branch-2)"/>
+    <circle cx="66.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="routing-p3">
+    <circle class="routing-pulse" cx="68" cy="250" r="8" fill="none" stroke="var(--branch-3)" stroke-width="2"/>
+    <circle cx="68" cy="250" r="10" fill="var(--branch-3)" opacity="0.22"/>
+    <circle cx="68" cy="250" r="5" fill="var(--branch-3)"/>
+    <circle cx="66.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>

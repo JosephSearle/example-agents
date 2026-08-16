@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 290" role="img" aria-label="Prompt Chaining pipeline for contract analysis: Input, Step 1 Analyze, Step 2 Extract Terms, Step 3 Check Compliance, Step 4 Summarize, Output — with a small Check validation gate on each connecting arrow between steps">
+  <title>Prompt Chaining</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --edge-color:#5b616c;
+      --accent-color:#0368FF;
+      --gate-stroke:#3a3f48;
+      --pass-color:#2FBF71;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+      --step-tag:#9aa0ab;
+    }
+    .chaining-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .chaining-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .chaining-label{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .chaining-step{font:700 9px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--step-tag);letter-spacing:.06em;}
+    .chaining-gatelabel{font:600 8.5px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--muted-text);letter-spacing:.03em;}
+    .chaining-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .chaining-gate{fill:var(--node-fill);stroke:var(--gate-stroke);stroke-width:1;}
+    .chaining-edge{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .chaining-flow{stroke:var(--accent-color);stroke-width:2;fill:none;stroke-dasharray:5 11;stroke-linecap:round;opacity:.55;animation:chaining-dash .9s linear infinite;}
+    .chaining-trail{stroke:var(--accent-color);stroke-width:3.5;fill:none;stroke-linecap:round;opacity:0;animation:chaining-trail 6s ease-out infinite;}
+    @keyframes chaining-dash{to{stroke-dashoffset:-16;}}
+    @keyframes chaining-trail{0%{opacity:0}3%{opacity:.5}13%{opacity:0}100%{opacity:0}}
+
+    .chaining-gflash{transform-box:fill-box;transform-origin:center;opacity:0;animation:chaining-gflash 6s ease-out infinite;}
+    @keyframes chaining-gflash{0%{opacity:0;transform:scale(.7)}1%{opacity:.85;transform:scale(1)}4%{opacity:.85;transform:scale(1)}7%{opacity:0;transform:scale(1.5)}100%{opacity:0;transform:scale(1.5)}}
+
+    .chaining-packet{animation:chaining-travel 6s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes chaining-travel{
+      0%{transform:translate(0,0);opacity:0}
+      2%{transform:translate(0,0);opacity:1}
+      7%{transform:translate(0,0)}
+      11%{transform:translate(59px,0)}
+      15%{transform:translate(140px,0)}
+      20%{transform:translate(140px,0)}
+      23%{transform:translate(221px,0)}
+      27%{transform:translate(304px,0)}
+      32%{transform:translate(304px,0)}
+      35%{transform:translate(387px,0)}
+      39%{transform:translate(476px,0)}
+      44%{transform:translate(476px,0)}
+      47%{transform:translate(565px,0)}
+      51%{transform:translate(646px,0)}
+      56%{transform:translate(646px,0)}
+      59%{transform:translate(727px,0)}
+      63%{transform:translate(789px,0)}
+      66%{transform:translate(789px,0);opacity:1}
+      69%{transform:translate(789px,0);opacity:0}
+      100%{transform:translate(789px,0);opacity:0}
+    }
+    .chaining-pulse{transform-box:fill-box;transform-origin:center;animation:chaining-pulse 1.5s ease-out infinite;}
+    @keyframes chaining-pulse{0%{opacity:.5;transform:scale(.6)}70%{opacity:0;transform:scale(2.2)}100%{opacity:0;transform:scale(2.2)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .chaining-flow,.chaining-trail,.chaining-gflash,.chaining-packet,.chaining-pulse{animation:none !important;}
+      .chaining-packet{opacity:1;}
+      .chaining-trail,.chaining-gflash,.chaining-pulse{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="chaining-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="chaining-arrow" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="7" refX="6.5" refY="3" orient="auto"><path d="M0,0 L6.5,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="290" fill="var(--diagram-bg)"/>
+
+  <text class="chaining-sub" x="40" y="52">WORKFLOW · CONTRACT ANALYSIS</text>
+  <text class="chaining-title" x="40" y="84" fill="url(#chaining-grad)">Prompt Chaining</text>
+
+  <!-- Connectors (gray base) -->
+  <line class="chaining-edge" x1="90" y1="190" x2="136" y2="190" marker-end="url(#chaining-arrow)"/>
+  <line class="chaining-edge" x1="252" y1="190" x2="298" y2="190" marker-end="url(#chaining-arrow)"/>
+  <line class="chaining-edge" x1="418" y1="190" x2="464" y2="190" marker-end="url(#chaining-arrow)"/>
+  <line class="chaining-edge" x1="596" y1="190" x2="642" y2="190" marker-end="url(#chaining-arrow)"/>
+  <line class="chaining-edge" x1="758" y1="190" x2="804" y2="190" marker-end="url(#chaining-arrow)"/>
+
+  <!-- Moving-dash flow overlays -->
+  <line class="chaining-flow" x1="90" y1="190" x2="135" y2="190"/>
+  <line class="chaining-flow" x1="252" y1="190" x2="297" y2="190"/>
+  <line class="chaining-flow" x1="418" y1="190" x2="463" y2="190"/>
+  <line class="chaining-flow" x1="596" y1="190" x2="641" y2="190"/>
+  <line class="chaining-flow" x1="758" y1="190" x2="803" y2="190"/>
+
+  <!-- Output-feeds-input trails (fade after packet passes) -->
+  <line class="chaining-trail" x1="90" y1="190" x2="135" y2="190" style="animation-delay:.55s"/>
+  <line class="chaining-trail" x1="252" y1="190" x2="297" y2="190" style="animation-delay:1.28s"/>
+  <line class="chaining-trail" x1="418" y1="190" x2="463" y2="190" style="animation-delay:2.02s"/>
+  <line class="chaining-trail" x1="596" y1="190" x2="641" y2="190" style="animation-delay:2.76s"/>
+  <line class="chaining-trail" x1="758" y1="190" x2="803" y2="190" style="animation-delay:3.5s"/>
+
+  <!-- Check gates (secondary detail) -->
+  <g>
+    <polygon class="chaining-gate" points="103,190 113,179 123,190 113,201"/>
+    <text class="chaining-gatelabel" x="113" y="218" text-anchor="middle">Check</text>
+    <polygon class="chaining-gflash" points="103,190 113,179 123,190 113,201" fill="var(--pass-color)" stroke="var(--pass-color)" stroke-width="1.5" style="animation-delay:.66s"/>
+  </g>
+  <g>
+    <polygon class="chaining-gate" points="265,190 275,179 285,190 275,201"/>
+    <text class="chaining-gatelabel" x="275" y="218" text-anchor="middle">Check</text>
+    <polygon class="chaining-gflash" points="265,190 275,179 285,190 275,201" fill="var(--pass-color)" stroke="var(--pass-color)" stroke-width="1.5" style="animation-delay:1.38s"/>
+  </g>
+  <g>
+    <polygon class="chaining-gate" points="431,190 441,179 451,190 441,201"/>
+    <text class="chaining-gatelabel" x="441" y="218" text-anchor="middle">Check</text>
+    <polygon class="chaining-gflash" points="431,190 441,179 451,190 441,201" fill="var(--pass-color)" stroke="var(--pass-color)" stroke-width="1.5" style="animation-delay:2.10s"/>
+  </g>
+  <g>
+    <polygon class="chaining-gate" points="609,190 619,179 629,190 619,201"/>
+    <text class="chaining-gatelabel" x="619" y="218" text-anchor="middle">Check</text>
+    <polygon class="chaining-gflash" points="609,190 619,179 629,190 619,201" fill="var(--pass-color)" stroke="var(--pass-color)" stroke-width="1.5" style="animation-delay:2.82s"/>
+  </g>
+  <g>
+    <polygon class="chaining-gate" points="771,190 781,179 791,190 781,201"/>
+    <text class="chaining-gatelabel" x="781" y="218" text-anchor="middle">Check</text>
+    <polygon class="chaining-gflash" points="771,190 781,179 791,190 781,201" fill="var(--pass-color)" stroke="var(--pass-color)" stroke-width="1.5" style="animation-delay:3.54s"/>
+  </g>
+
+  <!-- Main nodes -->
+  <rect class="chaining-nodebox" x="18" y="164" width="72" height="52" rx="12"/>
+  <text class="chaining-label" x="54" y="190" text-anchor="middle" dominant-baseline="middle">Input</text>
+
+  <rect class="chaining-nodebox" x="136" y="162" width="116" height="56" rx="12"/>
+  <text class="chaining-step" x="194" y="181" text-anchor="middle">STEP 1</text>
+  <text class="chaining-label" x="194" y="200" text-anchor="middle">Analyze</text>
+
+  <rect class="chaining-nodebox" x="298" y="162" width="120" height="56" rx="12"/>
+  <text class="chaining-step" x="358" y="181" text-anchor="middle">STEP 2</text>
+  <text class="chaining-label" x="358" y="200" text-anchor="middle">Extract Terms</text>
+
+  <rect class="chaining-nodebox" x="464" y="162" width="132" height="56" rx="12"/>
+  <text class="chaining-step" x="530" y="181" text-anchor="middle">STEP 3</text>
+  <text class="chaining-label" x="530" y="200" text-anchor="middle">Check Compliance</text>
+
+  <rect class="chaining-nodebox" x="642" y="162" width="116" height="56" rx="12"/>
+  <text class="chaining-step" x="700" y="181" text-anchor="middle">STEP 4</text>
+  <text class="chaining-label" x="700" y="200" text-anchor="middle">Summarize</text>
+
+  <rect class="chaining-nodebox" x="804" y="164" width="78" height="52" rx="12"/>
+  <text class="chaining-label" x="843" y="190" text-anchor="middle" dominant-baseline="middle">Output</text>
+
+  <!-- Traveling packet -->
+  <g class="chaining-packet">
+    <circle class="chaining-pulse" cx="54" cy="190" r="8" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="54" cy="190" r="10" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="54" cy="190" r="5" fill="var(--accent-color)"/>
+    <circle cx="52.5" cy="188.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>

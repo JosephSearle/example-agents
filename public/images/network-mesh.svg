@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 480" role="img" aria-label="Network / Mesh topology: five agents (Planner, Executor, Reviewer, Researcher, Validator) scattered in a loose non-symmetric layout with non-uniform connections including a route-back edge; any agent can route to any other, and the traversal path is decided at runtime rather than by a fixed graph shape">
+  <title>Network / Mesh</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --edge-color:#5b616c;
+      --accent-color:#0368FF;
+      --n-planner:#0368FF;
+      --n-executor:#B44BFF;
+      --n-reviewer:#FF7A59;
+      --n-researcher:#FF4FBA;
+      --n-validator:#FFB800;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+    }
+    .mesh-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .mesh-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .mesh-label{font:600 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .mesh-tag{font:600 10.5px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--muted-text);letter-spacing:.02em;}
+    .mesh-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .mesh-edge{stroke:var(--edge-color);stroke-width:1.4;fill:none;}
+    .mesh-flow{fill:none;stroke-width:1.75;stroke-dasharray:4 10;stroke-linecap:round;opacity:.4;stroke:var(--accent-color);animation:mesh-dash 1s linear infinite;}
+    .mesh-flow2{animation:mesh-dash2 1.3s linear infinite;}
+    @keyframes mesh-dash{to{stroke-dashoffset:-14;}}
+    @keyframes mesh-dash2{to{stroke-dashoffset:14;}}
+
+    .mesh-p1{animation:mesh-p1 14s cubic-bezier(0.45,0,0.35,1) infinite;}
+    @keyframes mesh-p1{
+      0%{transform:translate(0,0);opacity:0}
+      2%{opacity:1}
+      6%{transform:translate(0,0)}
+      14%{transform:translate(260px,90px)}
+      20%{transform:translate(260px,90px)}
+      28%{transform:translate(120px,220px)}
+      34%{transform:translate(120px,220px)}
+      42%{transform:translate(0,0)}
+      46%{transform:translate(0,0);opacity:1}
+      48%{transform:translate(0,0);opacity:0}
+      100%{transform:translate(0,0);opacity:0}
+    }
+    .mesh-p2{animation:mesh-p2 14s cubic-bezier(0.45,0,0.35,1) infinite;}
+    @keyframes mesh-p2{
+      0%{transform:translate(0,0);opacity:0}
+      50%{transform:translate(0,0);opacity:0}
+      52%{transform:translate(0,0);opacity:1}
+      58%{transform:translate(0,0)}
+      66%{transform:translate(380px,-30px)}
+      72%{transform:translate(380px,-30px)}
+      80%{transform:translate(520px,160px)}
+      86%{transform:translate(520px,160px)}
+      94%{transform:translate(260px,90px)}
+      98%{transform:translate(260px,90px);opacity:1}
+      99%{transform:translate(260px,90px);opacity:0}
+      100%{transform:translate(260px,90px);opacity:0}
+    }
+
+    .mesh-ring{transform-box:fill-box;transform-origin:center;opacity:0;}
+    .mesh-rP{animation:mesh-rP 14s ease-out infinite;}
+    @keyframes mesh-rP{0%{opacity:.7;transform:scale(.6)}5%{opacity:0;transform:scale(1.9)}6%{opacity:0;transform:scale(.6)}41%{opacity:0;transform:scale(.6)}42%{opacity:.7;transform:scale(.6)}47%{opacity:0;transform:scale(1.9)}48%{opacity:0;transform:scale(.6)}51%{opacity:0;transform:scale(.6)}52%{opacity:.7;transform:scale(.6)}57%{opacity:0;transform:scale(1.9)}100%{opacity:0;transform:scale(.6)}}
+    .mesh-rE{animation:mesh-rE 14s ease-out infinite;}
+    @keyframes mesh-rE{0%{opacity:0;transform:scale(.6)}13%{opacity:0;transform:scale(.6)}14%{opacity:.7;transform:scale(.6)}19%{opacity:0;transform:scale(1.9)}20%{opacity:0;transform:scale(.6)}93%{opacity:0;transform:scale(.6)}94%{opacity:.7;transform:scale(.6)}99%{opacity:0;transform:scale(1.9)}100%{opacity:0;transform:scale(.6)}}
+    .mesh-rRv{animation:mesh-rRv 14s ease-out infinite;}
+    @keyframes mesh-rRv{0%{opacity:0;transform:scale(.6)}27%{opacity:0;transform:scale(.6)}28%{opacity:.7;transform:scale(.6)}33%{opacity:0;transform:scale(1.9)}100%{opacity:0;transform:scale(.6)}}
+    .mesh-rRs{animation:mesh-rRs 14s ease-out infinite;}
+    @keyframes mesh-rRs{0%{opacity:0;transform:scale(.6)}65%{opacity:0;transform:scale(.6)}66%{opacity:.7;transform:scale(.6)}71%{opacity:0;transform:scale(1.9)}100%{opacity:0;transform:scale(.6)}}
+    .mesh-rV{animation:mesh-rV 14s ease-out infinite;}
+    @keyframes mesh-rV{0%{opacity:0;transform:scale(.6)}79%{opacity:0;transform:scale(.6)}80%{opacity:.7;transform:scale(.6)}85%{opacity:0;transform:scale(1.9)}100%{opacity:0;transform:scale(.6)}}
+    .mesh-pulse{transform-box:fill-box;transform-origin:center;animation:mesh-pulse 1.4s ease-out infinite;}
+    @keyframes mesh-pulse{0%{opacity:.6;transform:scale(.6)}70%{opacity:0;transform:scale(2.2)}100%{opacity:0;transform:scale(2.2)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .mesh-flow,.mesh-p1,.mesh-p2,.mesh-rP,.mesh-rE,.mesh-rRv,.mesh-rRs,.mesh-rV,.mesh-pulse{animation:none !important;}
+      .mesh-p1{opacity:1;}
+      .mesh-p2,.mesh-rP,.mesh-rE,.mesh-rRv,.mesh-rRs,.mesh-rV,.mesh-pulse{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="mesh-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="mesh-am" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="7" refX="6.5" refY="3" orient="auto"><path d="M0,0 L6.5,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="480" fill="var(--diagram-bg)"/>
+
+  <text class="mesh-sub" x="40" y="52">MULTI-AGENT · DYNAMIC ROUTING</text>
+  <text class="mesh-title" x="40" y="84" fill="url(#mesh-grad)">Network / Mesh</text>
+
+  <!-- Loose, non-uniform edges -->
+  <line class="mesh-edge" x1="240" y1="170" x2="380" y2="242" marker-start="url(#mesh-am)" marker-end="url(#mesh-am)"/>
+  <line class="mesh-edge" x1="240" y1="152" x2="500" y2="136" marker-start="url(#mesh-am)" marker-end="url(#mesh-am)"/>
+  <line class="mesh-edge" x1="418" y1="272" x2="330" y2="358" marker-start="url(#mesh-am)" marker-end="url(#mesh-am)"/>
+  <line class="mesh-edge" x1="500" y1="256" x2="640" y2="312" marker-start="url(#mesh-am)" marker-end="url(#mesh-am)"/>
+  <line class="mesh-edge" x1="470" y1="228" x2="548" y2="152" marker-start="url(#mesh-am)" marker-end="url(#mesh-am)"/>
+  <line class="mesh-edge" x1="600" y1="152" x2="686" y2="298" marker-start="url(#mesh-am)" marker-end="url(#mesh-am)"/>
+  <path class="mesh-edge" d="M252,362 C 150,340 128,250 158,184" marker-end="url(#mesh-am)"/>
+
+  <!-- animated dash overlays (mixed directions = busy) -->
+  <line class="mesh-flow" x1="240" y1="170" x2="380" y2="242"/>
+  <line class="mesh-flow mesh-flow2" x1="240" y1="152" x2="500" y2="136"/>
+  <line class="mesh-flow" x1="418" y1="272" x2="330" y2="358"/>
+  <line class="mesh-flow mesh-flow2" x1="500" y1="256" x2="640" y2="312"/>
+  <line class="mesh-flow" x1="470" y1="228" x2="548" y2="152"/>
+  <line class="mesh-flow mesh-flow2" x1="600" y1="152" x2="686" y2="298"/>
+  <path class="mesh-flow" d="M252,362 C 150,340 128,250 158,184"/>
+  <text class="mesh-tag" x="120" y="266" text-anchor="middle" fill="var(--n-reviewer)" transform="rotate(-78 120 266)">route back</text>
+
+  <!-- Node rings (behind boxes) -->
+  <rect class="mesh-ring mesh-rP" x="118" y="136" width="124" height="48" rx="13" fill="none" stroke="var(--n-planner)" stroke-width="2.5"/>
+  <rect class="mesh-ring mesh-rE" x="378" y="226" width="124" height="48" rx="13" fill="none" stroke="var(--n-executor)" stroke-width="2.5"/>
+  <rect class="mesh-ring mesh-rRv" x="238" y="356" width="124" height="48" rx="13" fill="none" stroke="var(--n-reviewer)" stroke-width="2.5"/>
+  <rect class="mesh-ring mesh-rRs" x="498" y="106" width="124" height="48" rx="13" fill="none" stroke="var(--n-researcher)" stroke-width="2.5"/>
+  <rect class="mesh-ring mesh-rV" x="638" y="296" width="124" height="48" rx="13" fill="none" stroke="var(--n-validator)" stroke-width="2.5"/>
+
+  <!-- Nodes -->
+  <rect class="mesh-nodebox" x="120" y="138" width="120" height="44" rx="12"/>
+  <text class="mesh-label" x="180" y="160" text-anchor="middle" dominant-baseline="middle">Planner</text>
+
+  <rect class="mesh-nodebox" x="380" y="228" width="120" height="44" rx="12"/>
+  <text class="mesh-label" x="440" y="250" text-anchor="middle" dominant-baseline="middle">Executor</text>
+
+  <rect class="mesh-nodebox" x="240" y="358" width="120" height="44" rx="12"/>
+  <text class="mesh-label" x="300" y="380" text-anchor="middle" dominant-baseline="middle">Reviewer</text>
+
+  <rect class="mesh-nodebox" x="500" y="108" width="120" height="44" rx="12"/>
+  <text class="mesh-label" x="560" y="130" text-anchor="middle" dominant-baseline="middle">Researcher</text>
+
+  <rect class="mesh-nodebox" x="640" y="298" width="120" height="44" rx="12"/>
+  <text class="mesh-label" x="700" y="320" text-anchor="middle" dominant-baseline="middle">Validator</text>
+
+  <!-- caption -->
+  <text class="mesh-tag" x="450" y="452" text-anchor="middle" fill="var(--muted-text)">any agent may route to any other · path decided at runtime</text>
+
+  <!-- Packets (different path each loop) -->
+  <g class="mesh-p1">
+    <circle class="mesh-pulse" cx="180" cy="160" r="8" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="180" cy="160" r="10" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="180" cy="160" r="5" fill="var(--accent-color)"/>
+    <circle cx="178.5" cy="158.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="mesh-p2">
+    <circle class="mesh-pulse" cx="180" cy="160" r="8" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="180" cy="160" r="10" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="180" cy="160" r="5" fill="var(--accent-color)"/>
+    <circle cx="178.5" cy="158.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>

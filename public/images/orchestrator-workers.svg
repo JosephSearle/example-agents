@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" role="img" aria-label="Orchestrator-Workers workflow: a Task goes to a central Orchestrator that dynamically decides how many workers to spawn, delegates to a variable set of workers (Worker 1, Worker 2, and further ghosted workers), which feed back into Orchestrator Synthesize and then Output">
+  <title>Orchestrator-Workers</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --orch-fill:#181818;
+      --orch-stroke:rgba(3,104,255,0.55);
+      --edge-color:#5b616c;
+      --accent-color:#0368FF;
+      --branch-1:#0368FF;
+      --branch-2:#B44BFF;
+      --branch-3:#FF7A59;
+      --ghost-stroke:#3a3f48;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+    }
+    .orchw-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .orchw-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .orchw-label{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .orchw-label2{font:600 11.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .orchw-orchlabel{font:700 13px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .orchw-ghostlabel{font:600 11.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);}
+    .orchw-tag{font:500 10px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--muted-text);letter-spacing:.02em;}
+    .orchw-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .orchw-orchbox{fill:var(--orch-fill);stroke:var(--orch-stroke);stroke-width:1.5;}
+    .orchw-ghost{fill:none;stroke:var(--ghost-stroke);stroke-width:1.25;stroke-dasharray:5 4;}
+    .orchw-edge{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .orchw-edgeghost{stroke:var(--ghost-stroke);stroke-width:1.25;fill:none;stroke-dasharray:4 4;}
+    .orchw-flow{fill:none;stroke-width:2;stroke-dasharray:5 11;stroke-linecap:round;animation:orchw-dash .9s linear infinite;}
+    .orchw-c1{stroke:var(--branch-1);}
+    .orchw-c2{stroke:var(--branch-2);}
+    .orchw-c3{stroke:var(--branch-3);}
+    @keyframes orchw-dash{to{stroke-dashoffset:-16;}}
+
+    .orchw-w3group{opacity:0;animation:orchw-w3 12s ease-in-out infinite;}
+    @keyframes orchw-w3{0%{opacity:0}50%{opacity:0}54%{opacity:1}92%{opacity:1}96%{opacity:0}100%{opacity:0}}
+
+    .orchw-pin{animation:orchw-pin 6s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes orchw-pin{
+      0%{transform:translate(0,0);opacity:0}
+      3%{opacity:1}
+      14%{transform:translate(126px,0)}
+      18%{transform:translate(126px,0);opacity:1}
+      22%{transform:translate(126px,0);opacity:0}
+      100%{transform:translate(126px,0);opacity:0}
+    }
+    .orchw-out{animation:orchw-out 6s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes orchw-out{
+      0%{transform:translate(0,0);opacity:0}
+      22%{transform:translate(0,0);opacity:0}
+      24%{opacity:1}
+      38%{transform:translate(var(--ox),var(--oy))}
+      44%{transform:translate(var(--ox),var(--oy));opacity:1}
+      47%{transform:translate(var(--ox),var(--oy));opacity:0}
+      100%{transform:translate(var(--ox),var(--oy));opacity:0}
+    }
+    .orchw-ret{animation:orchw-ret 6s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes orchw-ret{
+      0%{transform:translate(var(--rx),var(--ry));opacity:0}
+      48%{transform:translate(var(--rx),var(--ry));opacity:0}
+      50%{opacity:1}
+      64%{transform:translate(0,0)}
+      68%{transform:translate(0,0);opacity:1}
+      71%{transform:translate(0,0);opacity:0}
+      100%{transform:translate(0,0);opacity:0}
+    }
+    .orchw-fin{animation:orchw-fin 6s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes orchw-fin{
+      0%{transform:translate(0,0);opacity:0}
+      72%{transform:translate(0,0);opacity:0}
+      74%{opacity:1}
+      88%{transform:translate(122px,0);opacity:1}
+      93%{transform:translate(122px,0);opacity:0}
+      100%{transform:translate(122px,0);opacity:0}
+    }
+    .orchw-pulse{transform-box:fill-box;transform-origin:center;animation:orchw-pulse 1.5s ease-out infinite;}
+    @keyframes orchw-pulse{0%{opacity:.5;transform:scale(.6)}70%{opacity:0;transform:scale(2.1)}100%{opacity:0;transform:scale(2.1)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .orchw-w3group,.orchw-pin,.orchw-out,.orchw-ret,.orchw-fin,.orchw-pulse,.orchw-flow{animation:none !important;}
+      .orchw-w3group{opacity:1;}
+      .orchw-pin,.orchw-out,.orchw-ret,.orchw-fin{opacity:0;}
+      .orchw-pulse{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="orchw-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="orchw-am" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+    <marker id="orchw-amg" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="7" refX="6.5" refY="3" orient="auto"><path d="M0,0 L6.5,3 L0,6 Z" fill="var(--ghost-stroke)"/></marker>
+    <marker id="orchw-a1" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-1)"/></marker>
+    <marker id="orchw-a2" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-2)"/></marker>
+    <marker id="orchw-a3" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--branch-3)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="420" fill="var(--diagram-bg)"/>
+
+  <text class="orchw-sub" x="40" y="52">WORKFLOW · DYNAMIC WORKER COUNT</text>
+  <text class="orchw-title" x="40" y="84" fill="url(#orchw-grad)">Orchestrator-Workers</text>
+
+  <!-- Base structure -->
+  <line class="orchw-edge" x1="132" y1="250" x2="176" y2="250" marker-end="url(#orchw-am)"/>
+  <path class="orchw-edge" d="M300,232 C 360,150 360,150 424,143" marker-end="url(#orchw-am)"/>
+  <line class="orchw-edge" x1="300" y1="250" x2="424" y2="250" marker-end="url(#orchw-am)"/>
+  <path class="orchw-edgeghost" d="M300,268 C 360,350 360,350 424,357" marker-end="url(#orchw-amg)"/>
+  <path class="orchw-edge" d="M558,143 C 612,150 612,214 664,222" marker-end="url(#orchw-am)"/>
+  <line class="orchw-edge" x1="558" y1="250" x2="664" y2="250" marker-end="url(#orchw-am)"/>
+  <path class="orchw-edgeghost" d="M558,357 C 612,350 612,286 664,278" marker-end="url(#orchw-amg)"/>
+  <line class="orchw-edge" x1="772" y1="250" x2="806" y2="250" marker-end="url(#orchw-am)"/>
+
+  <text class="orchw-tag" x="360" y="204" text-anchor="middle">delegate</text>
+  <text class="orchw-tag" x="612" y="204" text-anchor="middle">gather</text>
+
+  <!-- Colored flow overlays -->
+  <path class="orchw-flow orchw-c1" d="M300,232 C 360,150 360,150 423,143" marker-end="url(#orchw-a1)"/>
+  <line class="orchw-flow orchw-c2" x1="300" y1="250" x2="423" y2="250" marker-end="url(#orchw-a2)"/>
+  <g class="orchw-w3group">
+    <path class="orchw-flow orchw-c3" d="M300,268 C 360,350 360,350 423,357" marker-end="url(#orchw-a3)"/>
+    <path class="orchw-flow orchw-c3" d="M558,357 C 612,350 612,286 663,278" marker-end="url(#orchw-a3)"/>
+    <rect x="424" y="335" width="134" height="44" rx="11" fill="none" stroke="var(--branch-3)" stroke-width="1.5"/>
+  </g>
+  <path class="orchw-flow orchw-c1" d="M558,143 C 612,150 612,214 663,222" marker-end="url(#orchw-a1)"/>
+  <line class="orchw-flow orchw-c2" x1="558" y1="250" x2="663" y2="250" marker-end="url(#orchw-a2)"/>
+
+  <!-- Nodes -->
+  <rect class="orchw-nodebox" x="60" y="226" width="72" height="48" rx="12"/>
+  <text class="orchw-label" x="96" y="250" text-anchor="middle" dominant-baseline="middle">Task</text>
+
+  <rect class="orchw-orchbox" x="176" y="206" width="124" height="88" rx="16"/>
+  <text class="orchw-orchlabel" x="238" y="243" text-anchor="middle" dominant-baseline="middle">Orchestrator</text>
+  <text class="orchw-tag" x="238" y="264" text-anchor="middle" fill="var(--branch-1)">plans breakdown</text>
+
+  <rect class="orchw-nodebox" x="424" y="121" width="134" height="44" rx="11"/>
+  <text class="orchw-label2" x="491" y="143" text-anchor="middle" dominant-baseline="middle">Worker 1</text>
+  <rect class="orchw-nodebox" x="424" y="228" width="134" height="44" rx="11"/>
+  <text class="orchw-label2" x="491" y="250" text-anchor="middle" dominant-baseline="middle">Worker 2</text>
+  <rect class="orchw-ghost" x="424" y="335" width="134" height="44" rx="11"/>
+  <text class="orchw-ghostlabel" x="491" y="357" text-anchor="middle" dominant-baseline="middle">Worker N...</text>
+
+  <rect class="orchw-orchbox" x="664" y="206" width="108" height="88" rx="16"/>
+  <text class="orchw-label" x="718" y="240" text-anchor="middle" dominant-baseline="middle">Orchestrator</text>
+  <text class="orchw-label" x="718" y="260" text-anchor="middle" dominant-baseline="middle">Synthesize</text>
+
+  <rect class="orchw-nodebox" x="808" y="226" width="82" height="48" rx="12"/>
+  <text class="orchw-label2" x="849" y="250" text-anchor="middle" dominant-baseline="middle">Output</text>
+
+  <!-- Packets -->
+  <g class="orchw-pin">
+    <circle class="orchw-pulse" cx="96" cy="250" r="8" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="96" cy="250" r="10" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="96" cy="250" r="5" fill="var(--accent-color)"/>
+    <circle cx="94.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+
+  <g class="orchw-out" style="--ox:186px;--oy:-107px;">
+    <circle cx="238" cy="250" r="5" fill="var(--branch-1)"/>
+    <circle cx="236.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="orchw-out" style="--ox:186px;--oy:0px;">
+    <circle cx="238" cy="250" r="5" fill="var(--branch-2)"/>
+    <circle cx="236.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="orchw-w3group">
+    <g class="orchw-out" style="--ox:186px;--oy:107px;">
+      <circle cx="238" cy="250" r="5" fill="var(--branch-3)"/>
+      <circle cx="236.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+    </g>
+  </g>
+
+  <g class="orchw-ret" style="--rx:-186px;--ry:-107px;animation-delay:-.18s;">
+    <circle class="orchw-pulse" cx="718" cy="250" r="7" fill="none" stroke="var(--branch-1)" stroke-width="2"/>
+    <circle cx="718" cy="250" r="5" fill="var(--branch-1)"/>
+    <circle cx="716.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="orchw-ret" style="--rx:-186px;--ry:0px;animation-delay:.12s;">
+    <circle class="orchw-pulse" cx="718" cy="250" r="7" fill="none" stroke="var(--branch-2)" stroke-width="2"/>
+    <circle cx="718" cy="250" r="5" fill="var(--branch-2)"/>
+    <circle cx="716.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+  </g>
+  <g class="orchw-w3group">
+    <g class="orchw-ret" style="--rx:-186px;--ry:107px;animation-delay:.34s;">
+      <circle class="orchw-pulse" cx="718" cy="250" r="7" fill="none" stroke="var(--branch-3)" stroke-width="2"/>
+      <circle cx="718" cy="250" r="5" fill="var(--branch-3)"/>
+      <circle cx="716.5" cy="248.5" r="1.8" fill="#fff" opacity="0.85"/>
+    </g>
+  </g>
+
+  <g class="orchw-fin">
+    <circle class="orchw-pulse" cx="718" cy="250" r="9" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="718" cy="250" r="11" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="718" cy="250" r="5.5" fill="var(--accent-color)"/>
+    <circle cx="716" cy="248" r="2" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>

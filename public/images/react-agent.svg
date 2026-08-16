@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 450" role="img" aria-label="ReAct Agent reason and act loop: a User Task enters the Thought node; the agent cycles clockwise through Thought, Action, and Observation repeatedly, and once it decides the task is done it exits from Thought to the Final Answer">
+  <title>ReAct Agent (Reason + Act Loop)</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --edge-color:#5b616c;
+      --accent-color:#0368FF;
+      --think-color:#0368FF;
+      --act-color:#FF7A59;
+      --observe-color:#B44BFF;
+      --exit-color:#2FBF71;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+    }
+    .react-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .react-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .react-label{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .react-label2{font:600 11.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .react-tag{font:600 11px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;letter-spacing:.02em;}
+    .react-center{font:600 10.5px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--muted-text);letter-spacing:.06em;}
+    .react-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .react-edge{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .react-flow{fill:none;stroke-width:2;stroke-dasharray:5 11;stroke-linecap:round;opacity:.6;stroke:var(--accent-color);animation:react-dash .9s linear infinite;}
+    .react-exit{stroke:var(--exit-color);stroke-width:2;fill:none;stroke-dasharray:5 11;stroke-linecap:round;animation:react-dash .9s linear infinite;}
+    @keyframes react-dash{to{stroke-dashoffset:-16;}}
+
+    .react-exitglow{opacity:0;animation:react-exitglow 14s ease-in-out infinite;}
+    @keyframes react-exitglow{0%{opacity:0}74%{opacity:0}78%{opacity:1}97%{opacity:1}99%{opacity:0}100%{opacity:0}}
+
+    .react-packet{animation:react-orbit 14s cubic-bezier(0.4,0,0.4,1) infinite;}
+    @keyframes react-orbit{
+      0%{transform:translate(0,0);opacity:0}
+      2%{transform:translate(0,0);opacity:1}
+      7%{transform:translate(130px,75px)}
+      12%{transform:translate(130px,225px)}
+      15%{transform:translate(130px,225px)}
+      20%{transform:translate(0,300px)}
+      25%{transform:translate(-130px,225px)}
+      28%{transform:translate(-130px,225px)}
+      33%{transform:translate(-130px,75px)}
+      37%{transform:translate(0,0)}
+      40%{transform:translate(0,0)}
+      44%{transform:translate(130px,75px)}
+      49%{transform:translate(130px,225px)}
+      52%{transform:translate(130px,225px)}
+      57%{transform:translate(0,300px)}
+      62%{transform:translate(-130px,225px)}
+      65%{transform:translate(-130px,225px)}
+      70%{transform:translate(-130px,75px)}
+      74%{transform:translate(0,0)}
+      78%{transform:translate(0,0)}
+      88%{transform:translate(278px,-30px);opacity:1}
+      97%{transform:translate(278px,-30px);opacity:1}
+      99%{transform:translate(278px,-30px);opacity:0}
+      100%{transform:translate(278px,-30px);opacity:0}
+    }
+
+    .react-pt{transform-box:fill-box;transform-origin:center;opacity:0;animation:react-pt 14s ease-out infinite;}
+    @keyframes react-pt{
+      0%{opacity:.85;transform:scale(.6)}4%{opacity:0;transform:scale(2.2)}5%{opacity:0;transform:scale(.6)}
+      36%{opacity:0;transform:scale(.6)}37%{opacity:.85;transform:scale(.6)}42%{opacity:0;transform:scale(2.2)}43%{opacity:0;transform:scale(.6)}
+      73%{opacity:0;transform:scale(.6)}74%{opacity:.85;transform:scale(.6)}79%{opacity:0;transform:scale(2.2)}
+      100%{opacity:0;transform:scale(.6)}
+    }
+    .react-pa{transform-box:fill-box;transform-origin:center;opacity:0;animation:react-pa 14s ease-out infinite;}
+    @keyframes react-pa{
+      0%{opacity:0;transform:scale(.6)}11%{opacity:0;transform:scale(.6)}12%{opacity:.85;transform:scale(.6)}17%{opacity:0;transform:scale(2.3)}18%{opacity:0;transform:scale(.6)}
+      48%{opacity:0;transform:scale(.6)}49%{opacity:.85;transform:scale(.6)}54%{opacity:0;transform:scale(2.3)}
+      100%{opacity:0;transform:scale(.6)}
+    }
+    .react-po{transform-box:fill-box;transform-origin:center;opacity:0;animation:react-po 14s ease-out infinite;}
+    @keyframes react-po{
+      0%{opacity:0;transform:scale(.6)}24%{opacity:0;transform:scale(.6)}25%{opacity:.85;transform:scale(.6)}30%{opacity:0;transform:scale(2.2)}31%{opacity:0;transform:scale(.6)}
+      61%{opacity:0;transform:scale(.6)}62%{opacity:.85;transform:scale(.6)}67%{opacity:0;transform:scale(2.2)}
+      100%{opacity:0;transform:scale(.6)}
+    }
+    .react-pulse{transform-box:fill-box;transform-origin:center;animation:react-pulse 1.4s ease-out infinite;}
+    @keyframes react-pulse{0%{opacity:.6;transform:scale(.6)}70%{opacity:0;transform:scale(2.2)}100%{opacity:0;transform:scale(2.2)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .react-flow,.react-exit,.react-exitglow,.react-packet,.react-pt,.react-pa,.react-po,.react-pulse{animation:none !important;}
+      .react-packet{opacity:1;}
+      .react-exitglow{opacity:1;}
+      .react-pt,.react-pa,.react-po,.react-pulse{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="react-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="react-am" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+    <marker id="react-ax" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--exit-color)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="450" fill="var(--diagram-bg)"/>
+
+  <text class="react-sub" x="40" y="52">AGENT · OPEN-ENDED REASONING LOOP</text>
+  <text class="react-title" x="40" y="84" fill="url(#react-grad)">ReAct Agent (Reason + Act Loop)</text>
+
+  <!-- Loop arcs (clockwise) -->
+  <path class="react-edge" d="M476,165 A150 150 0 0 1 560,310" marker-end="url(#react-am)"/>
+  <path class="react-edge" d="M494,424 A150 150 0 0 1 326,424" marker-end="url(#react-am)"/>
+  <path class="react-edge" d="M260,310 A150 150 0 0 1 344,165" marker-end="url(#react-am)"/>
+  <path class="react-flow" d="M476,165 A150 150 0 0 1 559,309"/>
+  <path class="react-flow" d="M494,424 A150 150 0 0 1 327,424"/>
+  <path class="react-flow" d="M260,310 A150 150 0 0 1 343,166"/>
+
+  <!-- center loop label -->
+  <text class="react-center" x="410" y="296" text-anchor="middle">reason ⟳ act</text>
+  <text class="react-center" x="410" y="314" text-anchor="middle" fill="var(--muted-text)" font-size="9">until task is done</text>
+
+  <!-- External connectors -->
+  <path class="react-edge" d="M202,128 C 270,150 300,150 352,150" marker-end="url(#react-am)"/>
+  <path class="react-edge" d="M464,148 C 540,130 560,124 626,122" marker-end="url(#react-am)"/>
+  <g class="react-exitglow">
+    <path class="react-exit" d="M464,148 C 540,130 560,124 625,122" marker-end="url(#react-ax)"/>
+  </g>
+  <text class="react-tag" x="548" y="112" text-anchor="middle" fill="var(--exit-color)">task done</text>
+
+  <!-- Nodes -->
+  <rect class="react-nodebox" x="98" y="97" width="104" height="46" rx="12"/>
+  <text class="react-label2" x="150" y="120" text-anchor="middle" dominant-baseline="middle">User Task</text>
+
+  <rect class="react-nodebox" x="356" y="126" width="108" height="48" rx="12"/>
+  <text class="react-label" x="410" y="150" text-anchor="middle" dominant-baseline="middle">Thought</text>
+
+  <rect class="react-nodebox" x="488" y="352" width="104" height="46" rx="12"/>
+  <text class="react-label" x="540" y="375" text-anchor="middle" dominant-baseline="middle">Action</text>
+
+  <rect class="react-nodebox" x="218" y="352" width="124" height="46" rx="12"/>
+  <text class="react-label" x="280" y="375" text-anchor="middle" dominant-baseline="middle">Observation</text>
+
+  <rect class="react-nodebox" x="628" y="96" width="122" height="48" rx="12"/>
+  <text class="react-label2" x="689" y="120" text-anchor="middle" dominant-baseline="middle">Final Answer</text>
+
+  <!-- role tags -->
+  <text class="react-tag" x="540" y="416" text-anchor="middle" fill="var(--act-color)">act on the world</text>
+  <text class="react-tag" x="280" y="416" text-anchor="middle" fill="var(--observe-color)">read the result</text>
+
+  <!-- Node pulse rings -->
+  <circle class="react-pt" cx="410" cy="150" r="26" fill="none" stroke="var(--think-color)" stroke-width="2"/>
+  <circle class="react-pa" cx="540" cy="375" r="26" fill="none" stroke="var(--act-color)" stroke-width="2.5"/>
+  <circle class="react-po" cx="280" cy="375" r="30" fill="none" stroke="var(--observe-color)" stroke-width="2"/>
+
+  <!-- Traveling packet (starts at Thought) -->
+  <g class="react-packet">
+    <circle class="react-pulse" cx="410" cy="150" r="9" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="410" cy="150" r="11" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="410" cy="150" r="5.5" fill="var(--accent-color)"/>
+    <circle cx="408" cy="148" r="2" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>

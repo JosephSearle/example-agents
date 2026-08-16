@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" role="img" aria-label="Swarm / Handoffs topology: three peer agents (Agent A, Agent B, Agent C) arranged in a triangle with direct bidirectional handoff arrows between every pair and no central coordinator; control passes directly from peer to peer, with one agent active at a time">
+  <title>Swarm / Handoffs</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --edge-color:#5b616c;
+      --accent-color:#0368FF;
+      --agent-a:#0368FF;
+      --agent-b:#B44BFF;
+      --agent-c:#FF7A59;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+    }
+    .swarm-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .swarm-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .swarm-label{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .swarm-tag{font:600 10.5px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--muted-text);letter-spacing:.02em;}
+    .swarm-center{font:600 11px "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--muted-text);letter-spacing:.04em;}
+    .swarm-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .swarm-edge{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .swarm-flow{fill:none;stroke-width:2;stroke-dasharray:5 11;stroke-linecap:round;opacity:.45;stroke:var(--accent-color);animation:swarm-dash .9s linear infinite;}
+    @keyframes swarm-dash{to{stroke-dashoffset:-16;}}
+
+    .swarm-ringA{opacity:0;animation:swarm-ringA 12s ease-in-out infinite;}
+    .swarm-ringB{opacity:0;animation:swarm-ringB 12s ease-in-out infinite;}
+    .swarm-ringC{opacity:0;animation:swarm-ringC 12s ease-in-out infinite;}
+    @keyframes swarm-ringA{0%{opacity:1}8%{opacity:1}11%{opacity:0}51%{opacity:0}52%{opacity:1}60%{opacity:1}63%{opacity:0}81%{opacity:0}82%{opacity:1}100%{opacity:1}}
+    @keyframes swarm-ringB{0%{opacity:0}15%{opacity:0}16%{opacity:1}26%{opacity:1}29%{opacity:0}65%{opacity:0}66%{opacity:1}74%{opacity:1}77%{opacity:0}100%{opacity:0}}
+    @keyframes swarm-ringC{0%{opacity:0}33%{opacity:0}34%{opacity:1}44%{opacity:1}47%{opacity:0}100%{opacity:0}}
+
+    .swarm-packet{animation:swarm-hop 12s cubic-bezier(0.5,0,0.3,1) infinite;}
+    @keyframes swarm-hop{
+      0%{transform:translate(0,0);opacity:0}
+      2%{transform:translate(0,0);opacity:1}
+      8%{transform:translate(0,0)}
+      16%{transform:translate(-180px,260px)}
+      26%{transform:translate(-180px,260px)}
+      34%{transform:translate(180px,260px)}
+      44%{transform:translate(180px,260px)}
+      52%{transform:translate(0,0)}
+      60%{transform:translate(0,0)}
+      66%{transform:translate(-180px,260px)}
+      74%{transform:translate(-180px,260px)}
+      82%{transform:translate(0,0)}
+      96%{transform:translate(0,0)}
+      100%{transform:translate(0,0)}
+    }
+    .swarm-pulse{transform-box:fill-box;transform-origin:center;animation:swarm-pulse 1.4s ease-out infinite;}
+    @keyframes swarm-pulse{0%{opacity:.6;transform:scale(.6)}70%{opacity:0;transform:scale(2.2)}100%{opacity:0;transform:scale(2.2)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .swarm-flow,.swarm-ringA,.swarm-ringB,.swarm-ringC,.swarm-packet,.swarm-pulse{animation:none !important;}
+      .swarm-packet{opacity:1;}
+      .swarm-ringA{opacity:1;}
+      .swarm-ringB,.swarm-ringC,.swarm-pulse{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="swarm-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="swarm-am" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="7" refX="6.5" refY="3" orient="auto"><path d="M0,0 L6.5,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="470" fill="var(--diagram-bg)"/>
+
+  <text class="swarm-sub" x="40" y="52">MULTI-AGENT · PEER-TO-PEER</text>
+  <text class="swarm-title" x="40" y="84" fill="url(#swarm-grad)">Swarm / Handoffs</text>
+
+  <!-- Direct peer edges (bidirectional) -->
+  <line class="swarm-edge" x1="374" y1="176" x2="266" y2="366" marker-start="url(#swarm-am)" marker-end="url(#swarm-am)"/>
+  <line class="swarm-edge" x1="446" y1="176" x2="554" y2="366" marker-start="url(#swarm-am)" marker-end="url(#swarm-am)"/>
+  <line class="swarm-edge" x1="300" y1="400" x2="520" y2="400" marker-start="url(#swarm-am)" marker-end="url(#swarm-am)"/>
+
+  <!-- flow overlays -->
+  <line class="swarm-flow" x1="372" y1="180" x2="268" y2="362"/>
+  <line class="swarm-flow" x1="448" y1="180" x2="552" y2="362"/>
+  <line class="swarm-flow" x1="302" y1="400" x2="518" y2="400"/>
+
+  <!-- center callout: empty middle -->
+  <text class="swarm-center" x="410" y="316" text-anchor="middle">no central</text>
+  <text class="swarm-center" x="410" y="333" text-anchor="middle">coordinator</text>
+
+  <!-- active_agent rings (behind boxes) -->
+  <rect class="swarm-ringA" x="336" y="112" width="148" height="56" rx="14" fill="none" stroke="var(--agent-a)" stroke-width="2.5"/>
+  <rect class="swarm-ringB" x="156" y="372" width="148" height="56" rx="14" fill="none" stroke="var(--agent-b)" stroke-width="2.5"/>
+  <rect class="swarm-ringC" x="516" y="372" width="148" height="56" rx="14" fill="none" stroke="var(--agent-c)" stroke-width="2.5"/>
+
+  <!-- Nodes -->
+  <rect class="swarm-nodebox" x="340" y="116" width="140" height="48" rx="12"/>
+  <text class="swarm-label" x="410" y="140" text-anchor="middle" dominant-baseline="middle">Agent A</text>
+
+  <rect class="swarm-nodebox" x="160" y="376" width="140" height="48" rx="12"/>
+  <text class="swarm-label" x="230" y="400" text-anchor="middle" dominant-baseline="middle">Agent B</text>
+
+  <rect class="swarm-nodebox" x="520" y="376" width="140" height="48" rx="12"/>
+  <text class="swarm-label" x="590" y="400" text-anchor="middle" dominant-baseline="middle">Agent C</text>
+
+  <!-- active_agent pill labels -->
+  <text class="swarm-ringA swarm-tag" x="410" y="102" text-anchor="middle" fill="var(--agent-a)">active_agent</text>
+  <text class="swarm-ringB swarm-tag" x="230" y="446" text-anchor="middle" fill="var(--agent-b)">active_agent</text>
+  <text class="swarm-ringC swarm-tag" x="590" y="446" text-anchor="middle" fill="var(--agent-c)">active_agent</text>
+
+  <!-- handoff hint on B<->C edge -->
+  <text class="swarm-tag" x="410" y="392" text-anchor="middle" fill="var(--muted-text)">direct handoff</text>
+
+  <!-- Traveling packet (conversation control) -->
+  <g class="swarm-packet">
+    <circle class="swarm-pulse" cx="410" cy="140" r="9" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="410" cy="140" r="11" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="410" cy="140" r="5.5" fill="var(--accent-color)"/>
+    <circle cx="408" cy="138" r="2" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>
