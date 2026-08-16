@@ -1,1 +1,240 @@
 # example-agents
+
+Reference implementations of the agent patterns this team uses — real, running code, not diagrams.
+
+## Highlights
+
+- **Companion to the playbook.** Backs the (currently stub) standards pages under
+  `pages/development/ai/agents/*` with working reference code until those are filled in.
+- **Framework tiering, not a single framework.** `langchain.agents.create_agent` by default;
+  raw LangGraph (`langgraph-supervisor` / `langgraph-swarm`) only when a pattern needs it;
+  `deepagents` reserved for long-horizon, planning-heavy work. See the ADR for the full rule.
+- **Full SDLC, not a script.** One `uv` workspace, Ruff, mypy `--strict`, pytest split into
+  `unit` / `integration` / `eval` markers, and GitHub Actions gating every PR.
+- **Real infra alongside the agents.** Postgres (checkpointing/memory), self-hosted MLflow
+  (observability + AI Gateway model access), and Milvus + Attu (vector store) — one
+  `make up` away, not mocked out.
+
+## Stack at a glance
+
+- **Language:** Python 3.12, one **uv workspace** monorepo (`agents/*`, `packages/*`).
+- **Agent frameworks:** `langchain.agents.create_agent` by default; raw LangGraph
+  (`langgraph-supervisor` / `langgraph-swarm`) for multi-agent patterns; `deepagents` reserved
+  for long-horizon, planning-heavy work. See the ADR for the decision rule.
+- **Checkpointing / memory:** Postgres (`langgraph-checkpoint-postgres`) — `PostgresSaver` for
+  per-thread state, `PostgresStore` for cross-thread memory. Browse it with pgAdmin
+  (`infra/postgres/servers.json`), same "give the dev a UI" reasoning as Attu for Milvus.
+- **Model access:** the self-hosted MLflow AI Gateway (`agents_common.get_chat_model`) — every
+  agent calls a named gateway route via `ChatOpenAI` pointed at the gateway's OpenAI-compatible
+  `/gateway/mlflow/v1` base URL, rather than holding a provider API key directly. The route
+  itself is provisioned once via `make provision-gateway` against a self-hosted OpenAI-compatible
+  model — see [`packages/mlflow-server/scripts/provision_gateway_route.py`](packages/mlflow-server/scripts/provision_gateway_route.py).
+- **Observability:** self-hosted MLflow (`packages/mlflow-server`) — tracing via
+  `mlflow.langchain.autolog()`, per-agent experiment tracking, and `mlflow.genai.evaluate()`
+  for eval suites.
+- **Vector store:** self-hosted Milvus standalone + Attu (`packages/milvus`) — `Settings.milvus_uri`
+  is wired up for a future RAG-pattern agent; no example agent uses it yet.
+- **Lint/format:** Ruff. **Types:** mypy (CI) + pyright (editor). **Tests:** pytest +
+  Hypothesis, split into `unit` / `integration` / `eval` markers.
+- **CI/CD:** GitHub Actions — `ci.yml` (lint/type/unit, every PR), `integration.yml`
+  (Postgres-backed tests, every PR), `eval.yml` (MLflow eval suite, nightly/manual/labelled —
+  not blocking, since it spends tokens).
+- **Containers:** root `docker-compose.yml` — Postgres + pgAdmin, MLflow, Milvus + Attu, and
+  each agent as its own service/image.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Patterns and architecture](#patterns-and-architecture)
+- [Repo layout](#repo-layout)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Installation
+
+Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/getting-started/installation/), plus
+Docker (Compose v2) for Postgres, MLflow, and Milvus.
+
+```bash
+make sync   # uv sync --all-packages — every agent + shared package, one workspace venv, one lockfile
+```
+
+See the [Makefile](Makefile) for every other available command; the sections below use it
+throughout instead of the raw `uv`/`docker compose` invocations.
+
+## Quick Start
+
+```bash
+# 1. Configure secrets — fill in MLFLOW_TRACKING_TOKEN (if your server has auth enabled) and
+#    the SELFHOSTED_MODEL_* values for the model your gateway route should call
+cp .env.example .env
+
+# 2. Start the core stack: Postgres + pgAdmin, MLflow, and Milvus + Attu
+make up
+open http://localhost:5050   # pgAdmin — the postgres service is pre-registered (servers.json),
+                              # just enter the password from POSTGRES_PASSWORD when prompted
+open http://localhost:5000   # MLflow UI
+open http://localhost:3000   # Attu (Milvus UI) — no example agent uses Milvus yet, but it's
+                              # running so you can poke at it; see packages/milvus/README.md
+
+# 3. One-off: provision the MLflow AI Gateway route agent code calls (see .env.example's
+#    SELFHOSTED_MODEL_* / GATEWAY_ROUTE_NAME vars). Only needs to be re-run if you delete the
+#    mlflow-artifacts/mlflow-server Postgres data or change the route name.
+make provision-gateway
+
+# 4. One-off: sync eval dataset seed files (packages/mlflow-server/datasets/*.jsonl) into
+#    MLflow's dataset registry — needed before `make test-eval`. Safe to re-run any time you
+#    edit a dataset JSONL.
+make provision-datasets
+
+# 5. Run the reference agent
+make demo
+```
+
+`make demo` runs `agents/react-agent` end to end against whatever model your MLflow AI Gateway
+route resolves to, and prints its structured `AgentResponse` (`answer` + `used_tools`) — the
+exact text depends on the model behind your gateway route, so it isn't reproduced here.
+
+## Usage
+
+### Run the test suites
+
+```bash
+make test-unit          # fast, no external services
+make test-integration   # needs `make up` (real Postgres)
+make test-eval           # needs `make provision-datasets` to have been run once; calls a real
+                          # model via the gateway
+make test                # unit + integration together
+```
+
+### Run everything containerized
+
+```bash
+make up-agents   # docker compose --profile agents up --build
+```
+
+Or run a single agent directly on the host instead of through Docker — see
+[`agents/react-agent/README.md`](agents/react-agent/README.md) (and its equivalent for any
+pattern you add) for the exact command.
+
+## Configuration
+
+Copy `.env.example` to `.env` and fill in the `SELFHOSTED_MODEL_*` values (plus
+`MLFLOW_TRACKING_TOKEN`, if your server has auth enabled) — every other value has a working
+local default. `agents_common.config.Settings` reads every agent-facing variable below; see
+[docs/decisions/0001-tech-stack.md](docs/decisions/0001-tech-stack.md) for why each service is
+configured this way.
+
+| Variable | Default | Required | Description |
+|---|---|---|---|
+| `POSTGRES_USER` | `agents` | No | Role used for checkpointing/memory and (indirectly) MLflow's backend store |
+| `POSTGRES_PASSWORD` | `change-me` | No | Change before running anywhere but a laptop |
+| `POSTGRES_DB` | `agents` | No | Database agents checkpoint/store into — see `infra/postgres/init.sql` for the second (`mlflow`) database |
+| `POSTGRES_HOST` | `localhost` | No | Overridden to `postgres` for containerized services |
+| `POSTGRES_PORT` | `5432` | No | — |
+| `MLFLOW_TRACKING_URI` | `http://localhost:5000` | No | Overridden to `http://mlflow:5000` for containerized services |
+| `MLFLOW_TRACKING_TOKEN` | *(empty)* | No | Authenticates tracking, evals, and calls *to* the gateway — only needed if your mlflow-server has auth enabled |
+| `SELFHOSTED_MODEL_BASE_URL` | *(empty)* | **Yes** | Base URL of the self-hosted OpenAI-compatible model the gateway route should call. Only read by `make provision-gateway`, not by agent code |
+| `SELFHOSTED_MODEL_API_KEY` | *(empty)* | **Yes** | Credential the *gateway* uses to call that model — distinct from `MLFLOW_TRACKING_TOKEN`. Only read by `make provision-gateway` |
+| `SELFHOSTED_MODEL_NAME` | `gpt-oss-120b` | No | Model name sent to the self-hosted endpoint. Only read by `make provision-gateway` |
+| `GATEWAY_ROUTE_NAME` | `gpt-oss-120b` | No | Gateway route name agent code calls via `get_chat_model(...)` — must match `react_agent.GATEWAY_ROUTE`. Only read by `make provision-gateway` |
+| `MILVUS_URI` | `http://localhost:19530` | No | No example agent uses this yet — see `packages/milvus/README.md` |
+| `LOG_LEVEL` | `INFO` | No | — |
+
+pgAdmin's own login (`admin@example-agents.dev` / `admin`) is hardcoded in `docker-compose.yml`
+rather than read from `.env` — it authenticates the pgAdmin UI itself, not Postgres, so it isn't
+a secret worth plumbing through config (same treatment as MinIO's `minioadmin`/`minioadmin`
+behind Milvus). Change it directly in `docker-compose.yml` if this ever runs somewhere
+non-local.
+
+## Patterns and architecture
+
+| Pattern | Framework tier | Status | Path |
+|---|---|---|---|
+| Single ReAct agent | Tier 1 — `create_agent` | **Implemented** | `agents/react-agent` |
+| Supervisor multi-agent | Tier 2 — LangGraph + `langgraph-supervisor` | Stub | `agents/supervisor-agent` |
+| Swarm multi-agent | Tier 2 — LangGraph + `langgraph-swarm` | Stub | `agents/swarm-agent` |
+| Deep agent | Tier 3 — `deepagents` | Stub | `agents/deep-agent` |
+
+See **[docs/decisions/0001-tech-stack.md](docs/decisions/0001-tech-stack.md)** for the full
+reasoning behind the tiering and every other stack choice — this README is the quick-start,
+that doc is the "why."
+
+### `react-agent` (the only implemented pattern today)
+
+A single `create_agent` compiled to a LangGraph graph: reason, call a tool, observe, repeat
+until it can answer — checkpointed to Postgres so a `thread_id` survives a process restart.
+
+```mermaid
+graph LR
+    user[User message] --> agent[create_agent loop]
+    agent -->|tool call| tools[Tools]
+    tools --> agent
+    agent -->|done| response[Structured AgentResponse]
+```
+
+See [`agents/react-agent/README.md`](agents/react-agent/README.md) for what it demonstrates in
+full and how to run or test it directly on the host.
+
+## Repo layout
+
+```
+example-agents/
+├── docs/decisions/0001-tech-stack.md   # the ADR — read this first
+├── docker-compose.yml                  # postgres/pgadmin + mlflow + milvus/attu + agent services
+├── agents/
+│   ├── react-agent/                    # tier 1 — implemented
+│   ├── supervisor-agent/               # tier 2 — stub
+│   ├── swarm-agent/                    # tier 2 — stub
+│   └── deep-agent/                     # tier 3 — stub
+├── packages/
+│   ├── agents-common/                  # shared checkpointing/observability/config
+│   ├── mlflow-server/                  # self-hosted MLflow tracking server image
+│   │   ├── scripts/                    # provision_gateway_route.py, provision_datasets.py
+│   │   └── datasets/                   # git-tracked eval dataset seed JSONL, one per agent
+│   └── milvus/                         # self-hosted Milvus standalone + Attu (compose wiring)
+└── infra/postgres/
+    ├── init.sql                        # creates the second (mlflow) logical database
+    └── servers.json                    # pre-registers postgres with pgAdmin on first boot
+```
+
+## Roadmap
+
+- [x] Single ReAct agent (`agents/react-agent`)
+- [ ] Supervisor multi-agent (`agents/supervisor-agent`)
+- [ ] Swarm multi-agent (`agents/swarm-agent`)
+- [ ] Deep agent (`agents/deep-agent`)
+- [ ] First RAG-pattern agent using `packages/milvus` — `Settings.milvus_uri` is already wired
+      up in `agents-common`, waiting on an agent to use it
+
+## Contributing
+
+Contributions are welcome — this repo grows by adding one well-tested reference pattern at a
+time.
+
+1. Pick a tier from the table above and be able to justify it in one sentence (see the ADR's
+   framework-tiering decision).
+2. `uv init --lib --python 3.12 agents/<name>-agent` (or copy `agents/react-agent`'s layout).
+3. Depend on `agents-common` for checkpointing/observability/config — don't re-implement it.
+4. Ship `tests/unit`, `tests/integration`, and `tests/evals` from day one, same as
+   `react-agent`.
+5. Add the agent to `docker-compose.yml` under the `agents` profile if it should run
+   standalone.
+
+Before opening a PR:
+
+```bash
+make lint typecheck test-unit
+```
+
+`ci.yml` and `integration.yml` block merges on every PR; `eval.yml` runs the MLflow eval suite
+separately (nightly, on demand, or on a PR labelled `run-evals`) since it costs tokens — see
+the ADR's CI/CD section for why they're split.
+
+## License
+
+[MIT](LICENSE) © 2026 Joseph Searle
