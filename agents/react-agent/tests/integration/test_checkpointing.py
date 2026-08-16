@@ -31,6 +31,6 @@ def test_thread_state_persists_across_agent_rebuilds(postgres_checkpointer: Post
     second_agent = build_agent(checkpointer=postgres_checkpointer)
     state = second_agent.get_state(config)  # type: ignore[arg-type]
 
-    assert state.values[
-        "messages"
-    ], "expected the first turn's messages to be recovered from Postgres"
+    assert state.values["messages"], (
+        "expected the first turn's messages to be recovered from Postgres"
+    )
