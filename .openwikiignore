@@ -1,0 +1,24 @@
+# Read boundary for OpenWiki (https://docs.langchain.com/oss/openwiki/code-mode#ignore-paths):
+# these paths are never read, scanned, or reproduced in the generated wiki.
+
+.venv/
+**/__pycache__/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+uv.lock
+.uv-cache/
+
+.pytest_cache/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+mlruns/
+infra/
