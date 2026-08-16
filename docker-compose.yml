@@ -175,6 +175,31 @@ services:
     profiles:
       - agents  # `docker compose --profile agents up` — not started by a plain `docker compose up`
 
+  routing-agent:
+    build:
+      context: .
+      dockerfile: agents/patterns/routing-agent/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+    environment:
+      # Settings.postgres_uri is built from these components — only POSTGRES_HOST changes
+      # from .env's "localhost" default, since containers reach Postgres over the compose
+      # network rather than the published host port.
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-agents}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      # The only credential this agent needs — authenticates tracking, evals, and AI Gateway
+      # model calls alike. See agents_common.models.get_chat_model.
+      MLFLOW_TRACKING_TOKEN: ${MLFLOW_TRACKING_TOKEN:-}
+    profiles:
+      - agents  # `docker compose --profile agents up` — not started by a plain `docker compose up`
+
 volumes:
   postgres-data:
   pgadmin-data:

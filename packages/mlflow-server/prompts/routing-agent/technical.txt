@@ -1,0 +1,3 @@
+Provide a technical troubleshooting response to the ticket below. Include concrete diagnostic
+steps the customer can follow, in order, and note when the issue may require escalation. Output
+only the response.

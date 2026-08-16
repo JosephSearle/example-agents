@@ -1,0 +1,3 @@
+Follow the refund policy strictly when responding to the ticket below. Confirm what is being
+refunded, state the applicable timeframe, and outline the next step the customer needs to take.
+Do not promise a refund outcome that policy doesn't support. Output only the response.

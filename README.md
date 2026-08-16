@@ -175,7 +175,7 @@ non-local.
 |---|---|---|---|
 | Single ReAct agent | Tier 1 — `create_agent` | **Implemented** | `agents/patterns/react-agent` |
 | Prompt Chaining | workflow — raw `StateGraph` | Stub | `agents/patterns/prompt-chaining-agent` |
-| Routing | workflow — raw `StateGraph` | Stub | `agents/patterns/routing-agent` |
+| Routing | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/routing-agent` |
 | Parallelization | workflow — raw `StateGraph` | Stub | `agents/patterns/parallelization-agent` |
 | Orchestrator-Workers | workflow — raw `StateGraph` | Stub | `agents/patterns/orchestrator-workers-agent` |
 | Evaluator-Optimizer | workflow — raw `StateGraph` | Stub | `agents/patterns/evaluator-optimizer-agent` |

@@ -1,0 +1,3 @@
+Answer this general support question directly and helpfully. Keep the tone friendly and concise.
+Do not mention refunds or billing policy, and do not include step-by-step technical
+troubleshooting unless the ticket explicitly asks for it. Output only the response.

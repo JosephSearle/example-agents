@@ -3549,6 +3549,32 @@ wheels = [
 name = "routing-agent"
 version = "0.1.0"
 source = { editable = "agents/patterns/routing-agent" }
+dependencies = [
+    { name = "agents-common" },
+    { name = "langgraph" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "hypothesis" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "agents-common", editable = "packages/agents-common" },
+    { name = "langgraph", specifier = ">=0.6" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "hypothesis", specifier = ">=6.112" },
+    { name = "pytest", specifier = ">=8.3" },
+    { name = "pytest-asyncio", specifier = ">=1.0" },
+    { name = "pytest-cov", specifier = ">=5.0" },
+]
 
 [[package]]
 name = "ruff"
