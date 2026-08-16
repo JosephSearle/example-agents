@@ -1,0 +1,33 @@
+[project]
+name            = "agents-common"
+version         = "0.1.0"
+description     = "Shared checkpointing, observability, and config helpers for every agent in this repo."
+readme          = "README.md"
+requires-python = ">=3.12"
+
+dependencies = [
+    "langgraph>=0.6",
+    "langgraph-checkpoint-postgres>=2.0",
+    "psycopg[binary,pool]>=3.2",
+    "mlflow[genai]>=3.1",
+    # The MLflow AI Gateway (baked into mlflow[genai]'s tracking server, mounted at
+    # /gateway/mlflow/v1) is OpenAI-compatible, so a plain ChatOpenAI pointed at the gateway's
+    # base_url is the client — no MLflow-specific LangChain integration needed. See
+    # agents_common.models.get_chat_model.
+    "langchain-openai>=0.2",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.5",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=1.0",
+]
+
+[build-system]
+requires      = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agents_common"]

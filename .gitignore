@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+.venv*/
+dist/
+build/
+
+# uv
+.uv-cache/
+
+# Test / coverage
+.pytest_cache/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# MLflow local artifacts (only relevant if a dev runs the server without docker)
+mlruns/
+mlartifacts/
+
+# Postgres local data volume (bind-mounted, not committed)
+infra/postgres/data/
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
