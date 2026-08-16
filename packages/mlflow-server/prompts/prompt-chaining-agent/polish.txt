@@ -1,0 +1,4 @@
+Proofread and tighten the draft below for clarity and tone. Fix awkward phrasing, remove
+redundancy, and keep the meaning intact. Rewrite it as flowing prose paragraphs — remove any
+numbered or bulleted headings, section labels, or list formatting carried over from the outline.
+Output only the polished text.

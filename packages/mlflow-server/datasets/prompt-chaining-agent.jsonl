@@ -1,0 +1,3 @@
+{"inputs": {"topic": "Why code review matters on small teams"}, "expectations": {"expected_facts": ["code review", "small team"]}}
+{"inputs": {"topic": "The basics of TCP versus UDP"}, "expectations": {"expected_facts": ["TCP", "UDP"]}}
+{"inputs": {"topic": "How composting turns food scraps into soil"}, "expectations": {"expected_facts": ["composting", "soil"]}}

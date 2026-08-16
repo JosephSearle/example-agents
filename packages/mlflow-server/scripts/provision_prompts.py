@@ -10,6 +10,13 @@ experiment name. Agents load their system prompt at runtime via
 `mlflow.genai.load_prompt("prompts:/<agent-name>@production")` rather than importing it from a
 Python module — see agents/patterns/react-agent/src/react_agent/graph.py's `load_system_prompt`.
 
+Agents with more than one prompt (e.g. a chain with a distinct prompt per step) use one
+subdirectory per agent instead: packages/mlflow-server/prompts/<agent-name>/<step-name>.txt is
+registered as prompt name <agent-name>-<step-name>, still linked to the single <agent-name>
+experiment (set once per subdirectory, so all of that agent's step prompts land on the same
+experiment's Prompts tab) — see
+agents/patterns/prompt-chaining-agent/src/prompt_chaining_agent/graph.py's `load_step_prompt`.
+
 Idempotent by design: re-running is safe. Before registering, this compares the file's content
 against the template of the current `production`-aliased version (if any) and skips registering
 a new version when they already match, so re-running `make up` doesn't create a new prompt
@@ -44,6 +51,22 @@ def _current_production_template(name: str) -> str | None:
     return None if prompt is None else prompt.template
 
 
+def _provision_one(name: str, text: str, *, source: str) -> None:
+    if _current_production_template(name) == text:
+        print(f"Prompt '{name}' unchanged, skipping.")
+        return
+
+    print(f"Provisioning prompt '{name}' from {source}...")
+    version = register_prompt(
+        name=name,
+        template=text,
+        commit_message=f"Provisioned from {source}",
+        tags={"source": "seed-file"},
+    )
+    set_prompt_alias(name, _PRODUCTION_ALIAS, version.version)
+    print(f"  registered version {version.version}, aliased '{_PRODUCTION_ALIAS}' -> it")
+
+
 def main() -> None:
     """Sync every prompt text file in PROMPTS_DIR into MLflow's prompt registry."""
     settings = get_settings()
@@ -51,25 +74,24 @@ def main() -> None:
 
     for prompt_path in sorted(PROMPTS_DIR.glob("*.txt")):
         name = prompt_path.stem
-        text = prompt_path.read_text()
 
         # Must be set before the register_prompt/load_prompt calls below, since MLflow links a
         # prompt version to whichever experiment is active at call time.
         mlflow.set_experiment(name)
+        _provision_one(name, prompt_path.read_text(), source=f"prompts/{prompt_path.name}")
 
-        if _current_production_template(name) == text:
-            print(f"Prompt '{name}' unchanged, skipping.")
-            continue
+    for agent_dir in sorted(p for p in PROMPTS_DIR.iterdir() if p.is_dir()):
+        # One experiment per agent, set once so every step prompt in this subdirectory links to
+        # the same experiment's Prompts tab rather than one experiment per step.
+        mlflow.set_experiment(agent_dir.name)
 
-        print(f"Provisioning prompt '{name}' from {prompt_path.name}...")
-        version = register_prompt(
-            name=name,
-            template=text,
-            commit_message=f"Provisioned from prompts/{prompt_path.name}",
-            tags={"source": "seed-file"},
-        )
-        set_prompt_alias(name, _PRODUCTION_ALIAS, version.version)
-        print(f"  registered version {version.version}, aliased '{_PRODUCTION_ALIAS}' -> it")
+        for prompt_path in sorted(agent_dir.glob("*.txt")):
+            name = f"{agent_dir.name}-{prompt_path.stem}"
+            _provision_one(
+                name,
+                prompt_path.read_text(),
+                source=f"prompts/{agent_dir.name}/{prompt_path.name}",
+            )
 
     print("\nDone.")
 

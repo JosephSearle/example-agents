@@ -1,0 +1,3 @@
+Write a structured outline for the following topic. Produce at least three sections, each on its
+own line, covering the topic's key points in a logical order. Output only the outline — no
+preamble, no closing remarks.

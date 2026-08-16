@@ -1,0 +1,2 @@
+Expand the outline below into a full first draft. Write flowing prose organized around the
+outline's sections — do not just restate the outline's bullet points. Output only the draft.
