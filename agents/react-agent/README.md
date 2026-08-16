@@ -20,6 +20,19 @@ past what this tier can express — see `docs/decisions/0001-tech-stack.md`.
   (real Postgres checkpointer round-trip via docker compose), `tests/evals` (MLflow
   `mlflow.genai.evaluate()` suite against a live model).
 
+## How it works
+
+A single `create_agent` compiled to a LangGraph graph: reason, call a tool, observe, repeat
+until it can answer — checkpointed to Postgres so a `thread_id` survives a process restart.
+
+```mermaid
+graph LR
+    user[User message] --> agent[create_agent loop]
+    agent -->|tool call| tools[Tools]
+    tools --> agent
+    agent -->|done| response[Structured AgentResponse]
+```
+
 ## Run it
 
 ```bash

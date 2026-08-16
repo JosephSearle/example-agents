@@ -182,21 +182,10 @@ See **[docs/decisions/0001-tech-stack.md](docs/decisions/0001-tech-stack.md)** f
 reasoning behind the tiering and every other stack choice — this README is the quick-start,
 that doc is the "why."
 
-### `react-agent` (the only implemented pattern today)
-
-A single `create_agent` compiled to a LangGraph graph: reason, call a tool, observe, repeat
-until it can answer — checkpointed to Postgres so a `thread_id` survives a process restart.
-
-```mermaid
-graph LR
-    user[User message] --> agent[create_agent loop]
-    agent -->|tool call| tools[Tools]
-    tools --> agent
-    agent -->|done| response[Structured AgentResponse]
-```
-
-See [`agents/react-agent/README.md`](agents/react-agent/README.md) for what it demonstrates in
-full and how to run or test it directly on the host.
+Pattern-specific content (how a given agent works, what it demonstrates, how to run or test it
+directly on the host) lives in that agent's own README, not here — see
+[`agents/react-agent/README.md`](agents/react-agent/README.md) for the one implemented pattern
+today.
 
 ## Repo layout
 
