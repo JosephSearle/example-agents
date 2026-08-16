@@ -10,7 +10,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Resolved relative to this file, not the process's cwd — a relative "​.env" would silently
 # resolve against wherever the caller happened to `cd` first (e.g. `make demo`'s
-# `cd agents/react-agent && ...`), missing the repo-root .env entirely and falling back to
+# `cd agents/patterns/react-agent && ...`), missing the repo-root .env entirely and falling back to
 # defaults instead of erroring, which is worse: it looks like a real (wrong) config rather than
 # a missing file.
 _REPO_ROOT_ENV_FILE = Path(__file__).resolve().parents[5] / ".env"

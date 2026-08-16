@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" role="img" aria-label="Retrieve-then-Rerank pipeline: Question, Vector Search k=20, 20 candidate documents, Cross-Encoder Reranker funnel, 3 surviving documents, Generate, Answer">
+  <title>Retrieve-then-Rerank</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#141414;
+      --node-stroke:rgba(255,255,255,0.12);
+      --edge-color:#6b7280;
+      --accent-color:#0368FF;
+      --text-color:#f4f4f5;
+      --muted-text:#9ca3af;
+      --doc-accent:#0b2b5e;
+      --doc-muted:#20242c;
+      --doc-muted-stroke:#454b57;
+      --funnel-fill:rgba(3,104,255,0.06);
+      --funnel-stroke:rgba(3,104,255,0.45);
+    }
+    .rerank-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .rerank-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .rerank-label{font:600 13px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .rerank-label2{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .rerank-cap{font:600 11px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.02em;}
+    .rerank-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .rerank-edge{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .rerank-funnel{fill:var(--funnel-fill);stroke:var(--funnel-stroke);stroke-width:1.25;}
+
+    .rerank-flow{stroke:var(--accent-color);stroke-width:2;fill:none;stroke-dasharray:5 11;stroke-linecap:round;opacity:.85;animation:rerank-dash .9s linear infinite;}
+    @keyframes rerank-dash{to{stroke-dashoffset:-16;}}
+
+    .rerank-doc{transform-box:fill-box;transform-origin:center;opacity:.9;}
+    .rerank-reject{animation:rerank-reject 4.5s ease-in-out infinite;}
+    @keyframes rerank-reject{
+      0%{opacity:0;transform:translate(0,0) scale(.85);}
+      12%{opacity:.85;transform:translate(0,0) scale(1);}
+      26%{opacity:.85;transform:translate(0,0) scale(1);}
+      52%{opacity:.6;transform:translate(calc(var(--dx)*0.78),calc(var(--dy)*0.78)) scale(.9);}
+      64%{opacity:0;transform:translate(calc(var(--dx)*0.92),calc(var(--dy)*0.92)) scale(.7);}
+      100%{opacity:0;transform:translate(calc(var(--dx)*0.92),calc(var(--dy)*0.92)) scale(.7);}
+    }
+    .rerank-survive{animation:rerank-survive 4.5s ease-in-out infinite;}
+    @keyframes rerank-survive{
+      0%{opacity:0;transform:translate(0,0) scale(.85);}
+      12%{opacity:.9;transform:translate(0,0) scale(1);}
+      26%{opacity:1;transform:translate(0,0) scale(1);}
+      56%{opacity:1;transform:translate(var(--tx),var(--ty)) scale(1);}
+      78%{opacity:1;transform:translate(var(--fx),var(--fy)) scale(1.05);}
+      92%{opacity:1;transform:translate(var(--fx),var(--fy)) scale(1);}
+      100%{opacity:0;transform:translate(var(--fx),var(--fy)) scale(1);}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .rerank-reject,.rerank-survive,.rerank-flow{animation:none !important;}
+      .rerank-doc{opacity:.9;transform:none;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="rerank-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="rerank-arrow" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="var(--edge-color)"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="400" fill="var(--diagram-bg)"/>
+
+  <text class="rerank-sub" x="40" y="52">RETRIEVE-THEN-RERANK</text>
+  <text class="rerank-title" x="40" y="84" fill="url(#rerank-grad)">Retrieve-then-Rerank</text>
+
+  <!-- Funnel / filter -->
+  <path class="rerank-funnel" d="M400,156 L556,232 L556,268 L400,344 Z"/>
+  <text class="rerank-cap" x="454" y="378" text-anchor="middle">Cross-Encoder Reranker</text>
+
+  <!-- Connectors -->
+  <line class="rerank-edge" x1="116" y1="250" x2="132" y2="250" marker-end="url(#rerank-arrow)"/>
+  <line class="rerank-edge" x1="258" y1="250" x2="276" y2="250" marker-end="url(#rerank-arrow)"/>
+  <line class="rerank-edge" x1="616" y1="250" x2="632" y2="250" marker-end="url(#rerank-arrow)"/>
+  <line class="rerank-edge" x1="740" y1="250" x2="760" y2="250" marker-end="url(#rerank-arrow)"/>
+  <line class="rerank-flow" x1="116" y1="250" x2="131" y2="250"/>
+  <line class="rerank-flow" x1="258" y1="250" x2="275" y2="250"/>
+  <line class="rerank-flow" x1="616" y1="250" x2="631" y2="250"/>
+  <line class="rerank-flow" x1="740" y1="250" x2="759" y2="250"/>
+
+  <!-- Nodes -->
+  <rect class="rerank-nodebox" x="24" y="223" width="92" height="54" rx="12"/>
+  <text class="rerank-label" x="70" y="250" text-anchor="middle" dominant-baseline="middle">Question</text>
+
+  <rect class="rerank-nodebox" x="140" y="223" width="118" height="54" rx="12"/>
+  <text class="rerank-label2" x="199" y="250" text-anchor="middle" dominant-baseline="middle"><tspan x="199" dy="-0.35em">Vector Search</tspan><tspan x="199" dy="1.25em">(k=20)</tspan></text>
+
+  <rect class="rerank-nodebox" x="636" y="223" width="104" height="54" rx="12"/>
+  <text class="rerank-label" x="688" y="250" text-anchor="middle" dominant-baseline="middle">Generate</text>
+
+  <rect class="rerank-nodebox" x="760" y="223" width="104" height="54" rx="12"/>
+  <text class="rerank-label" x="812" y="250" text-anchor="middle" dominant-baseline="middle">Answer</text>
+
+  <!-- Candidate document cloud (20) -->
+  <g>
+    <g transform="translate(285,172)"><g class="rerank-doc rerank-reject" style="--dx:271px;--dy:78px;animation-delay:0s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(320,172)"><g class="rerank-doc rerank-reject" style="--dx:236px;--dy:78px;animation-delay:-0.04s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(355,172)"><g class="rerank-doc rerank-reject" style="--dx:201px;--dy:78px;animation-delay:-0.09s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(390,172)"><g class="rerank-doc rerank-reject" style="--dx:166px;--dy:78px;animation-delay:-0.14s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(285,208)"><g class="rerank-doc rerank-reject" style="--dx:271px;--dy:42px;animation-delay:-0.18s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(320,208)"><g class="rerank-doc rerank-reject" style="--dx:236px;--dy:42px;animation-delay:-0.22s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(355,208)"><g class="rerank-doc rerank-survive" style="--tx:201px;--ty:42px;--fx:235px;--fy:26px;animation-delay:-0.30s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-accent)" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--accent-color)" stroke-width="1"/></g></g>
+    <g transform="translate(390,208)"><g class="rerank-doc rerank-reject" style="--dx:166px;--dy:42px;animation-delay:-0.32s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(285,244)"><g class="rerank-doc rerank-reject" style="--dx:271px;--dy:6px;animation-delay:-0.36s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(320,244)"><g class="rerank-doc rerank-survive" style="--tx:236px;--ty:6px;--fx:270px;--fy:6px;animation-delay:-0.45s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-accent)" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--accent-color)" stroke-width="1"/></g></g>
+    <g transform="translate(355,244)"><g class="rerank-doc rerank-reject" style="--dx:201px;--dy:6px;animation-delay:-0.45s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(390,244)"><g class="rerank-doc rerank-reject" style="--dx:166px;--dy:6px;animation-delay:-0.49s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(285,280)"><g class="rerank-doc rerank-reject" style="--dx:271px;--dy:-30px;animation-delay:-0.54s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(320,280)"><g class="rerank-doc rerank-reject" style="--dx:236px;--dy:-30px;animation-delay:-0.58s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(355,280)"><g class="rerank-doc rerank-reject" style="--dx:201px;--dy:-30px;animation-delay:-0.63s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(390,280)"><g class="rerank-doc rerank-survive" style="--tx:166px;--ty:-30px;--fx:200px;--fy:-14px;animation-delay:-0.75s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-accent)" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--accent-color)" stroke-width="1"/></g></g>
+    <g transform="translate(285,316)"><g class="rerank-doc rerank-reject" style="--dx:271px;--dy:-66px;animation-delay:-0.72s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(320,316)"><g class="rerank-doc rerank-reject" style="--dx:236px;--dy:-66px;animation-delay:-0.77s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(355,316)"><g class="rerank-doc rerank-reject" style="--dx:201px;--dy:-66px;animation-delay:-0.81s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+    <g transform="translate(390,316)"><g class="rerank-doc rerank-reject" style="--dx:166px;--dy:-66px;animation-delay:-0.85s;"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-muted)" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--doc-muted-stroke)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--doc-muted-stroke)" stroke-width="1"/></g></g>
+  </g>
+
+  <!-- Persistent surviving cluster (3 highlighted) -->
+  <g>
+    <g transform="translate(600,234)"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-accent)" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--accent-color)" stroke-width="1"/></g>
+    <g transform="translate(600,250)"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-accent)" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--accent-color)" stroke-width="1"/></g>
+    <g transform="translate(600,266)"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="var(--doc-accent)" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-4" x2="3.2" y2="-4" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="-0.5" x2="3.2" y2="-0.5" stroke="var(--accent-color)" stroke-width="1"/><line x1="-3.2" y1="3" x2="1.2" y2="3" stroke="var(--accent-color)" stroke-width="1"/></g>
+  </g>
+</svg>

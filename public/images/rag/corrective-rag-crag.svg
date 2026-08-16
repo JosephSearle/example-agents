@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" role="img" aria-label="Corrective RAG (CRAG) flowchart: Question, Retrieve, Grade Relevance decision, then either Generate to Answer if relevant, or Web Search Fallback merging back into Generate if not relevant">
+  <title>Corrective RAG (CRAG)</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#141414;
+      --node-stroke:rgba(255,255,255,0.12);
+      --edge-color:#6b7280;
+      --accent-color:#0368FF;
+      --text-color:#f4f4f5;
+      --muted-text:#7c828d;
+    }
+    .crag-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .crag-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .crag-label{font:600 13px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .crag-label2{font:600 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .crag-tag{font:600 11.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;letter-spacing:.02em;}
+    .crag-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .crag-edge-mute{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .crag-dashline{stroke:var(--accent-color);stroke-width:2;fill:none;stroke-dasharray:5 11;stroke-linecap:round;animation:crag-dash .9s linear infinite;}
+
+    @keyframes crag-dash{to{stroke-dashoffset:-16;}}
+
+    .crag-glowA{animation:crag-glowA 8s ease-in-out infinite;}
+    .crag-glowB{animation:crag-glowB 8s ease-in-out infinite;}
+    @keyframes crag-glowA{0%{opacity:1}46%{opacity:1}50%{opacity:0}96%{opacity:0}100%{opacity:1}}
+    @keyframes crag-glowB{0%{opacity:0}46%{opacity:0}50%{opacity:1}96%{opacity:1}100%{opacity:0}}
+
+    .crag-packet{animation:crag-travel 8s ease-in-out infinite;}
+    @keyframes crag-travel{
+      0%{transform:translate(0,0);opacity:0}
+      2%{transform:translate(0,0);opacity:1}
+      9%{transform:translate(118px,0)}
+      11%{transform:translate(118px,0)}
+      18%{transform:translate(260px,0)}
+      20%{transform:translate(260px,0)}
+      28%{transform:translate(326px,0)}
+      40%{transform:translate(542px,0)}
+      42%{transform:translate(542px,0)}
+      48%{transform:translate(682px,0)}
+      50%{transform:translate(682px,0);opacity:1}
+      51%{transform:translate(682px,0);opacity:0}
+      51.5%{transform:translate(0,0);opacity:0}
+      53%{transform:translate(0,0);opacity:1}
+      58%{transform:translate(118px,0)}
+      60%{transform:translate(118px,0)}
+      66%{transform:translate(260px,0)}
+      68%{transform:translate(260px,0)}
+      70%{transform:translate(260px,46px)}
+      74%{transform:translate(260px,120px)}
+      78%{transform:translate(260px,181px)}
+      80%{transform:translate(260px,181px)}
+      88%{transform:translate(542px,181px)}
+      92%{transform:translate(542px,26px)}
+      94%{transform:translate(542px,0)}
+      95%{transform:translate(542px,0)}
+      99%{transform:translate(682px,0);opacity:1}
+      100%{transform:translate(682px,0);opacity:0}
+    }
+    .crag-pulse{transform-box:fill-box;transform-origin:center;animation:crag-pulse 1.4s ease-out infinite;}
+    @keyframes crag-pulse{0%{opacity:.6;transform:scale(.6)}70%{opacity:0;transform:scale(2.3)}100%{opacity:0;transform:scale(2.3)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .crag-glowA,.crag-glowB,.crag-packet,.crag-pulse,.crag-dashline{animation:none !important;}
+      .crag-glowA,.crag-glowB{opacity:1;}
+      .crag-packet{opacity:1;}
+      .crag-pulse{opacity:0;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="crag-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="crag-arrow" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--accent-color)"/></marker>
+    <marker id="crag-arrow-mute" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="420" fill="var(--diagram-bg)"/>
+
+  <text class="crag-sub" x="40" y="52">CORRECTIVE RAG</text>
+  <text class="crag-title" x="40" y="84" fill="url(#crag-grad)">Corrective RAG (CRAG)</text>
+
+  <!-- Gray base layer (muted structure) -->
+  <line class="crag-edge-mute" x1="398" y1="180" x2="558" y2="180" marker-end="url(#crag-arrow-mute)"/>
+  <text class="crag-tag" x="478" y="169" text-anchor="middle" fill="var(--muted-text)">Relevant</text>
+  <path class="crag-edge-mute" d="M330,228 L330,332" marker-end="url(#crag-arrow-mute)"/>
+  <path class="crag-edge-mute" d="M400,361 L612,361 L612,210" marker-end="url(#crag-arrow-mute)"/>
+  <text class="crag-tag" x="344" y="286" text-anchor="start" fill="var(--muted-text)">Not relevant</text>
+  <rect class="crag-nodebox" x="260" y="334" width="140" height="54" rx="12"/>
+  <text class="crag-label2" x="330" y="361" text-anchor="middle" dominant-baseline="middle" fill="var(--muted-text)"><tspan x="330" dy="-0.35em">Web Search</tspan><tspan x="330" dy="1.2em">Fallback</tspan></text>
+
+  <!-- Active glow overlays -->
+  <g class="crag-glowA">
+    <line class="crag-dashline" x1="398" y1="180" x2="557" y2="180" marker-end="url(#crag-arrow)"/>
+    <text class="crag-tag" x="478" y="169" text-anchor="middle" fill="var(--accent-color)">Relevant</text>
+  </g>
+  <g class="crag-glowB">
+    <path class="crag-dashline" d="M330,228 L330,331"/>
+    <path class="crag-dashline" d="M400,361 L612,361 L612,211" marker-end="url(#crag-arrow)"/>
+    <rect x="260" y="334" width="140" height="54" rx="12" fill="none" stroke="var(--accent-color)" stroke-width="1.5"/>
+    <text class="crag-label2" x="330" y="361" text-anchor="middle" dominant-baseline="middle" fill="var(--accent-color)"><tspan x="330" dy="-0.35em">Web Search</tspan><tspan x="330" dy="1.2em">Fallback</tspan></text>
+    <text class="crag-tag" x="344" y="286" text-anchor="start" fill="var(--accent-color)">Not relevant</text>
+  </g>
+
+  <!-- Shared arrows (always active) -->
+  <line class="crag-edge-mute" x1="116" y1="180" x2="140" y2="180" marker-end="url(#crag-arrow-mute)"/>
+  <line class="crag-edge-mute" x1="236" y1="180" x2="262" y2="180" marker-end="url(#crag-arrow-mute)"/>
+  <line class="crag-edge-mute" x1="664" y1="180" x2="700" y2="180" marker-end="url(#crag-arrow-mute)"/>
+  <line class="crag-dashline" x1="116" y1="180" x2="139" y2="180" marker-end="url(#crag-arrow)"/>
+  <line class="crag-dashline" x1="236" y1="180" x2="261" y2="180" marker-end="url(#crag-arrow)"/>
+  <line class="crag-dashline" x1="664" y1="180" x2="699" y2="180" marker-end="url(#crag-arrow)"/>
+
+  <!-- Nodes -->
+  <rect class="crag-nodebox" x="24" y="154" width="92" height="52" rx="12"/>
+  <text class="crag-label" x="70" y="180" text-anchor="middle" dominant-baseline="middle">Question</text>
+
+  <rect class="crag-nodebox" x="140" y="154" width="96" height="52" rx="12"/>
+  <text class="crag-label" x="188" y="180" text-anchor="middle" dominant-baseline="middle">Retrieve</text>
+
+  <polygon class="crag-nodebox" points="264,180 330,132 396,180 330,228"/>
+  <text class="crag-label2" x="330" y="180" text-anchor="middle" dominant-baseline="middle"><tspan x="330" dy="-0.35em">Grade</tspan><tspan x="330" dy="1.2em">Relevance</tspan></text>
+
+  <rect class="crag-nodebox" x="560" y="154" width="104" height="52" rx="12"/>
+  <text class="crag-label" x="612" y="180" text-anchor="middle" dominant-baseline="middle">Generate</text>
+
+  <rect class="crag-nodebox" x="700" y="154" width="104" height="52" rx="12"/>
+  <text class="crag-label" x="752" y="180" text-anchor="middle" dominant-baseline="middle">Answer</text>
+
+  <!-- Traveling packet -->
+  <g class="crag-packet">
+    <circle class="crag-pulse" cx="70" cy="180" r="9" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="70" cy="180" r="11" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="70" cy="180" r="5.5" fill="var(--accent-color)"/>
+    <circle cx="68" cy="178" r="2" fill="#ffffff" opacity="0.85"/>
+  </g>
+</svg>

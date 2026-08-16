@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 370" role="img" aria-label="Basic RAG pipeline: Question, Embed Query, Vector Search (top-k), Retrieved Documents, Stuff into Prompt, LLM, Answer">
+  <title>Basic RAG</title>
+  <style>
+    :root {
+      --diagram-bg: #0A0A0A;
+      --node-fill: #141414;
+      --node-stroke: rgba(255,255,255,0.12);
+      --edge-color: #6b7280;
+      --accent-color: #0368FF;
+      --text-color: #f4f4f5;
+      --muted-text: #9ca3af;
+      --doc-fill: #1e293b;
+      --doc-stroke: rgba(3,104,255,0.55);
+    }
+    .basicrag-title  { font: 700 26px system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .basicrag-sub    { font: 500 12px system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: var(--muted-text); letter-spacing: .12em; }
+    .basicrag-label  { font: 600 13px system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: var(--text-color); }
+    .basicrag-label2 { font: 600 12.5px system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: var(--text-color); }
+    .basicrag-nodebox { fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 1; }
+    .basicrag-edge    { stroke: var(--edge-color); stroke-width: 1.5; fill: none; }
+    .basicrag-branch  { stroke: var(--edge-color); stroke-width: 1.25; fill: none; opacity: .35; stroke-dasharray: 3 5; }
+
+    .basicrag-flow {
+      stroke: var(--accent-color); stroke-width: 2; fill: none;
+      stroke-dasharray: 5 11; stroke-linecap: round; opacity: .85;
+      animation: basicrag-dash .9s linear infinite;
+    }
+    @keyframes basicrag-dash { to { stroke-dashoffset: -16; } }
+
+    .basicrag-packet {
+      opacity: 1;
+      animation: basicrag-travel 4.5s ease-in-out infinite;
+    }
+    @keyframes basicrag-travel {
+      0%   { transform: translateX(0);      opacity: 0; }
+      3%   { transform: translateX(0);      opacity: 1; }
+      6%   { transform: translateX(0); }
+      17%  { transform: translateX(122px); }
+      20%  { transform: translateX(122px); }
+      31%  { transform: translateX(244px); }
+      34%  { transform: translateX(244px); }
+      45%  { transform: translateX(366px); }
+      48%  { transform: translateX(366px); }
+      59%  { transform: translateX(488px); }
+      62%  { transform: translateX(488px); }
+      73%  { transform: translateX(610px); }
+      76%  { transform: translateX(610px); }
+      87%  { transform: translateX(732px); }
+      90%  { transform: translateX(732px); opacity: 1; }
+      97%  { transform: translateX(732px); opacity: 0; }
+      100% { transform: translateX(732px); opacity: 0; }
+    }
+
+    .basicrag-pulse {
+      transform-box: fill-box; transform-origin: center;
+      animation: basicrag-pulse 4.5s ease-out infinite;
+    }
+    @keyframes basicrag-pulse {
+      0%{opacity:0;transform:scale(.5)}
+      3%{opacity:.8;transform:scale(.5)}   7%{opacity:0;transform:scale(2.6)}   8%{opacity:0;transform:scale(.5)}
+      17%{opacity:.8;transform:scale(.5)}  21%{opacity:0;transform:scale(2.6)}  22%{opacity:0;transform:scale(.5)}
+      31%{opacity:.8;transform:scale(.5)}  35%{opacity:0;transform:scale(2.6)}  36%{opacity:0;transform:scale(.5)}
+      45%{opacity:.8;transform:scale(.5)}  49%{opacity:0;transform:scale(2.6)}  50%{opacity:0;transform:scale(.5)}
+      59%{opacity:.8;transform:scale(.5)}  63%{opacity:0;transform:scale(2.6)}  64%{opacity:0;transform:scale(.5)}
+      73%{opacity:.8;transform:scale(.5)}  77%{opacity:0;transform:scale(2.6)}  78%{opacity:0;transform:scale(.5)}
+      87%{opacity:.8;transform:scale(.5)}  91%{opacity:0;transform:scale(2.6)}  100%{opacity:0;transform:scale(.5)}
+    }
+
+    .basicrag-doc {
+      transform-box: fill-box; transform-origin: center;
+      animation: basicrag-doc 4.5s ease-in-out infinite;
+    }
+    @keyframes basicrag-doc {
+      0%   { opacity: 0;  transform: translate(452px,286px) scale(.7); }
+      2%   { opacity: .6; transform: translate(462px,296px) scale(1); }
+      8%   { opacity: .6; transform: translate(558px,296px) scale(1); }
+      11%  { opacity: 0;  transform: translate(572px,286px) scale(.85); }
+      100% { opacity: 0;  transform: translate(572px,286px) scale(.85); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .basicrag-packet, .basicrag-pulse, .basicrag-doc, .basicrag-flow { animation: none !important; }
+      .basicrag-packet { opacity: 1; }
+      .basicrag-pulse  { opacity: 0; }
+      .basicrag-doc    { opacity: .5; }
+    }
+  </style>
+
+  <defs>
+    <linearGradient id="basicrag-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#0368FF"/>
+      <stop offset="30%" stop-color="#8D30FF"/>
+      <stop offset="55%" stop-color="#FF4FBA"/>
+      <stop offset="78%" stop-color="#FF2B6E"/>
+      <stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="basicrag-arrow" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="var(--edge-color)"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="370" fill="var(--diagram-bg)"/>
+
+  <text class="basicrag-sub"   x="40" y="52">RETRIEVAL-AUGMENTED GENERATION</text>
+  <text class="basicrag-title" x="40" y="84" fill="url(#basicrag-grad)">Basic RAG</text>
+
+  <line class="basicrag-edge" x1="137" y1="210" x2="153" y2="210" marker-end="url(#basicrag-arrow)"/>
+  <line class="basicrag-edge" x1="259" y1="210" x2="275" y2="210" marker-end="url(#basicrag-arrow)"/>
+  <line class="basicrag-edge" x1="381" y1="210" x2="397" y2="210" marker-end="url(#basicrag-arrow)"/>
+  <line class="basicrag-edge" x1="503" y1="210" x2="519" y2="210" marker-end="url(#basicrag-arrow)"/>
+  <line class="basicrag-edge" x1="625" y1="210" x2="641" y2="210" marker-end="url(#basicrag-arrow)"/>
+  <line class="basicrag-edge" x1="747" y1="210" x2="763" y2="210" marker-end="url(#basicrag-arrow)"/>
+
+  <line class="basicrag-flow" x1="137" y1="210" x2="152" y2="210"/>
+  <line class="basicrag-flow" x1="259" y1="210" x2="274" y2="210"/>
+  <line class="basicrag-flow" x1="381" y1="210" x2="396" y2="210"/>
+  <line class="basicrag-flow" x1="503" y1="210" x2="518" y2="210"/>
+  <line class="basicrag-flow" x1="625" y1="210" x2="640" y2="210"/>
+  <line class="basicrag-flow" x1="747" y1="210" x2="762" y2="210"/>
+
+  <path class="basicrag-branch" d="M450,244 C450,304 572,304 572,244"/>
+  <text class="basicrag-sub" x="511" y="332" text-anchor="middle" font-size="10">top-k docs</text>
+
+  <g>
+    <rect class="basicrag-nodebox" x="34"  y="178" width="100" height="64" rx="12"/>
+    <text class="basicrag-label" x="84" y="210" text-anchor="middle" dominant-baseline="middle">Question</text>
+
+    <rect class="basicrag-nodebox" x="156" y="178" width="100" height="64" rx="12"/>
+    <text class="basicrag-label" x="206" y="210" text-anchor="middle" dominant-baseline="middle">Embed Query</text>
+
+    <rect class="basicrag-nodebox" x="278" y="178" width="100" height="64" rx="12"/>
+    <text class="basicrag-label2" x="328" y="210" text-anchor="middle" dominant-baseline="middle"><tspan x="328" dy="-0.35em">Vector Search</tspan><tspan x="328" dy="1.25em">(top-k)</tspan></text>
+
+    <rect class="basicrag-nodebox" x="400" y="178" width="100" height="64" rx="12"/>
+    <text class="basicrag-label2" x="450" y="210" text-anchor="middle" dominant-baseline="middle"><tspan x="450" dy="-0.35em">Retrieved</tspan><tspan x="450" dy="1.25em">Documents</tspan></text>
+
+    <rect class="basicrag-nodebox" x="522" y="178" width="100" height="64" rx="12"/>
+    <text class="basicrag-label2" x="572" y="210" text-anchor="middle" dominant-baseline="middle"><tspan x="572" dy="-0.35em">Stuff into</tspan><tspan x="572" dy="1.25em">Prompt</tspan></text>
+
+    <rect class="basicrag-nodebox" x="644" y="178" width="100" height="64" rx="12"/>
+    <text class="basicrag-label" x="694" y="210" text-anchor="middle" dominant-baseline="middle">LLM</text>
+
+    <rect class="basicrag-nodebox" x="766" y="178" width="100" height="64" rx="12"/>
+    <text class="basicrag-label" x="816" y="210" text-anchor="middle" dominant-baseline="middle">Answer</text>
+  </g>
+
+  <g>
+    <g class="basicrag-doc" style="transform:translate(470px,296px);opacity:.5;">
+      <rect x="-7" y="-9" width="14" height="18" rx="2" fill="var(--doc-fill)" stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="-4" x2="4" y2="-4" stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="0"  x2="4" y2="0"  stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="4"  x2="2" y2="4"  stroke="var(--doc-stroke)" stroke-width="1"/>
+    </g>
+    <g class="basicrag-doc" style="transform:translate(500px,296px);opacity:.5;animation-delay:-2.5s;">
+      <rect x="-7" y="-9" width="14" height="18" rx="2" fill="var(--doc-fill)" stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="-4" x2="4" y2="-4" stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="0"  x2="4" y2="0"  stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="4"  x2="2" y2="4"  stroke="var(--doc-stroke)" stroke-width="1"/>
+    </g>
+    <g class="basicrag-doc" style="transform:translate(530px,296px);opacity:.5;animation-delay:-2.3s;">
+      <rect x="-7" y="-9" width="14" height="18" rx="2" fill="var(--doc-fill)" stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="-4" x2="4" y2="-4" stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="0"  x2="4" y2="0"  stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="4"  x2="2" y2="4"  stroke="var(--doc-stroke)" stroke-width="1"/>
+    </g>
+    <g class="basicrag-doc" style="transform:translate(556px,296px);opacity:.5;animation-delay:-2.1s;">
+      <rect x="-7" y="-9" width="14" height="18" rx="2" fill="var(--doc-fill)" stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="-4" x2="4" y2="-4" stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="0"  x2="4" y2="0"  stroke="var(--doc-stroke)" stroke-width="1"/>
+      <line x1="-4" y1="4"  x2="2" y2="4"  stroke="var(--doc-stroke)" stroke-width="1"/>
+    </g>
+  </g>
+
+  <g class="basicrag-packet">
+    <circle class="basicrag-pulse" cx="84" cy="210" r="9" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="84" cy="210" r="11" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="84" cy="210" r="5.5" fill="var(--accent-color)"/>
+    <circle cx="82" cy="208" r="2" fill="#ffffff" opacity="0.85"/>
+  </g>
+</svg>

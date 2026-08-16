@@ -39,7 +39,7 @@ dev = [
 package = false
 
 [tool.uv.workspace]
-members = ["agents/*", "packages/*"]
+members = ["agents/patterns/*", "agents/examples/*", "packages/*"]
 # mlflow-server ships as a plain Dockerfile + requirements.txt (it runs `pip install -r
 # requirements.txt` inside its own image, not this workspace's venv) — not a uv package.
 # milvus is off-the-shelf images wired into docker-compose.yml plus documentation — no Python

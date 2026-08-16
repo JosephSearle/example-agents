@@ -4,16 +4,21 @@ requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.15'",
     "python_full_version == '3.14.*'",
-    "python_full_version == '3.13.*'",
-    "python_full_version < '3.13'",
+    "python_full_version < '3.14'",
 ]
 
 [manifest]
 members = [
     "agents-common",
-    "deep-agent",
+    "evaluator-optimizer-agent",
     "example-agents",
+    "map-reduce-agent",
+    "network-mesh-agent",
+    "orchestrator-workers-agent",
+    "parallelization-agent",
+    "prompt-chaining-agent",
     "react-agent",
+    "routing-agent",
     "supervisor-agent",
     "swarm-agent",
 ]
@@ -831,7 +836,7 @@ wheels = [
 
 [[package]]
 name = "databricks-sdk"
-version = "0.129.0"
+version = "0.130.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "google-auth" },
@@ -839,15 +844,10 @@ dependencies = [
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c3/d5/8715dc8acd56da3ee90123bba06dafe828c86abc60fa5211d878f688ab0b/databricks_sdk-0.129.0.tar.gz", hash = "sha256:324583d22fa18bd1b3219118743ce53c8261a11254ac5b6ea829cf02e19d751b", size = 1156077, upload-time = "2026-08-15T04:29:53.588Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/48/29/d553b49b7d38d7ce71f12c2b67aa0e7988c054f5101e13c1cb896b69307c/databricks_sdk-0.130.0.tar.gz", hash = "sha256:1ea962d1fd10a0e8eb3b405d6f9023cdb7ef1942b34eaeb02ecf14c84131d4e8", size = 1156390, upload-time = "2026-08-16T04:31:09.392Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4d/c7/18a0a34223c402c840300e1223867eb47a950104a636ca74d595469fb69b/databricks_sdk-0.129.0-py3-none-any.whl", hash = "sha256:102a80bb4e838dfbacd828b2730f692bd79563b4062fb53e496c70ea3504b170", size = 1098774, upload-time = "2026-08-15T04:29:51.845Z" },
+    { url = "https://files.pythonhosted.org/packages/65/65/1b8538b2fd0d4bb4028cbd9f6fd5b1e16f685d8f8c213047bad394dd2aa3/databricks_sdk-0.130.0-py3-none-any.whl", hash = "sha256:a3f505ff5a46f33e7bd3638a952fb6852249d99c75cda92b54ec68377e1fb364", size = 1099046, upload-time = "2026-08-16T04:31:07.023Z" },
 ]
-
-[[package]]
-name = "deep-agent"
-version = "0.1.0"
-source = { editable = "agents/deep-agent" }
 
 [[package]]
 name = "deprecated"
@@ -892,6 +892,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/88/7f/731ff914b0255d3d0
 wheels = [
     { url = "https://files.pythonhosted.org/packages/75/23/529140fe1aab80fc6992f93a706deec709140a6397439139a054e1515c45/docker-7.2.0-py3-none-any.whl", hash = "sha256:a3f45fdeb9165e2d25d9a1d02ddf3bc70fb572cf5ebbf9b58558c22caf29b71f", size = 148775, upload-time = "2026-07-09T14:53:45.224Z" },
 ]
+
+[[package]]
+name = "evaluator-optimizer-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/evaluator-optimizer-agent" }
 
 [[package]]
 name = "example-agents"
@@ -2005,6 +2010,11 @@ wheels = [
 ]
 
 [[package]]
+name = "map-reduce-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/map-reduce-agent" }
+
+[[package]]
 name = "markupsafe"
 version = "3.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -2384,6 +2394,11 @@ wheels = [
 ]
 
 [[package]]
+name = "network-mesh-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/network-mesh-agent" }
+
+[[package]]
 name = "nodeenv"
 version = "1.10.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2536,6 +2551,11 @@ wheels = [
 ]
 
 [[package]]
+name = "orchestrator-workers-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/orchestrator-workers-agent" }
+
+[[package]]
 name = "orjson"
 version = "3.12.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2683,6 +2703,11 @@ wheels = [
 ]
 
 [[package]]
+name = "parallelization-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/parallelization-agent" }
+
+[[package]]
 name = "pathspec"
 version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2807,6 +2832,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/81/74/ba08d81e668ccfe86
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fe/be/2e6798ace5cc036f5d05d36b7b2fd85346f1a708c87060890b070d0ec607/prettytable-3.18.0-py3-none-any.whl", hash = "sha256:b3346e0e6f79180833aebaac088ae926340586cf6d7d991b9eb125b65f72313a", size = 37357, upload-time = "2026-06-22T16:07:48.595Z" },
 ]
+
+[[package]]
+name = "prompt-chaining-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/prompt-chaining-agent" }
 
 [[package]]
 name = "propcache"
@@ -3344,7 +3374,7 @@ wheels = [
 [[package]]
 name = "react-agent"
 version = "0.1.0"
-source = { editable = "agents/react-agent" }
+source = { editable = "agents/patterns/react-agent" }
 dependencies = [
     { name = "agents-common" },
     { name = "langchain" },
@@ -3488,6 +3518,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/f3/61/d7545dafb7ac2230c
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3f/51/d4db610ef29373b879047326cbf6fa98b6c1969d6f6dc423279de2b1be2c/requests_toolbelt-1.0.0-py2.py3-none-any.whl", hash = "sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06", size = 54481, upload-time = "2023-05-01T04:11:28.427Z" },
 ]
+
+[[package]]
+name = "routing-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/routing-agent" }
 
 [[package]]
 name = "ruff"
@@ -3740,12 +3775,12 @@ wheels = [
 [[package]]
 name = "supervisor-agent"
 version = "0.1.0"
-source = { editable = "agents/supervisor-agent" }
+source = { editable = "agents/patterns/supervisor-agent" }
 
 [[package]]
 name = "swarm-agent"
 version = "0.1.0"
-source = { editable = "agents/swarm-agent" }
+source = { editable = "agents/patterns/swarm-agent" }
 
 [[package]]
 name = "tenacity"
