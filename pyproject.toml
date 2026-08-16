@@ -1,0 +1,164 @@
+# ============================================================================
+# example-agents — root workspace configuration
+#
+# This is a uv workspace: the root pyproject.toml declares shared tooling
+# (Ruff, mypy, pytest) and lists the workspace members. Each agent under
+# agents/* and each shared library under packages/* is its own installable
+# package with its own pyproject.toml. `uv sync` at the root installs every
+# member into one shared virtual environment and resolves one root uv.lock.
+# ============================================================================
+
+[project]
+name            = "example-agents"
+version         = "0.1.0"
+description     = "Reference implementations of production agent patterns (ReAct, supervisor, swarm, deep agent) on LangChain / LangGraph."
+readme          = "README.md"
+requires-python = ">=3.12"
+license         = "MIT"
+
+# The root project itself ships no runtime code — it only exists to anchor
+# the workspace and hold shared dev tooling. Real dependencies live in each
+# member package.
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=5.0",
+    "pytest-xdist>=3.6",
+    "pytest-asyncio>=1.0",
+    "hypothesis>=6.112",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pre-commit>=4.0",
+]
+
+[tool.uv]
+# The root is a virtual workspace anchor, not an installable package itself — every real
+# package lives under agents/* and packages/*.
+package = false
+
+[tool.uv.workspace]
+members = ["agents/*", "packages/*"]
+# mlflow-server ships as a plain Dockerfile + requirements.txt (it runs `pip install -r
+# requirements.txt` inside its own image, not this workspace's venv) — not a uv package.
+# milvus is off-the-shelf images wired into docker-compose.yml plus documentation — no Python
+# package of its own at all.
+exclude = ["packages/mlflow-server", "packages/milvus"]
+
+# ---------------------------------------------------------------------------
+# Ruff — single config, applies to every workspace member
+# ---------------------------------------------------------------------------
+[tool.ruff]
+target-version = "py312"
+line-length    = 100
+src            = ["agents", "packages"]
+extend-exclude = ["docs/_build", "build", "dist"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F", "I", "UP", "B", "C4", "SIM", "RET", "PTH",
+    "TC", "TID", "ISC", "ICN", "FA", "FURB", "PERF", "PIE", "PL",
+    "RUF", "D",
+    "S105", "S106", "S107", "S108", "S113",
+    "S301", "S307", "S324", "S506", "S608",
+]
+ignore = ["COM812", "ISC001", "E501", "D203", "D213", "PLR0913"]
+unfixable = ["F401"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.isort]
+combine-as-imports         = true
+force-sort-within-sections = true
+split-on-trailing-comma    = true
+
+[tool.ruff.lint.pylint]
+max-args = 8
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**/*.py"  = ["D", "S101", "S105", "S106", "PLR2004"]
+"**/__init__.py"    = ["F401", "D104"]
+
+[tool.ruff.format]
+quote-style               = "double"
+indent-style              = "space"
+docstring-code-format     = true
+skip-magic-trailing-comma = false
+
+# ---------------------------------------------------------------------------
+# mypy — CI only, whole-workspace graph
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version      = "3.12"
+strict              = true
+warn_unreachable    = true
+warn_unused_configs = true
+pretty              = true
+show_error_codes    = true
+files               = ["agents", "packages"]
+# Test files are excluded from the strict mypy gate (they're still type-annotated where it's
+# cheap, but strict-mode ceremony isn't worth it for fixtures/parametrize blocks) and instead
+# get correctness coverage from actually running via pytest in CI.
+exclude             = ["tests/"]
+
+# ---------------------------------------------------------------------------
+# pytest — collects across every workspace member
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion   = "8.0"
+testpaths    = ["agents", "packages"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--showlocals",
+    "--tb=short",
+    # Every workspace member has its own tests/ directory (and some share test-module
+    # basenames like conftest.py); importlib mode keys modules by file path instead of by
+    # a package name derived from directory nesting, so there's no cross-package collision
+    # and no need for tests/__init__.py files.
+    "--import-mode=importlib",
+]
+markers = [
+    "unit: pure-function / mocked-LLM tests, no network, run on every push",
+    "integration: exercises real Postgres checkpointing and/or MLflow tracking; needs docker compose",
+    "eval: MLflow GenAI evaluation suite against a live model; slow, costs tokens, gated in CI",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:langchain.*",
+    "ignore::DeprecationWarning:langgraph.*",
+    # langchain-community is in maintenance-only "sunset" mode upstream, but ChatMlflow (our
+    # MLflow AI Gateway client) has no standalone-package replacement yet — see
+    # agents_common.models. Revisit when one ships. Matched by message, not module: the
+    # warning is raised with a stacklevel that attributes it to the *importing* module, not
+    # to langchain_community itself, so a `module=` filter silently fails to match.
+    "ignore:.*langchain-community.*is being sunset.*:DeprecationWarning",
+    # Raised by mlflow.langchain's own module-load-time schema inference (mlflow.types.responses),
+    # not by our code — matched by message for the same stacklevel-attribution reason as above.
+    "ignore:.*is inferred as AnyType.*:UserWarning",
+]
+
+[tool.coverage.run]
+branch         = true
+parallel       = true
+relative_files = true
+omit = ["*/tests/*", "*/__main__.py"]
+
+[tool.coverage.report]
+fail_under   = 80
+show_missing = true
+precision    = 2
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
