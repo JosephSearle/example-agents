@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 390" role="img" aria-label="Evaluator-Optimizer workflow: a Task goes to a Generator producing a Draft, which an Evaluator judges; if it needs refinement, feedback loops back to the Generator for another iteration, and once it meets criteria it proceeds to Output">
+  <title>Evaluator-Optimizer</title>
+  <style>
+    :root{
+      --diagram-bg:#0A0A0A;
+      --node-fill:#111111;
+      --node-stroke:rgba(255,255,255,0.10);
+      --edge-color:#5b616c;
+      --accent-color:#0368FF;
+      --pass-color:#2FBF71;
+      --warn-color:#FFB800;
+      --text-color:#f4f4f5;
+      --muted-text:#8b909b;
+    }
+    .evalopt-title{font:700 26px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .evalopt-sub{font:500 12px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--muted-text);letter-spacing:.12em;}
+    .evalopt-label{font:600 12.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .evalopt-label2{font:600 11.5px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;fill:var(--text-color);}
+    .evalopt-tag{font:600 11px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;letter-spacing:.02em;}
+    .evalopt-badge{font:700 11px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;letter-spacing:.03em;}
+    .evalopt-nodebox{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:1;}
+    .evalopt-edge{stroke:var(--edge-color);stroke-width:1.5;fill:none;}
+    .evalopt-loop{stroke:var(--warn-color);stroke-width:1.75;fill:none;stroke-dasharray:6 8;stroke-linecap:round;opacity:.6;animation:evalopt-dash 1.1s linear infinite;}
+    .evalopt-flow{stroke:var(--accent-color);stroke-width:2;fill:none;stroke-dasharray:5 11;stroke-linecap:round;opacity:.7;animation:evalopt-dash .9s linear infinite;}
+    @keyframes evalopt-dash{to{stroke-dashoffset:-15;}}
+
+    .evalopt-flash-a{transform-box:fill-box;transform-origin:center;opacity:0;animation:evalopt-flash-a 10s ease-out infinite;}
+    .evalopt-flash-g{transform-box:fill-box;transform-origin:center;opacity:0;animation:evalopt-flash-g 10s ease-out infinite;}
+    @keyframes evalopt-flash-a{0%{opacity:0}23%{opacity:0}25%{opacity:.7}30%{opacity:.7}34%{opacity:0}100%{opacity:0}}
+    @keyframes evalopt-flash-g{0%{opacity:0}73%{opacity:0}75%{opacity:.7}80%{opacity:.7}84%{opacity:0}100%{opacity:0}}
+
+    .evalopt-badge1{opacity:0;animation:evalopt-badge1 10s ease-in-out infinite;}
+    @keyframes evalopt-badge1{0%{opacity:0}35%{opacity:0}37%{opacity:1}54%{opacity:1}56%{opacity:0}100%{opacity:0}}
+
+    .evalopt-loopglow{opacity:0;animation:evalopt-loopglow 10s ease-in-out infinite;}
+    @keyframes evalopt-loopglow{0%{opacity:0}34%{opacity:0}36%{opacity:1}57%{opacity:1}59%{opacity:0}100%{opacity:0}}
+
+    .evalopt-packet{animation:evalopt-travel 10s cubic-bezier(0.22,1,0.36,1) infinite;}
+    @keyframes evalopt-travel{
+      0%{transform:translate(0,0);opacity:0}
+      2%{transform:translate(0,0);opacity:1}
+      7%{transform:translate(0,0)}
+      12%{transform:translate(150px,0)}
+      16%{transform:translate(150px,0)}
+      21%{transform:translate(300px,0)}
+      25%{transform:translate(300px,0)}
+      30%{transform:translate(450px,0)}
+      34%{transform:translate(450px,0)}
+      38%{transform:translate(450px,80px)}
+      44%{transform:translate(240px,150px)}
+      50%{transform:translate(150px,44px)}
+      52%{transform:translate(150px,0)}
+      54%{transform:translate(150px,0)}
+      60%{transform:translate(300px,0)}
+      64%{transform:translate(300px,0)}
+      70%{transform:translate(450px,0)}
+      74%{transform:translate(450px,0)}
+      82%{transform:translate(450px,0)}
+      90%{transform:translate(600px,0);opacity:1}
+      93%{transform:translate(600px,0);opacity:0}
+      100%{transform:translate(600px,0);opacity:0}
+    }
+    .evalopt-pulse{transform-box:fill-box;transform-origin:center;animation:evalopt-pulse 1.4s ease-out infinite;}
+    @keyframes evalopt-pulse{0%{opacity:.6;transform:scale(.6)}70%{opacity:0;transform:scale(2.3)}100%{opacity:0;transform:scale(2.3)}}
+
+    @media (prefers-reduced-motion: reduce){
+      .evalopt-flow,.evalopt-loop,.evalopt-flash-a,.evalopt-flash-g,.evalopt-badge1,.evalopt-loopglow,.evalopt-packet,.evalopt-pulse{animation:none !important;}
+      .evalopt-packet{opacity:1;}
+      .evalopt-flash-a,.evalopt-flash-g,.evalopt-pulse{opacity:0;}
+      .evalopt-badge1,.evalopt-loopglow{opacity:1;}
+    }
+  </style>
+  <defs>
+    <linearGradient id="evalopt-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0368FF"/><stop offset="30%" stop-color="#8D30FF"/><stop offset="55%" stop-color="#FF4FBA"/><stop offset="78%" stop-color="#FF2B6E"/><stop offset="100%" stop-color="#FF7A59"/>
+    </linearGradient>
+    <marker id="evalopt-arrow" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--edge-color)"/></marker>
+    <marker id="evalopt-arrowg" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--pass-color)"/></marker>
+    <marker id="evalopt-arrowa" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--warn-color)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="390" fill="var(--diagram-bg)"/>
+
+  <text class="evalopt-sub" x="40" y="52">WORKFLOW · TWO-LLM REFINEMENT LOOP</text>
+  <text class="evalopt-title" x="40" y="84" fill="url(#evalopt-grad)">Evaluator-Optimizer</text>
+
+  <!-- Feedback loop-back arc (below main flow) -->
+  <path class="evalopt-edge" d="M600,232 C 600,360 240,360 240,232" marker-end="url(#evalopt-arrow)"/>
+  <g class="evalopt-loopglow">
+    <path class="evalopt-loop" d="M600,232 C 600,360 240,360 240,233" marker-end="url(#evalopt-arrowa)"/>
+  </g>
+  <text class="evalopt-tag" x="420" y="352" text-anchor="middle" fill="var(--warn-color)">Feedback → refine &amp; regenerate</text>
+
+  <!-- Forward arrows -->
+  <line class="evalopt-edge" x1="150" y1="210" x2="176" y2="210" marker-end="url(#evalopt-arrow)"/>
+  <line class="evalopt-edge" x1="300" y1="210" x2="326" y2="210" marker-end="url(#evalopt-arrow)"/>
+  <line class="evalopt-edge" x1="450" y1="210" x2="476" y2="210" marker-end="url(#evalopt-arrow)"/>
+  <line class="evalopt-edge" x1="600" y1="210" x2="686" y2="210" marker-end="url(#evalopt-arrow)"/>
+  <line class="evalopt-flow" x1="150" y1="210" x2="175" y2="210"/>
+  <line class="evalopt-flow" x1="300" y1="210" x2="325" y2="210"/>
+  <line class="evalopt-flow" x1="450" y1="210" x2="475" y2="210"/>
+  <text class="evalopt-tag" x="643" y="199" text-anchor="middle" fill="var(--pass-color)">Meets criteria</text>
+
+  <!-- Nodes -->
+  <rect class="evalopt-nodebox" x="40" y="184" width="72" height="52" rx="12"/>
+  <text class="evalopt-label" x="76" y="210" text-anchor="middle" dominant-baseline="middle">Task</text>
+
+  <rect class="evalopt-nodebox" x="176" y="184" width="96" height="52" rx="12"/>
+  <text class="evalopt-label" x="224" y="210" text-anchor="middle" dominant-baseline="middle">Generator</text>
+
+  <rect class="evalopt-nodebox" x="326" y="184" width="88" height="52" rx="12"/>
+  <text class="evalopt-label" x="370" y="210" text-anchor="middle" dominant-baseline="middle">Draft</text>
+
+  <polygon class="evalopt-nodebox" points="476,210 526,168 576,210 526,252"/>
+  <polygon class="evalopt-flash-a" points="476,210 526,168 576,210 526,252" fill="var(--warn-color)" stroke="var(--warn-color)" stroke-width="2"/>
+  <polygon class="evalopt-flash-g" points="476,210 526,168 576,210 526,252" fill="var(--pass-color)" stroke="var(--pass-color)" stroke-width="2"/>
+  <text class="evalopt-label2" x="526" y="210" text-anchor="middle" dominant-baseline="middle">Evaluator</text>
+
+  <rect class="evalopt-nodebox" x="688" y="184" width="88" height="52" rx="12"/>
+  <text class="evalopt-label" x="732" y="210" text-anchor="middle" dominant-baseline="middle">Output</text>
+
+  <text class="evalopt-tag" x="526" y="286" text-anchor="middle" fill="var(--warn-color)">Needs refinement</text>
+
+  <!-- Iteration counter badge -->
+  <g class="evalopt-badge1">
+    <rect x="380" y="316" width="86" height="22" rx="11" fill="var(--node-fill)" stroke="var(--warn-color)" stroke-width="1.25"/>
+    <text class="evalopt-badge" x="423" y="327" text-anchor="middle" dominant-baseline="middle" fill="var(--warn-color)">Iteration 1</text>
+  </g>
+
+  <!-- Traveling packet -->
+  <g class="evalopt-packet">
+    <circle class="evalopt-pulse" cx="76" cy="210" r="9" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+    <circle cx="76" cy="210" r="11" fill="var(--accent-color)" opacity="0.22"/>
+    <circle cx="76" cy="210" r="5.5" fill="var(--accent-color)"/>
+    <circle cx="74" cy="208" r="2" fill="#fff" opacity="0.85"/>
+  </g>
+</svg>
