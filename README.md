@@ -1,6 +1,24 @@
+<div align="center">
+
 # example-agents
 
 Reference implementations of the agent patterns this team uses — real, running code, not diagrams.
+
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![uv](https://img.shields.io/badge/uv-workspace-DE5FE9?logo=uv&logoColor=white)](https://docs.astral.sh/uv/)
+[![LangChain](https://img.shields.io/badge/LangChain-create__agent-1C3C3C?logo=langchain&logoColor=white)](https://python.langchain.com/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-workflows-1C3C3C)](https://langchain-ai.github.io/langgraph/)
+[![MLflow](https://img.shields.io/badge/MLflow-AI%20Gateway%20%2B%20Evals-0194E2?logo=mlflow&logoColor=white)](https://mlflow.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-checkpointing-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Milvus](https://img.shields.io/badge/Milvus-vector%20store-00A1EA?logo=milvus&logoColor=white)](https://milvus.io/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![Ruff](https://img.shields.io/badge/lint%2Fformat-Ruff-D7FF64?logo=ruff&logoColor=black)](https://docs.astral.sh/ruff/)
+[![mypy](https://img.shields.io/badge/types-mypy%20strict-blue)](https://mypy-lang.org/)
+[![pytest](https://img.shields.io/badge/tests-pytest-0A9EDC?logo=pytest&logoColor=white)](https://docs.pytest.org/)
+[![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/features/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+</div>
 
 ## Highlights
 
