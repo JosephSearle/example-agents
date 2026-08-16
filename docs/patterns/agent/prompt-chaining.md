@@ -4,6 +4,8 @@ Prompt chaining decomposes one complex task into a sequence of simpler LLM calls
 
 ![Prompt Chaining pipeline for contract analysis: Input, Step 1 Analyze, Step 2 Extract Terms, Step 3 Check Compliance, Step 4 Summarize, Output — with a small Check validation gate on each connecting arrow between steps](../../../public/images/agent/prompt-chaining.svg)
 
+**Package:** [`agents/patterns/prompt-chaining-agent`](../../../agents/patterns/prompt-chaining-agent/README.md) (stub)
+
 > **Note:**
 > This is a **workflow**, not an agent, per [Anthropic's framing](https://www.anthropic.com/engineering/building-effective-agents): the sequence of steps is fixed in code ahead of time — the LLM doesn't decide what step comes next or whether to loop back. It's best suited to tasks that decompose cleanly into fixed subtasks. If your task needs dynamic branching, or the LLM deciding its own next step, that's routing or an agent — different patterns, covered in other docs in this series.
 

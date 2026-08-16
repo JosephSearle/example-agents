@@ -10,8 +10,15 @@ resolution-markers = [
 [manifest]
 members = [
     "agents-common",
+    "evaluator-optimizer-agent",
     "example-agents",
+    "map-reduce-agent",
+    "network-mesh-agent",
+    "orchestrator-workers-agent",
+    "parallelization-agent",
+    "prompt-chaining-agent",
     "react-agent",
+    "routing-agent",
     "supervisor-agent",
     "swarm-agent",
 ]
@@ -885,6 +892,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/88/7f/731ff914b0255d3d0
 wheels = [
     { url = "https://files.pythonhosted.org/packages/75/23/529140fe1aab80fc6992f93a706deec709140a6397439139a054e1515c45/docker-7.2.0-py3-none-any.whl", hash = "sha256:a3f45fdeb9165e2d25d9a1d02ddf3bc70fb572cf5ebbf9b58558c22caf29b71f", size = 148775, upload-time = "2026-07-09T14:53:45.224Z" },
 ]
+
+[[package]]
+name = "evaluator-optimizer-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/evaluator-optimizer-agent" }
 
 [[package]]
 name = "example-agents"
@@ -1998,6 +2010,11 @@ wheels = [
 ]
 
 [[package]]
+name = "map-reduce-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/map-reduce-agent" }
+
+[[package]]
 name = "markupsafe"
 version = "3.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -2377,6 +2394,11 @@ wheels = [
 ]
 
 [[package]]
+name = "network-mesh-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/network-mesh-agent" }
+
+[[package]]
 name = "nodeenv"
 version = "1.10.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2529,6 +2551,11 @@ wheels = [
 ]
 
 [[package]]
+name = "orchestrator-workers-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/orchestrator-workers-agent" }
+
+[[package]]
 name = "orjson"
 version = "3.12.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2676,6 +2703,11 @@ wheels = [
 ]
 
 [[package]]
+name = "parallelization-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/parallelization-agent" }
+
+[[package]]
 name = "pathspec"
 version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2800,6 +2832,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/81/74/ba08d81e668ccfe86
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fe/be/2e6798ace5cc036f5d05d36b7b2fd85346f1a708c87060890b070d0ec607/prettytable-3.18.0-py3-none-any.whl", hash = "sha256:b3346e0e6f79180833aebaac088ae926340586cf6d7d991b9eb125b65f72313a", size = 37357, upload-time = "2026-06-22T16:07:48.595Z" },
 ]
+
+[[package]]
+name = "prompt-chaining-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/prompt-chaining-agent" }
 
 [[package]]
 name = "propcache"
@@ -3481,6 +3518,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/f3/61/d7545dafb7ac2230c
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3f/51/d4db610ef29373b879047326cbf6fa98b6c1969d6f6dc423279de2b1be2c/requests_toolbelt-1.0.0-py2.py3-none-any.whl", hash = "sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06", size = 54481, upload-time = "2023-05-01T04:11:28.427Z" },
 ]
+
+[[package]]
+name = "routing-agent"
+version = "0.1.0"
+source = { editable = "agents/patterns/routing-agent" }
 
 [[package]]
 name = "ruff"

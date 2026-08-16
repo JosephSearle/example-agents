@@ -4,6 +4,8 @@ This pattern's name is borrowed wholesale from 2000s-era distributed data proces
 
 ![Map-Reduce pipeline: a Coordinator runs a Map step that fans out to four identical workers each processing a data chunk in parallel, then all four converge and combine into a single Reduce node producing the Merged Result](../../../public/images/agent/map-reduce.svg)
 
+**Package:** [`agents/patterns/map-reduce-agent`](../../../agents/patterns/map-reduce-agent/README.md) (stub)
+
 > **Note:**
 > This is essentially [Parallelization](./parallelization)'s **Sectioning** variant, generalized: instead of a fixed set of subtasks written by the developer ahead of time, the number of parallel branches is determined **at runtime** by graph state. Same idea, now with unknown-in-advance fan-out.
 

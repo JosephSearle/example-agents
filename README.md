@@ -174,10 +174,20 @@ non-local.
 | Pattern | Framework tier | Status | Path |
 |---|---|---|---|
 | Single ReAct agent | Tier 1 — `create_agent` | **Implemented** | `agents/patterns/react-agent` |
+| Prompt Chaining | workflow — raw `StateGraph` | Stub | `agents/patterns/prompt-chaining-agent` |
+| Routing | workflow — raw `StateGraph` | Stub | `agents/patterns/routing-agent` |
+| Parallelization | workflow — raw `StateGraph` | Stub | `agents/patterns/parallelization-agent` |
+| Orchestrator-Workers | workflow — raw `StateGraph` | Stub | `agents/patterns/orchestrator-workers-agent` |
+| Evaluator-Optimizer | workflow — raw `StateGraph` | Stub | `agents/patterns/evaluator-optimizer-agent` |
+| Map-Reduce | workflow — raw `StateGraph` | Stub | `agents/patterns/map-reduce-agent` |
 | Supervisor multi-agent | Tier 2 — LangGraph + `langgraph-supervisor` | Stub | `agents/patterns/supervisor-agent` |
 | Swarm multi-agent | Tier 2 — LangGraph + `langgraph-swarm` | Stub | `agents/patterns/swarm-agent` |
+| Network / Mesh | workflow — raw `StateGraph` | Stub | `agents/patterns/network-mesh-agent` |
 
-See **[docs/decisions/0001-tech-stack.md](docs/decisions/0001-tech-stack.md)** for the full
+Every pattern in this table has a full writeup under
+[`docs/patterns/agent/`](docs/patterns/agent/) — see
+**[agents/patterns/README.md](agents/patterns/README.md)** for the doc-to-package index. See
+**[docs/decisions/0001-tech-stack.md](docs/decisions/0001-tech-stack.md)** for the full
 reasoning behind the tiering and every other stack choice — this README is the quick-start,
 that doc is the "why."
 
@@ -196,7 +206,8 @@ example-agents/
 │   ├── patterns/                       # reusable pattern implementations
 │   │   ├── react-agent/                # tier 1 — implemented
 │   │   ├── supervisor-agent/           # tier 2 — stub
-│   │   └── swarm-agent/                # tier 2 — stub
+│   │   ├── swarm-agent/                # tier 2 — stub
+│   │   └── ...                         # 7 more workflow-pattern stubs
 │   └── examples/                       # applied demos composing patterns above
 ├── packages/
 │   ├── agents-common/                  # shared checkpointing/observability/config
@@ -214,6 +225,8 @@ example-agents/
 - [x] Single ReAct agent (`agents/patterns/react-agent`)
 - [ ] Supervisor multi-agent (`agents/patterns/supervisor-agent`)
 - [ ] Swarm multi-agent (`agents/patterns/swarm-agent`)
+- [ ] Remaining workflow-pattern stubs (`agents/patterns/{prompt-chaining,routing,parallelization,
+      orchestrator-workers,evaluator-optimizer,map-reduce,network-mesh}-agent`)
 - [ ] First RAG-pattern agent using `packages/milvus` — `Settings.milvus_uri` is already wired
       up in `agents-common`, waiting on an agent to use it
 

@@ -4,6 +4,8 @@ One LLM generates a response while another evaluates it and provides feedback, i
 
 ![Evaluator-Optimizer workflow: a Task goes to a Generator producing a Draft, which an Evaluator judges; if it needs refinement, feedback loops back to the Generator for another iteration, and once it meets criteria it proceeds to Output](../../../public/images/agent/evaluator-optimizer.svg)
 
+**Package:** [`agents/patterns/evaluator-optimizer-agent`](../../../agents/patterns/evaluator-optimizer-agent/README.md) (stub)
+
 > **Note:**
 > Per [Anthropic's framing](https://www.anthropic.com/engineering/building-effective-agents), this pattern is *"particularly effective when we have clear evaluation criteria, and when iterative refinement provides measurable value."* Two signs it's a good fit: *"LLM responses can be demonstrably improved when a human articulates their feedback"*, and *"the LLM can provide such feedback"* itself. If neither holds — no clear way to judge "better," or the LLM can't meaningfully critique its own domain — this pattern just adds latency and cost for no measurable gain.
 

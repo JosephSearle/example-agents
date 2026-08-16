@@ -4,6 +4,8 @@ Parallelization runs multiple LLM calls at the same time instead of one after an
 
 ![Parallelization workflow with two variations: Sectioning splits a task into three independent subtasks that run simultaneously and are aggregated; Voting runs three identical attempts of the same task simultaneously and keeps the consensus result](../../../public/images/agent/parallelization.svg)
 
+**Package:** [`agents/patterns/parallelization-agent`](../../../agents/patterns/parallelization-agent/README.md) (stub)
+
 > **Note:**
 > Like [Prompt Chaining](./prompt-chaining) and [Routing](./routing), this is a **workflow**, not an agent: which calls run and how their outputs are combined is fixed in code ahead of time — nothing here is dynamically decided by an LLM mid-flight.
 
