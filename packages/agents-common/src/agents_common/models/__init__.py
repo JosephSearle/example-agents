@@ -38,7 +38,11 @@ def get_chat_model(gateway_route: str, *, settings: Settings | None = None) -> C
     """
     settings = settings or get_settings()
     return ChatOpenAI(
-        api_key=settings.mlflow_tracking_token,  # type: ignore[arg-type]
+        # openai-python rejects an empty-string api_key at construction time (raises
+        # OpenAIError before any request is made) — fall back to a placeholder when the
+        # gateway has no auth enabled, same convention used for the gateway's own upstream
+        # secret in provision_gateway_route.py.
+        api_key=settings.mlflow_tracking_token or "unused",  # type: ignore[arg-type]
         model=gateway_route,
         base_url=settings.mlflow_gateway_base_url,
         # langchain_openai only auto-enables stream_usage when the client uses the default
