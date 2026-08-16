@@ -1,0 +1,66 @@
+name: eval
+
+# Calls a real model and spends tokens, so this is deliberately NOT a required check on every
+# PR — see docs/decisions/0001-tech-stack.md. Trigger it on a schedule, on demand, or by
+# labelling a PR "run-evals" when you want the MLflow GenAI eval suite to gate a change.
+on:
+  schedule:
+    - cron: "0 6 * * *"  # 06:00 UTC nightly
+  workflow_dispatch: {}
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: eval-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    name: MLflow GenAI eval suite
+    if: >
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'run-evals')
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: agents
+          POSTGRES_PASSWORD: agents
+          POSTGRES_DB: agents
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agents"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Settings.postgres_uri is built from these — matches the postgres service block above.
+      POSTGRES_USER: agents
+      POSTGRES_PASSWORD: agents
+      POSTGRES_DB: agents
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      # The only credential this job needs — authenticates tracking, evaluate(), and AI
+      # Gateway model calls alike. No MLFLOW_EXPERIMENT_NAME override: each agent's eval test
+      # logs to its own hardcoded experiment (see e.g. react_agent.EXPERIMENT_NAME).
+      MLFLOW_TRACKING_TOKEN: ${{ secrets.MLFLOW_TRACKING_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Sync workspace
+        run: uv sync --all-packages --frozen
+
+      - name: Run eval suite (logs results to MLflow)
+        run: uv run pytest -m eval -v
