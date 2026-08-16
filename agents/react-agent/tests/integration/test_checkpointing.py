@@ -1,7 +1,9 @@
 """Integration test: the agent's conversation state actually survives a rebuild via Postgres.
 
 This is the point of the checkpointing pattern — run with `pytest -m integration` against a
-live Postgres (`docker compose up -d postgres`).
+live Postgres (`docker compose up -d postgres`). Uses `fake_chat_model` (see conftest.py) rather
+than a real gateway model: this test is about Postgres round-tripping checkpoint state, not
+model behavior, so it shouldn't need network access to a live model to run.
 """
 
 from __future__ import annotations
@@ -18,7 +20,11 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.integration
 
 
-def test_thread_state_persists_across_agent_rebuilds(postgres_checkpointer: PostgresSaver) -> None:
+def test_thread_state_persists_across_agent_rebuilds(
+    postgres_checkpointer: PostgresSaver,
+    fake_chat_model: object,
+) -> None:
+    _ = fake_chat_model  # fixture patches get_chat_model as a side effect; unused directly
     thread_id = str(uuid.uuid4())
     config = {"configurable": {"thread_id": thread_id}}
 
