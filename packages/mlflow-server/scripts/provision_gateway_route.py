@@ -27,6 +27,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 import sys
+from typing import Any
 
 from dotenv import load_dotenv
 import requests
@@ -52,7 +53,7 @@ if MLFLOW_TRACKING_TOKEN:
 _HTTP_BAD_REQUEST = 400
 
 
-def _post(path: str, body: dict) -> dict:
+def _post(path: str, body: dict[str, Any]) -> dict[str, Any]:
     url = f"{MLFLOW_TRACKING_URI}/api/3.0/mlflow/gateway/{path}"
     resp = _session.post(url, json=body, timeout=30)
     if resp.status_code == _HTTP_BAD_REQUEST and "RESOURCE_ALREADY_EXISTS" in resp.text:
@@ -67,7 +68,8 @@ def _post(path: str, body: dict) -> dict:
     if not resp.ok:
         print(f"POST {url} failed ({resp.status_code}): {resp.text}", file=sys.stderr)
         resp.raise_for_status()
-    return resp.json()
+    result: dict[str, Any] = resp.json()
+    return result
 
 
 def main() -> None:
