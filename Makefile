@@ -1,4 +1,4 @@
-.PHONY: sync lint format typecheck test test-unit test-integration test-eval up up-agents down reset logs demo demo-all provision-gateway provision-datasets provision-prompts provision-monitors
+.PHONY: sync lint format typecheck test test-unit test-integration test-eval up up-agents down reset logs demo demo-all provision-gateway provision-datasets provision-prompts provision-monitors wiki-init wiki-update
 
 sync:
 	uv sync --all-packages
@@ -88,3 +88,14 @@ provision-prompts:
 # PRODUCTION_SCORERS entry to push the update.
 provision-monitors:
 	uv run python packages/mlflow-server/scripts/provision_monitors.py
+
+# OpenWiki (https://docs.langchain.com/oss/openwiki/overview): generates/refreshes the
+# openwiki/ Markdown wiki plus the AGENTS.md/CLAUDE.md pointer blocks. Requires the `openwiki`
+# CLI (`npm install -g openwiki`) and provider config in ~/.openwiki/.env — see README.md's
+# OpenWiki section. Routed through the local MLflow AI Gateway (make up), same model access
+# path every agent uses, not a separate provider API key.
+wiki-init:
+	openwiki code --init
+
+wiki-update:
+	openwiki code --update --print

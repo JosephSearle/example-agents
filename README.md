@@ -242,6 +242,54 @@ example-agents/
     └── servers.json                    # pre-registers postgres with pgAdmin on first boot
 ```
 
+## OpenWiki
+
+[OpenWiki](https://docs.langchain.com/oss/openwiki/overview) generates and maintains a Markdown
+wiki under `openwiki/` for coding agents (and humans) to use as durable context, with pointers
+wired into `AGENTS.md`/`CLAUDE.md`. It's a standalone Node CLI, not a package in the `uv`
+workspace — install it once with:
+
+```bash
+npm install -g openwiki
+```
+
+Then configure the provider in `~/.openwiki/.env` (not committed) to route through the local
+MLflow AI Gateway, the same model access path every agent in this repo uses:
+
+```bash
+OPENWIKI_PROVIDER=openai-compatible
+OPENAI_COMPATIBLE_BASE_URL=http://localhost:5000/gateway/mlflow/v1
+OPENAI_COMPATIBLE_API_KEY=<your MLFLOW_TRACKING_TOKEN, or "unused" if the gateway has no auth>
+OPENWIKI_MODEL_ID=gpt-oss-120b
+```
+
+With `make up` running (gateway live), generate or refresh the wiki:
+
+```bash
+make wiki-init     # first run: generates openwiki/, creates AGENTS.md, appends to CLAUDE.md
+make wiki-update    # subsequent runs: refresh after code changes
+```
+
+Edit `openwiki/INSTRUCTIONS.md` to steer scope and priorities — OpenWiki reads it on every
+init/update run but never rewrites it itself. `.openwikiignore` at the repo root excludes
+generated/vendored paths (`.venv/`, `uv.lock`, `mlruns/`, etc.) from the wiki.
+
+A scheduled workflow (`.github/workflows/openwiki-update.yml`) refreshes the wiki weekly and
+opens a PR when it changes. GitHub's hosted runners can't reach a developer's local gateway, so
+that workflow uses a direct `ANTHROPIC_API_KEY` repo secret instead — see the comment at the top
+of the workflow file.
+
+**Known limitation:** `gpt-oss-120b` (the only model currently provisioned on the local gateway)
+is not reliably capable enough for OpenWiki's repo-init workflow — it's a long, multi-step
+agentic loop (build a skeleton, invoke critic/verifier subagents, fill in every page) and the
+model has been observed to stop after a single tool call with no content and no further tool
+calls, producing an effectively empty `openwiki/`. Check the `gateway/gpt-oss-120b` MLflow
+experiment's traces (`localhost:5000`) after a run if `openwiki/` looks sparse — a `finish_reason:
+"stop"` with empty content right after the initial `ls` is this failure mode, not a config bug.
+Provisioning a second gateway route backed by a stronger model (e.g. Anthropic — the gateway
+supports non-OpenAI providers per route, see `provision_gateway_route.py`) and pointing
+`OPENWIKI_MODEL_ID` at it is the fix; not done yet for lack of a second provider key.
+
 ## Roadmap
 
 - [x] Single ReAct agent (`agents/patterns/react-agent`)

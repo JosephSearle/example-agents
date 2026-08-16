@@ -1,0 +1,48 @@
+name: openwiki-update
+
+# Scheduled refresh of the OpenWiki-managed docs (openwiki/, AGENTS.md, CLAUDE.md's managed
+# block). See README.md's OpenWiki section and https://docs.langchain.com/oss/openwiki/automate-updates.
+#
+# Provider note: locally, `make wiki-update` routes through the self-hosted MLflow AI Gateway
+# (see agents_common.models.get_chat_model) like every agent in this repo. Hosted GitHub
+# runners can't reach a developer's localhost:5000 gateway, so this workflow uses a direct
+# ANTHROPIC_API_KEY repo secret instead — a deliberate, documented exception to the
+# "gateway is the only model access path" convention, scoped to this one CI job.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # weekly, Monday 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-wiki:
+    name: refresh openwiki docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install openwiki
+        run: npm install -g openwiki
+
+      - name: Run openwiki update
+        env:
+          OPENWIKI_PROVIDER: anthropic
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENWIKI_TELEMETRY_DISABLED: "1"
+        run: openwiki code --update --print
+
+      - name: Open PR if the wiki changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "docs(openwiki): refresh generated wiki"
+          title: "docs(openwiki): refresh generated wiki"
+          body: Automated OpenWiki refresh — see `openwiki/.last-update.json` for the run that produced this diff.
+          branch: openwiki/scheduled-update
+          add-paths: |
+            openwiki/**
+            AGENTS.md
+            CLAUDE.md

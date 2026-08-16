@@ -13,7 +13,10 @@
       "Bash(docker compose logs*)",
       "Bash(uv run pytest*)",
       "Bash(uv run ruff*)",
-      "Bash(uv run mypy*)"
+      "Bash(uv run mypy*)",
+      "mcp__mlflow-mcp__search_experiments",
+      "mcp__mlflow-mcp__search_traces",
+      "mcp__mlflow-mcp__get_trace"
     ],
     "deny": [
       "Read(**/.env)"
