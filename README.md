@@ -1,6 +1,6 @@
 <div align="center">
 
-# example-agents
+# Example Agents
 
 Reference implementations of the agent patterns this team uses — real, running code, not diagrams.
 
