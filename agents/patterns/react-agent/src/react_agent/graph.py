@@ -11,11 +11,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from agents_common import get_chat_model
-from agents_common.config import get_settings
+from agents_common.prompts import (
+    PRODUCTION_ALIAS,
+    link_prompts_to_trace,
+    load_prompt_version,
+    prompt_text,
+)
 from langchain.agents import create_agent
-import mlflow
-from mlflow import MlflowClient
-from mlflow.genai.prompts import load_prompt
 from pydantic import BaseModel, Field, ValidationError
 
 from react_agent.tools import TOOLS
@@ -25,6 +27,17 @@ if TYPE_CHECKING:
     from langgraph.checkpoint.base import BaseCheckpointSaver
     from langgraph.graph.state import CompiledStateGraph
     from mlflow.entities.model_registry import PromptVersion
+
+__all__ = [
+    "AgentResponse",
+    "build_agent",
+    "extract_response",
+    "invoke_config",
+    "link_prompt_to_trace",
+    "load_system_prompt",
+    "load_system_prompt_version",
+    "prompt_text",
+]
 
 # This agent's own MLflow experiment — see agents_common.observability.configure_mlflow for
 # why this is a per-agent constant rather than a shared name pulled from .env.
@@ -45,7 +58,7 @@ DEFAULT_RECURSION_LIMIT = 25
 # The alias provisioning points at the "live" version of a prompt — see
 # packages/mlflow-server/scripts/provision_prompts.py, which registers this agent's system
 # prompt from packages/mlflow-server/prompts/react-agent.txt and aliases it here.
-_PROMPT_ALIAS = "production"
+_PROMPT_ALIAS = PRODUCTION_ALIAS
 
 
 class AgentResponse(BaseModel):
@@ -61,39 +74,16 @@ class AgentResponse(BaseModel):
 def load_system_prompt_version(*, alias: str = _PROMPT_ALIAS) -> PromptVersion:
     """Fetch this agent's system prompt version from the MLflow prompt registry.
 
-    Sets the tracking URI and active experiment itself rather than assuming
-    `agents_common.configure_mlflow` already ran, so it works whether the caller is `__main__`
-    (which does call it first) or a test that only sets up a checkpointer — and so the loaded
-    prompt version is linked to this agent's experiment (MLflow only links a prompt to whichever
-    experiment is *active* at load time, not implicitly by name match). See
-    packages/mlflow-server/scripts/provision_prompts.py, which registers `EXPERIMENT_NAME`'s
-    prompt from packages/mlflow-server/prompts/react-agent.txt and points `alias` at it — that
-    script must have run (or `make up`, which now runs it automatically) before this can
-    succeed.
+    Thin wrapper around `agents_common.prompts.load_prompt_version` binding this agent's own
+    registry name and experiment. See packages/mlflow-server/scripts/provision_prompts.py, which
+    registers `EXPERIMENT_NAME`'s prompt from packages/mlflow-server/prompts/react-agent.txt and
+    points `alias` at it — that script must have run (or `make up`, which now runs it
+    automatically) before this can succeed.
 
     Returns the full `PromptVersion` (not just its text) so a caller running the agent can pass
     it to `link_prompt_to_trace` afterwards — see `react_agent.__main__` for the intended usage.
     """
-    settings = get_settings()
-    mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
-    mlflow.set_experiment(EXPERIMENT_NAME)
-    return load_prompt(f"prompts:/{EXPERIMENT_NAME}@{alias}")  # type: ignore[no-any-return]
-
-
-def prompt_text(prompt_version: PromptVersion) -> str:
-    """Narrow a `PromptVersion`'s template to plain text.
-
-    `PromptVersion.template` is typed as `str | list[dict]` because MLflow's prompt registry
-    also supports chat-messages-list templates; this agent's prompts are always registered as
-    plain text (see packages/mlflow-server/prompts/react-agent.txt and
-    scripts/provision_prompts.py), so a non-`str` template indicates a registry/provisioning
-    mismatch worth failing loudly on rather than silently mishandling.
-    """
-    template = prompt_version.template
-    if not isinstance(template, str):
-        msg = f"Expected a plain-text prompt template for {prompt_version.name!r}, got {type(template).__name__}"
-        raise TypeError(msg)
-    return template
+    return load_prompt_version(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME, alias=alias)
 
 
 def load_system_prompt(*, alias: str = _PROMPT_ALIAS) -> str:
@@ -108,18 +98,10 @@ def load_system_prompt(*, alias: str = _PROMPT_ALIAS) -> str:
 def link_prompt_to_trace(prompt_version: PromptVersion, trace_id: str | None) -> None:
     """Link a prompt version to a trace so the MLflow UI's trace view shows it under "Prompts".
 
-    `trace_id` is typically `mlflow.get_last_active_trace_id()`, called right after
-    `agent.invoke(...)` returns (autologging via `mlflow.langchain.autolog()` — see
-    `agents_common.observability.configure_mlflow` — creates one trace per invocation). A `None`
-    trace_id (autologging disabled, or nothing traced yet) is a no-op rather than an error, since
-    linking is an enhancement to an already-successful invocation, not something that invocation
-    should fail over.
+    Thin wrapper around `agents_common.prompts.link_prompts_to_trace` for this agent's single
+    system prompt — see that function's docstring for `trace_id` semantics.
     """
-    if trace_id is None:
-        return
-    MlflowClient().link_prompt_versions_to_trace(
-        prompt_versions=[prompt_version], trace_id=trace_id
-    )
+    link_prompts_to_trace([prompt_version], trace_id)
 
 
 def build_agent(

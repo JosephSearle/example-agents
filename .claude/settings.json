@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make lint)",
+      "Bash(make format)",
+      "Bash(make typecheck)",
+      "Bash(make test-unit)",
+      "Bash(make test-integration)",
+      "Bash(make test)",
+      "Bash(make sync)",
+      "Bash(make demo)",
+      "Bash(docker compose ps*)",
+      "Bash(docker compose logs*)",
+      "Bash(uv run pytest*)",
+      "Bash(uv run ruff*)",
+      "Bash(uv run mypy*)"
+    ],
+    "deny": [
+      "Read(**/.env)"
+    ]
+  }
+}
