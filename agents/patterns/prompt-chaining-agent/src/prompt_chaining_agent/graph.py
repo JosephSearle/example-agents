@@ -12,16 +12,30 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, TypedDict
 
 from agents_common import get_chat_model
-from agents_common.config import get_settings
+from agents_common.prompts import (
+    PRODUCTION_ALIAS,
+    link_prompts_to_trace as _link_prompts_to_trace,
+    load_prompt_version,
+    prompt_text,
+)
 from langgraph.graph import END, START, StateGraph
-import mlflow
-from mlflow import MlflowClient
-from mlflow.genai.prompts import load_prompt
 
 if TYPE_CHECKING:
     from langgraph.checkpoint.base import BaseCheckpointSaver
     from langgraph.graph.state import CompiledStateGraph
     from mlflow.entities.model_registry import PromptVersion
+
+__all__ = [
+    "STEPS",
+    "ChainState",
+    "build_chain",
+    "gate_check_outline",
+    "invoke_config",
+    "link_prompts_to_trace",
+    "load_step_prompt",
+    "load_step_prompt_version",
+    "prompt_text",
+]
 
 # This agent's own MLflow experiment — see agents_common.observability.configure_mlflow.
 EXPERIMENT_NAME = "prompt-chaining-agent"
@@ -33,7 +47,7 @@ GATEWAY_ROUTE = "gpt-oss-120b"
 # The alias provisioning points at the "live" version of each step prompt — see
 # packages/mlflow-server/scripts/provision_prompts.py, which registers this agent's three step
 # prompts from packages/mlflow-server/prompts/prompt-chaining-agent/*.txt.
-_PROMPT_ALIAS = "production"
+_PROMPT_ALIAS = PRODUCTION_ALIAS
 
 STEPS = ("outline", "draft", "polish")
 
@@ -55,31 +69,22 @@ class ChainState(TypedDict):
 def load_step_prompt_version(step: str, *, alias: str = _PROMPT_ALIAS) -> PromptVersion:
     """Fetch one step's prompt version from the MLflow prompt registry.
 
-    Generalizes react_agent.graph.load_system_prompt_version to this agent's multiple step
-    prompts — each step is registered as its own prompt name (`<EXPERIMENT_NAME>-<step>`) under
-    this agent's single experiment; see provision_prompts.py's per-subdirectory provisioning.
+    Thin wrapper around `agents_common.prompts.load_prompt_version`, binding this agent's
+    per-step registry name (`<EXPERIMENT_NAME>-<step>`) and experiment — each step is registered
+    as its own prompt name under this agent's single experiment; see provision_prompts.py's
+    per-subdirectory provisioning.
 
     Returns the full `PromptVersion` (not just its text) so a caller can pass it to
-    `link_prompt_to_trace` afterwards — see `prompt_chaining_agent.__main__` for the intended
+    `link_prompts_to_trace` afterwards — see `prompt_chaining_agent.__main__` for the intended
     usage.
 
     Args:
         step: One of "outline", "draft", "polish".
         alias: Prompt registry alias to load. Defaults to the production alias.
     """
-    settings = get_settings()
-    mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
-    mlflow.set_experiment(EXPERIMENT_NAME)
-    return load_prompt(f"prompts:/{EXPERIMENT_NAME}-{step}@{alias}")  # type: ignore[no-any-return]
-
-
-def prompt_text(prompt_version: PromptVersion) -> str:
-    """Narrow a `PromptVersion`'s template to plain text — see react_agent.graph.prompt_text."""
-    template = prompt_version.template
-    if not isinstance(template, str):
-        msg = f"Expected a plain-text prompt template for {prompt_version.name!r}, got {type(template).__name__}"
-        raise TypeError(msg)
-    return template
+    return load_prompt_version(
+        f"{EXPERIMENT_NAME}-{step}", experiment_name=EXPERIMENT_NAME, alias=alias
+    )
 
 
 def load_step_prompt(step: str, *, alias: str = _PROMPT_ALIAS) -> str:
@@ -92,18 +97,12 @@ def load_step_prompt(step: str, *, alias: str = _PROMPT_ALIAS) -> str:
 
 
 def link_prompts_to_trace(prompt_versions: dict[str, PromptVersion], trace_id: str | None) -> None:
-    """Link this invocation's step prompt versions to a trace — see react_agent.graph.link_prompt_to_trace.
+    """Link this invocation's step prompt versions to a trace.
 
-    `trace_id` is typically `mlflow.get_last_active_trace_id()`, called right after
-    `chain.invoke(...)` returns. A `None` trace_id (autologging disabled, or nothing traced yet)
-    is a no-op rather than an error, since linking is an enhancement to an already-successful
-    invocation, not something that invocation should fail over.
+    Thin wrapper around `agents_common.prompts.link_prompts_to_trace` that accepts this agent's
+    step-keyed dict shape — see that function's docstring for `trace_id` semantics.
     """
-    if trace_id is None:
-        return
-    MlflowClient().link_prompt_versions_to_trace(
-        prompt_versions=list(prompt_versions.values()), trace_id=trace_id
-    )
+    _link_prompts_to_trace(list(prompt_versions.values()), trace_id)
 
 
 def gate_check_outline(outline: str) -> None:
