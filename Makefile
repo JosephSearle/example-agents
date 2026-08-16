@@ -36,7 +36,7 @@ logs:
 	docker compose logs -f
 
 demo:
-	cd agents/react-agent && uv run react-agent "What's 47 * 12, and does that number mean anything in dev slang?"
+	cd agents/patterns/react-agent && uv run react-agent "What's 47 * 12, and does that number mean anything in dev slang?"
 
 # One-off: provisions the MLflow AI Gateway route agent code calls (see .env.example's
 # SELFHOSTED_MODEL_* / GATEWAY_ROUTE_NAME vars). Run once after `make up`, before running

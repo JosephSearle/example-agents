@@ -113,7 +113,7 @@ make provision-datasets
 make demo
 ```
 
-`make demo` runs `agents/react-agent` end to end against whatever model your MLflow AI Gateway
+`make demo` runs `agents/patterns/react-agent` end to end against whatever model your MLflow AI Gateway
 route resolves to, and prints its structured `AgentResponse` (`answer` + `used_tools`) — the
 exact text depends on the model behind your gateway route, so it isn't reproduced here.
 
@@ -136,7 +136,7 @@ make up-agents   # docker compose --profile agents up --build
 ```
 
 Or run a single agent directly on the host instead of through Docker — see
-[`agents/react-agent/README.md`](agents/react-agent/README.md) (and its equivalent for any
+[`agents/patterns/react-agent/README.md`](agents/patterns/react-agent/README.md) (and its equivalent for any
 pattern you add) for the exact command.
 
 ## Configuration
@@ -173,10 +173,9 @@ non-local.
 
 | Pattern | Framework tier | Status | Path |
 |---|---|---|---|
-| Single ReAct agent | Tier 1 — `create_agent` | **Implemented** | `agents/react-agent` |
-| Supervisor multi-agent | Tier 2 — LangGraph + `langgraph-supervisor` | Stub | `agents/supervisor-agent` |
-| Swarm multi-agent | Tier 2 — LangGraph + `langgraph-swarm` | Stub | `agents/swarm-agent` |
-| Deep agent | Tier 3 — `deepagents` | Stub | `agents/deep-agent` |
+| Single ReAct agent | Tier 1 — `create_agent` | **Implemented** | `agents/patterns/react-agent` |
+| Supervisor multi-agent | Tier 2 — LangGraph + `langgraph-supervisor` | Stub | `agents/patterns/supervisor-agent` |
+| Swarm multi-agent | Tier 2 — LangGraph + `langgraph-swarm` | Stub | `agents/patterns/swarm-agent` |
 
 See **[docs/decisions/0001-tech-stack.md](docs/decisions/0001-tech-stack.md)** for the full
 reasoning behind the tiering and every other stack choice — this README is the quick-start,
@@ -184,7 +183,7 @@ that doc is the "why."
 
 Pattern-specific content (how a given agent works, what it demonstrates, how to run or test it
 directly on the host) lives in that agent's own README, not here — see
-[`agents/react-agent/README.md`](agents/react-agent/README.md) for the one implemented pattern
+[`agents/patterns/react-agent/README.md`](agents/patterns/react-agent/README.md) for the one implemented pattern
 today.
 
 ## Repo layout
@@ -194,10 +193,11 @@ example-agents/
 ├── docs/decisions/0001-tech-stack.md   # the ADR — read this first
 ├── docker-compose.yml                  # postgres/pgadmin + mlflow + milvus/attu + agent services
 ├── agents/
-│   ├── react-agent/                    # tier 1 — implemented
-│   ├── supervisor-agent/               # tier 2 — stub
-│   ├── swarm-agent/                    # tier 2 — stub
-│   └── deep-agent/                     # tier 3 — stub
+│   ├── patterns/                       # reusable pattern implementations
+│   │   ├── react-agent/                # tier 1 — implemented
+│   │   ├── supervisor-agent/           # tier 2 — stub
+│   │   └── swarm-agent/                # tier 2 — stub
+│   └── examples/                       # applied demos composing patterns above
 ├── packages/
 │   ├── agents-common/                  # shared checkpointing/observability/config
 │   ├── mlflow-server/                  # self-hosted MLflow tracking server image
@@ -211,10 +211,9 @@ example-agents/
 
 ## Roadmap
 
-- [x] Single ReAct agent (`agents/react-agent`)
-- [ ] Supervisor multi-agent (`agents/supervisor-agent`)
-- [ ] Swarm multi-agent (`agents/swarm-agent`)
-- [ ] Deep agent (`agents/deep-agent`)
+- [x] Single ReAct agent (`agents/patterns/react-agent`)
+- [ ] Supervisor multi-agent (`agents/patterns/supervisor-agent`)
+- [ ] Swarm multi-agent (`agents/patterns/swarm-agent`)
 - [ ] First RAG-pattern agent using `packages/milvus` — `Settings.milvus_uri` is already wired
       up in `agents-common`, waiting on an agent to use it
 
@@ -225,7 +224,7 @@ time.
 
 1. Pick a tier from the table above and be able to justify it in one sentence (see the ADR's
    framework-tiering decision).
-2. `uv init --lib --python 3.12 agents/<name>-agent` (or copy `agents/react-agent`'s layout).
+2. `uv init --lib --python 3.12 agents/patterns/<name>-agent` (or copy `agents/patterns/react-agent`'s layout).
 3. Depend on `agents-common` for checkpointing/observability/config — don't re-implement it.
 4. Ship `tests/unit`, `tests/integration`, and `tests/evals` from day one, same as
    `react-agent`.

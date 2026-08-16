@@ -39,9 +39,9 @@ work identically at every level.
 
 | Tier | Framework | Use for | Example in this repo |
 |---|---|---|---|
-| 1 | `langchain.agents.create_agent` (LangChain v1) | A single agent with tools in a ReAct loop. The default. Reach for this first, every time, and only leave it when you hit something it can't express. | `agents/react-agent` (implemented) |
-| 2 | Raw LangGraph (`StateGraph`, `langgraph-supervisor`, `langgraph-swarm`) | Multiple cooperating agents: a supervisor routing to specialist subgraphs, or peer agents handing off via `Command(goto=...)`. Needed when one agent's tool-loop can't express the control flow, or you need custom state, HITL interrupts, or explicit inter-agent contracts. | `agents/supervisor-agent`, `agents/swarm-agent` (stubs, follow-up PRs) |
-| 3 | `deepagents` | Long-horizon, planning-heavy work with a virtual filesystem and spawned subagents — the ITZ-19739 shape of problem (multi-turn PR review, iterating on generated tests, proactive follow-up over days not minutes). Not used for anything that fits in tiers 1–2; its planning/filesystem/subagent machinery is overhead you don't want to pay for a simple tool-calling agent. | `agents/deep-agent` (stub, follow-up PR) |
+| 1 | `langchain.agents.create_agent` (LangChain v1) | A single agent with tools in a ReAct loop. The default. Reach for this first, every time, and only leave it when you hit something it can't express. | `agents/patterns/react-agent` (implemented) |
+| 2 | Raw LangGraph (`StateGraph`, `langgraph-supervisor`, `langgraph-swarm`) | Multiple cooperating agents: a supervisor routing to specialist subgraphs, or peer agents handing off via `Command(goto=...)`. Needed when one agent's tool-loop can't express the control flow, or you need custom state, HITL interrupts, or explicit inter-agent contracts. | `agents/patterns/supervisor-agent`, `agents/patterns/swarm-agent` (stubs, follow-up PRs) |
+| 3 | `deepagents` | Long-horizon, planning-heavy work with a virtual filesystem and spawned subagents — the ITZ-19739 shape of problem (multi-turn PR review, iterating on generated tests, proactive follow-up over days not minutes). Not used for anything that fits in tiers 1–2; its planning/filesystem/subagent machinery is overhead you don't want to pay for a simple tool-calling agent. | *(none yet — this is a framework choice for a problem shape, not a standalone pattern with its own doc; add an example under `agents/patterns/` once a real tier-3 use case shows up)* |
 
 **Rule of thumb when adding a new example agent:** start writing it as `create_agent` (tier 1).
 Only move to tier 2 if you can point at a concrete requirement — multiple domains with
@@ -80,7 +80,7 @@ routing. Only reach for deepagents if the task is long-horizon and planning-firs
   "react-agent"`). `react-agent`, `supervisor-agent`, etc. are meaningfully different systems;
   one shared `example-agents` experiment would mix their runs and metrics into one
   undifferentiated stream, which defeats the point of trending eval quality per pattern.
-- **Evals:** `mlflow.genai.evaluate()` is the eval-suite harness (see `agents/react-agent/tests/evals`
+- **Evals:** `mlflow.genai.evaluate()` is the eval-suite harness (see `agents/patterns/react-agent/tests/evals`
   for the test code itself) — LLM-as-judge and deterministic scorers, run against a fixed
   dataset, logged as a run in that agent's own experiment so eval history is queryable over time,
   not just pass/fail in CI logs. The dataset itself lives in MLflow's dataset registry at
@@ -212,7 +212,7 @@ profiles:
 ## Containerization
 
 `docker-compose.yml` at the repo root runs the whole stack for local development:
-`postgres` → `mlflow` (`packages/mlflow-server`) → agent services (`agents/react-agent`, ...).
+`postgres` → `mlflow` (`packages/mlflow-server`) → agent services (`agents/patterns/react-agent`, ...).
 Each agent has its own multi-stage `Dockerfile` built with `uv sync --frozen --no-dev`, so an
 agent image only ever contains its own dependencies, not the whole workspace's.
 

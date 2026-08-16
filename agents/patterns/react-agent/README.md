@@ -38,8 +38,8 @@ graph LR
 ```bash
 # From the repo root, with the workspace synced (`uv sync`) and Postgres + MLflow running
 # (`docker compose up postgres mlflow`):
-cd agents/react-agent
-cp ../../.env.example ../../.env   # fill in MLFLOW_TRACKING_TOKEN
+cd agents/patterns/react-agent
+cp ../../../.env.example ../../../.env   # fill in MLFLOW_TRACKING_TOKEN
 uv run react-agent "What's 47 * 12, and then look up what that number means in dev slang?"
 ```
 
