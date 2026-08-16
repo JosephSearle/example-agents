@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "example-agents (docker compose)",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "agents",
+      "Username": "agents",
+      "SSLMode": "prefer",
+      "Comment": "Pre-registered by pgAdmin's servers.json import — see docker-compose.yml. If you change POSTGRES_USER/POSTGRES_DB in .env from their defaults, update Username/MaintenanceDB here to match, or just register a second server by hand."
+    }
+  }
+}
