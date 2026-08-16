@@ -9,6 +9,12 @@ past what this tier can express — see `docs/decisions/0001-tech-stack.md`.
 
 - `create_agent` with a `system_prompt`, typed tools, and a `response_format` for structured
   output (see `src/react_agent/graph.py`).
+- Registry-backed prompts: the system prompt isn't a Python string — it's checked into
+  `packages/mlflow-server/prompts/react-agent.txt`, provisioned into MLflow's prompt registry
+  (`make provision-prompts`, which also runs automatically via `make up`), and fetched at
+  runtime via `mlflow.genai.load_prompt("prompts:/react-agent@production")`
+  (`load_system_prompt()` in `src/react_agent/graph.py`). Editing the prompt is a file change +
+  re-provision, not a code change.
 - Durable execution: the graph is compiled with a Postgres `checkpointer`, so a conversation
   (`thread_id`) survives process restarts — resume it and the agent picks up where it left off.
 - Model access via the MLflow AI Gateway (`GATEWAY_ROUTE` in `src/react_agent/graph.py`) rather

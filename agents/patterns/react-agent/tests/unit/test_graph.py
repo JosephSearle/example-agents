@@ -9,9 +9,16 @@ from react_agent.graph import (
     AgentResponse,
     extract_response,
     invoke_config,
+    link_prompt_to_trace,
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_link_prompt_to_trace_is_a_noop_without_a_trace_id() -> None:
+    # No trace_id (e.g. autologging produced nothing to link against) shouldn't raise or attempt
+    # any MLflow call — exercised without a live MLflow instance, unlike the "real" linking path.
+    link_prompt_to_trace(prompt_version=object(), trace_id=None)  # type: ignore[arg-type]
 
 
 def test_invoke_config_applies_default_recursion_limit() -> None:

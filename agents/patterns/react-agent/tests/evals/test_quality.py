@@ -39,6 +39,9 @@ from react_agent.graph import (
     build_agent,
     extract_response,
     invoke_config,
+    link_prompt_to_trace,
+    load_system_prompt_version,
+    prompt_text,
 )
 
 pytestmark = pytest.mark.eval
@@ -47,10 +50,12 @@ _JUDGE_MODEL_URI = f"openai:/{GATEWAY_ROUTE}"
 
 
 def _predict_fn(question: str) -> str:
+    prompt_version = load_system_prompt_version()
     checkpointer = InMemorySaver()
-    agent = build_agent(checkpointer=checkpointer)
+    agent = build_agent(checkpointer=checkpointer, system_prompt=prompt_text(prompt_version))
     config = invoke_config(str(uuid.uuid4()))
     result = agent.invoke({"messages": [{"role": "user", "content": question}]}, config=config)  # type: ignore[arg-type]
+    link_prompt_to_trace(prompt_version, mlflow.get_last_active_trace_id())
     return extract_response(result).answer
 
 
