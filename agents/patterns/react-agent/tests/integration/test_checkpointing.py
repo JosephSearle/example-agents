@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 import uuid
 
 import pytest
-from react_agent.graph import build_agent
+from react_agent.graph import build_agent, invoke_config
 
 if TYPE_CHECKING:
     from langgraph.checkpoint.postgres import PostgresSaver
@@ -26,7 +26,7 @@ def test_thread_state_persists_across_agent_rebuilds(
 ) -> None:
     _ = fake_chat_model  # fixture patches get_chat_model as a side effect; unused directly
     thread_id = str(uuid.uuid4())
-    config = {"configurable": {"thread_id": thread_id}}
+    config = invoke_config(thread_id)
 
     first_agent = build_agent(checkpointer=postgres_checkpointer)
     first_agent.invoke(

@@ -4,9 +4,27 @@ from __future__ import annotations
 
 from langchain_core.messages import AIMessage
 import pytest
-from react_agent.graph import AgentResponse, extract_response
+from react_agent.graph import (
+    DEFAULT_RECURSION_LIMIT,
+    AgentResponse,
+    extract_response,
+    invoke_config,
+)
 
 pytestmark = pytest.mark.unit
+
+
+def test_invoke_config_applies_default_recursion_limit() -> None:
+    config = invoke_config("some-thread-id")
+
+    assert config["configurable"]["thread_id"] == "some-thread-id"
+    assert config["recursion_limit"] == DEFAULT_RECURSION_LIMIT
+
+
+def test_invoke_config_accepts_recursion_limit_override() -> None:
+    config = invoke_config("some-thread-id", recursion_limit=5)
+
+    assert config["recursion_limit"] == 5
 
 
 def test_extract_response_prefers_structured_response() -> None:

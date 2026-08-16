@@ -33,6 +33,29 @@ graph LR
     agent -->|done| response[Structured AgentResponse]
 ```
 
+The loop's length isn't fixed in code — the model decides how many Thought/Action/Observation
+cycles it needs, up to `DEFAULT_RECURSION_LIMIT` (see `src/react_agent/graph.py`), which caps it
+so a confused model or an unhelpful tool result can't loop forever.
+
+## Worked example
+
+A single `.invoke()` call for `"What's 47 * 12, and then look up what that number means in dev
+slang?"` runs the whole Thought → Action → Observation loop with no manually orchestrated
+"call the tool, then reason" code:
+
+1. **Thought**: the model reasons it needs to compute `47 * 12` before it can look anything up.
+2. **Action**: it calls `calculator("47 * 12")`.
+3. **Observation**: the tool returns `"564"`.
+4. **Thought**: the model reasons it now has the number and should check what it means in dev
+   slang.
+5. **Action**: it calls `lookup_glossary_term("564")`.
+6. **Observation**: the tool returns the glossary definition (or "no entry found").
+7. **Thought → Final Answer**: the model decides it has enough to answer and returns a
+   structured `AgentResponse(answer=..., used_tools=["calculator", "lookup_glossary_term"])`.
+
+All seven steps happen inside one `agent.invoke(...)` call in `src/react_agent/__main__.py` —
+the number and order of tool calls is decided by the model at runtime, not by this repo's code.
+
 ## Run it
 
 ```bash

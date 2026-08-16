@@ -3,15 +3,11 @@
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING
 import uuid
 
 from agents_common import configure_mlflow, get_checkpointer
 
-from react_agent.graph import EXPERIMENT_NAME, build_agent, extract_response
-
-if TYPE_CHECKING:
-    from langchain_core.runnables import RunnableConfig
+from react_agent.graph import EXPERIMENT_NAME, build_agent, extract_response, invoke_config
 
 _MIN_ARGC = 2
 
@@ -27,7 +23,7 @@ def main() -> None:
 
     with get_checkpointer() as checkpointer:
         agent = build_agent(checkpointer=checkpointer)
-        config: RunnableConfig = {"configurable": {"thread_id": str(uuid.uuid4())}}
+        config = invoke_config(str(uuid.uuid4()))
         result = agent.invoke({"messages": [{"role": "user", "content": message}]}, config=config)
         print(extract_response(result))
 

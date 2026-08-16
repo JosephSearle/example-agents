@@ -18,6 +18,7 @@ from react_agent.prompts import SYSTEM_PROMPT
 from react_agent.tools import TOOLS
 
 if TYPE_CHECKING:
+    from langchain_core.runnables import RunnableConfig
     from langgraph.checkpoint.base import BaseCheckpointSaver
     from langgraph.graph.state import CompiledStateGraph
 
@@ -29,6 +30,13 @@ EXPERIMENT_NAME = "react-agent"
 # packages/mlflow-server/scripts/provision_gateway_route.py against our self-hosted
 # OpenAI-compatible model. See agents_common.models.get_chat_model.
 GATEWAY_ROUTE = "gpt-oss-120b"
+
+# The ReAct loop's length isn't fixed in code — the model decides how many Thought/Action/
+# Observation cycles it needs. Without a cap, a confused model (or a broken tool feeding it
+# unhelpful observations) can loop indefinitely. LangGraph enforces this as a step count on the
+# compiled graph, set per-invocation via `config`, not on `create_agent` itself — see
+# `invoke_config()` below.
+DEFAULT_RECURSION_LIMIT = 25
 
 
 class AgentResponse(BaseModel):
@@ -71,6 +79,22 @@ def build_agent(
         response_format=AgentResponse,
         checkpointer=checkpointer,
     )
+
+
+def invoke_config(
+    thread_id: str,
+    *,
+    recursion_limit: int = DEFAULT_RECURSION_LIMIT,
+) -> RunnableConfig:
+    """Build the `.invoke()` config for a thread, with the recursion cap applied.
+
+    Every call site that runs the compiled graph should route through this so the cap in
+    `DEFAULT_RECURSION_LIMIT` is actually enforced rather than silently left unbounded.
+    """
+    return {
+        "configurable": {"thread_id": thread_id},
+        "recursion_limit": recursion_limit,
+    }
 
 
 def extract_response(result: dict[str, Any]) -> AgentResponse:

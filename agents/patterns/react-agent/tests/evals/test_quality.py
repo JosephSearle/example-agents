@@ -33,7 +33,13 @@ import mlflow
 from mlflow.genai.datasets import get_dataset
 from mlflow.genai.scorers import Correctness, Guidelines
 import pytest
-from react_agent.graph import EXPERIMENT_NAME, GATEWAY_ROUTE, build_agent, extract_response
+from react_agent.graph import (
+    EXPERIMENT_NAME,
+    GATEWAY_ROUTE,
+    build_agent,
+    extract_response,
+    invoke_config,
+)
 
 pytestmark = pytest.mark.eval
 
@@ -43,7 +49,7 @@ _JUDGE_MODEL_URI = f"openai:/{GATEWAY_ROUTE}"
 def _predict_fn(question: str) -> str:
     checkpointer = InMemorySaver()
     agent = build_agent(checkpointer=checkpointer)
-    config = {"configurable": {"thread_id": str(uuid.uuid4())}}
+    config = invoke_config(str(uuid.uuid4()))
     result = agent.invoke({"messages": [{"role": "user", "content": question}]}, config=config)  # type: ignore[arg-type]
     return extract_response(result).answer
 
