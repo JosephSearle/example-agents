@@ -92,7 +92,10 @@ throughout instead of the raw `uv`/`docker compose` invocations.
 #    the SELFHOSTED_MODEL_* values for the model your gateway route should call
 cp .env.example .env
 
-# 2. Start the core stack: Postgres + pgAdmin, MLflow, and Milvus + Attu
+# 2. Start the core stack: Postgres + pgAdmin, MLflow (+ its MCP server), and Milvus + Attu
+#    (+ its MCP server) — also runs every provision-* step below automatically, including
+#    registering mlflow-mcp/milvus-mcp/docs-langchain/reference-langchain in MLflow's MCP
+#    Registry (see "MCP servers via MLflow's MCP Registry" below)
 make up
 open http://localhost:5050   # pgAdmin — the postgres service is pre-registered (servers.json),
                               # just enter the password from POSTGRES_PASSWORD when prompted
@@ -184,6 +187,21 @@ writing a new eval dataset case, or just read the weekly scheduled report as a s
 spot-check. Like `eval.yml`, it's not a required PR check — it spends tokens and its output is
 for a human to read, not a pass/fail signal.
 
+#### MCP servers via MLflow's MCP Registry
+
+`experiment_analysis_agent.graph` resolves its `mlflow-mcp` connection dynamically through
+[MLflow's MCP Registry](https://mlflow.org/docs/latest/genai/mcp-registry/) — `.mcp.json`'s
+`mlflow-mcp`/`milvus-mcp`/`docs-langchain`/`reference-langchain` entries are all registered
+there too (`make provision-mcp-registry`, which `make up` runs automatically), so any agent can
+look one up via `mlflow.genai.search_mcp_access_endpoints` instead of hardcoding a launch
+command. `mlflow-mcp` and `milvus-mcp` needed converting from their stdio-only/localhost-only
+CLIs into persistent streamable-http services first (`mlflow-mcp` and `milvus-mcp`
+docker-compose services, `packages/mlflow-server/mlflow_mcp_server.py` /
+`packages/milvus/milvus_mcp_server.py`) — MLflow's `create_mcp_access_endpoint` only accepts
+`transport_type="streamable-http"`/`"sse"`, confirmed against the installed package. See
+[`agents_common.mcp_servers`](packages/agents-common/src/agents_common/mcp_servers/__init__.py)
+and `docs/decisions/0001-tech-stack.md` for the full investigation.
+
 ### Run everything containerized
 
 ```bash
@@ -266,12 +284,14 @@ example-agents/
 │   └── examples/                       # applied demos composing patterns above
 │       └── experiment-analysis-agent/  # tier 3 (deepagents) — MLflow AI Issue Discovery
 ├── packages/
-│   ├── agents-common/                  # shared checkpointing/observability/config
+│   ├── agents-common/                  # shared checkpointing/observability/config/mcp_servers
 │   ├── mlflow-server/                  # self-hosted MLflow tracking server image
+│   │   ├── mlflow_mcp_server.py         # mlflow-mcp over streamable-http (its own compose service)
 │   │   ├── scripts/                    # provision_gateway_route.py, provision_datasets.py,
-│   │   │                               # provision_monitors.py
+│   │   │                               # provision_monitors.py, provision_mcp_registry.py
 │   │   └── datasets/                   # git-tracked eval dataset seed JSONL, one per agent
 │   └── milvus/                         # self-hosted Milvus standalone + Attu (compose wiring)
+│       └── milvus_mcp_server.py         # milvus-mcp over streamable-http (its own compose service)
 └── infra/postgres/
     ├── init.sql                        # creates the second (mlflow) logical database
     └── servers.json                    # pre-registers postgres with pgAdmin on first boot

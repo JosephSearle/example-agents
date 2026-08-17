@@ -1,2 +1,2 @@
-mlflow[genai]>=3.1
+mlflow[genai,mcp]>=3.1
 psycopg2-binary>=2.9

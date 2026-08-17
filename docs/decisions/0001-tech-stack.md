@@ -49,6 +49,48 @@ different tools/prompts, a workflow that can't be one ReAct loop, or a need for 
 routing. Only reach for deepagents if the task is long-horizon and planning-first, not just
 "has several steps."
 
+### MCP server connections: MLflow's MCP Registry, not hardcoded launch commands
+
+`experiment-analysis-agent` was the repo's first agent to consume an MCP server at runtime
+(`mlflow-mcp`, via `langchain-mcp-adapters`). It initially hardcoded that server's stdio launch
+command, duplicating `.mcp.json`'s declaration of the same server for interactive Claude Code
+use. Fixing that duplication went through two passes:
+
+1. **First pass**: extract the shared stdio command/args into one Python constant both
+   `.mcp.json` and the agent could point at. Worked, but still a hardcoded launch command
+   somewhere.
+2. **Second pass** (current): resolve every MCP server connection dynamically via
+   [MLflow's MCP Registry](https://mlflow.org/docs/latest/genai/mcp-registry/) —
+   `mlflow.genai.search_mcp_access_endpoints` at runtime, `.mcp.json` and agent code both
+   pointing at the same registered endpoint instead of either hardcoding anything.
+
+This forced a real infrastructure change, confirmed against the installed `mlflow==3.15.1` API
+(not just its docs, which were incomplete on these points):
+
+- `mlflow.genai.create_mcp_access_endpoint`'s `transport_type` only accepts
+  `"streamable-http"`/`"sse"` — never `"stdio"`.
+- `mlflow mcp run` (the CLI `.mcp.json` used) only speaks stdio, no transport flag.
+- `mcp-server-milvus`'s own `--streamable-http` CLI mode hard-codes `host="localhost"` with no
+  override — unreachable from any other container.
+- The registry's REST API is pure catalog metadata; it doesn't proxy or host live MCP traffic.
+  Registering a server doesn't make it reachable — it only catalogs a pointer to wherever it
+  already is reachable.
+
+So both `mlflow-mcp` and `milvus-mcp` needed converting into persistent streamable-http services
+first (`packages/mlflow-server/mlflow_mcp_server.py`, `packages/milvus/milvus_mcp_server.py` —
+each bypasses its respective CLI, calling the underlying `FastMCP` instance directly with
+`host="0.0.0.0"`), each its own docker-compose service, before `packages/mlflow-server/scripts/
+provision_mcp_registry.py` had anything connectable to register. `docs-langchain`/
+`reference-langchain` needed no such conversion — already remote, third-party-hosted HTTP
+servers; registering them is pure cataloging.
+
+All four of `.mcp.json`'s servers are registered this way, not just the one `experiment-
+analysis-agent` currently consumes — so the next agent that needs one (e.g. the planned
+RAG-pattern agent using Milvus) resolves a connection instead of reintroducing a hardcoded
+launch command on day one. See `agents_common.mcp_servers` for the resolver and
+`provision_mcp_registry.py`'s docstring for the registered server list and the
+host/container-reachability known-gap this setup still has.
+
 ## Language, packaging, monorepo layout
 
 - **Python 3.12**, managed with **uv**. One **uv workspace** at the repo root

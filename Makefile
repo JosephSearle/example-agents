@@ -1,4 +1,4 @@
-.PHONY: sync lint format typecheck test test-unit test-integration test-eval up up-agents down reset logs demo demo-all provision-gateway provision-datasets provision-prompts provision-monitors analyze-experiment
+.PHONY: sync lint format typecheck test test-unit test-integration test-eval up up-agents down reset logs demo demo-all provision-gateway provision-datasets provision-prompts provision-monitors provision-mcp-registry analyze-experiment
 
 sync:
 	uv sync --all-packages
@@ -24,11 +24,12 @@ test-eval:
 test: test-unit test-integration
 
 up:
-	docker compose up -d --wait postgres pgadmin mlflow milvus-etcd milvus-minio milvus-standalone attu
+	docker compose up -d --wait postgres pgadmin mlflow mlflow-mcp milvus-etcd milvus-minio milvus-standalone milvus-mcp attu
 	$(MAKE) provision-gateway
 	$(MAKE) provision-prompts
 	$(MAKE) provision-datasets
 	$(MAKE) provision-monitors
+	$(MAKE) provision-mcp-registry
 
 up-agents:
 	docker compose --profile agents up --build
@@ -91,6 +92,18 @@ provision-prompts:
 # PRODUCTION_SCORERS entry to push the update.
 provision-monitors:
 	uv run python packages/mlflow-server/scripts/provision_monitors.py
+
+# Idempotent, safe to re-run: registers every server in .mcp.json (mlflow-mcp, milvus-mcp,
+# docs-langchain, reference-langchain) in MLflow's MCP Registry, creates each one's access
+# endpoint, and refreshes its discovered-tools snapshot — see
+# packages/mlflow-server/scripts/provision_mcp_registry.py and agents_common.mcp_servers, which
+# resolves these at runtime. `--with 'mlflow[mcp]>=3.5.1'` is ephemeral (not a permanent
+# dependency of any agent package) — only this script's tool-discovery step needs it. Runs
+# automatically as part of `make up` (needs `mlflow`, `mlflow-mcp`, and `milvus-mcp` healthy,
+# hence chained after `docker compose up --wait`) since experiment-analysis-agent depends on it
+# to function at all, not an opt-in like `provision-monitors`.
+provision-mcp-registry:
+	uv run --with 'mlflow[mcp]>=3.5.1' python packages/mlflow-server/scripts/provision_mcp_registry.py
 
 # Runs MLflow AI Issue Discovery against one agent's experiment via
 # agents/examples/experiment-analysis-agent — this repo's Tier 3 (`deepagents`) pattern,

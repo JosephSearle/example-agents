@@ -57,6 +57,13 @@ services:
     environment:
       MLFLOW_BACKEND_STORE_URI: postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD}@postgres:5432/mlflow
       MLFLOW_ARTIFACT_ROOT: /mlartifacts
+      # MLflow's DNS-rebinding protection (MLFLOW_SERVER_ALLOWED_HOSTS, default: localhost/
+      # 127.0.0.1/private-IP patterns only) rejects the literal "mlflow:5000" Host header any
+      # in-compose-network caller sends — every containerized service here (react-agent/
+      # routing-agent's `agents`-profile containers, mlflow-mcp, milvus-mcp) reaches this
+      # service via that compose DNS name, not localhost, so it has to be allow-listed
+      # explicitly. Host-only entries also cover the bare hostname without a port.
+      MLFLOW_SERVER_ALLOWED_HOSTS: "mlflow:5000,mlflow,localhost:5000,localhost,127.0.0.1:5000,127.0.0.1"
     command: >
       --backend-store-uri postgresql://${POSTGRES_USER:-agents}:${POSTGRES_PASSWORD}@postgres:5432/mlflow
       --default-artifact-root /mlartifacts
@@ -65,6 +72,35 @@ services:
       - mlflow-artifacts:/mlartifacts
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # MLflow's built-in MCP server (traces/experiments/scorers as MCP tools), run over
+  # streamable-http instead of `mlflow mcp run`'s stdio-only default — a persistent, network-
+  # reachable service is what makes it resolvable via MLflow's MCP Registry (see
+  # packages/mlflow-server/scripts/provision_mcp_registry.py and
+  # agents_common.mcp_servers.mlflow_mcp_connection). Same image as `mlflow` above
+  # (packages/mlflow-server/mlflow_mcp_server.py), different process.
+  mlflow-mcp:
+    build:
+      context: ./packages/mlflow-server
+    restart: unless-stopped
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    entrypoint: ["python", "mlflow_mcp_server.py"]
+    ports:
+      - "8001:8001"
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_TRACKING_TOKEN: ${MLFLOW_TRACKING_TOKEN:-}
+      MLFLOW_MCP_PORT: "8001"
+    healthcheck:
+      # A plain GET against the streamable-http endpoint doesn't necessarily return 2xx (MCP's
+      # protocol expects a proper session handshake, not an unauthenticated GET) — a raw socket
+      # connect is enough to confirm the process is up and accepting connections.
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8001), timeout=3)"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -137,6 +173,29 @@ services:
         condition: service_healthy
       milvus-minio:
         condition: service_healthy
+
+  # Exposes Milvus operations as MCP tools over streamable-http (see packages/milvus/milvus_mcp_server.py
+  # for why this bypasses mcp-server-milvus's own CLI). Not consumed by any agent yet — see the
+  # planned RAG-pattern agent in README's Roadmap — registered ahead of time in MLflow's MCP
+  # Registry (packages/mlflow-server/scripts/provision_mcp_registry.py) the same way `mlflow-mcp`
+  # is, so that agent has a resolvable connection waiting rather than a stdio command to hardcode.
+  milvus-mcp:
+    build:
+      context: ./packages/milvus
+    restart: unless-stopped
+    depends_on:
+      milvus-standalone:
+        condition: service_healthy
+    ports:
+      - "8002:8002"
+    environment:
+      MILVUS_URI: http://milvus-standalone:19530
+      MILVUS_MCP_PORT: "8002"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8002), timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   attu:
     container_name: milvus-attu
