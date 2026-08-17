@@ -41,13 +41,55 @@ work identically at every level.
 |---|---|---|---|
 | 1 | `langchain.agents.create_agent` (LangChain v1) | A single agent with tools in a ReAct loop. The default. Reach for this first, every time, and only leave it when you hit something it can't express. | `agents/patterns/react-agent` (implemented) |
 | 2 | Raw LangGraph (`StateGraph`, `langgraph-supervisor`, `langgraph-swarm`) | Multiple cooperating agents: a supervisor routing to specialist subgraphs, or peer agents handing off via `Command(goto=...)`. Needed when one agent's tool-loop can't express the control flow, or you need custom state, HITL interrupts, or explicit inter-agent contracts. | `agents/patterns/supervisor-agent`, `agents/patterns/swarm-agent` (stubs, follow-up PRs) |
-| 3 | `deepagents` | Long-horizon, planning-heavy work with a virtual filesystem and spawned subagents — the ITZ-19739 shape of problem (multi-turn PR review, iterating on generated tests, proactive follow-up over days not minutes). Not used for anything that fits in tiers 1–2; its planning/filesystem/subagent machinery is overhead you don't want to pay for a simple tool-calling agent. | *(none yet — this is a framework choice for a problem shape, not a standalone pattern with its own doc; add an example under `agents/patterns/` once a real tier-3 use case shows up)* |
+| 3 | `deepagents` | Long-horizon, planning-heavy work with a virtual filesystem and spawned subagents — the ITZ-19739 shape of problem (multi-turn PR review, iterating on generated tests, proactive follow-up over days not minutes). Not used for anything that fits in tiers 1–2; its planning/filesystem/subagent machinery is overhead you don't want to pay for a simple tool-calling agent. | `agents/examples/experiment-analysis-agent` (implemented) — MLflow AI Issue Discovery over another agent's traces: search in batches, refine hypotheses, write a report. Lives under `agents/examples/` rather than `agents/patterns/` since it doesn't compose into a standalone reusable pattern with its own doc, and it analyzes the other agents' traces rather than fitting the same-shaped-request loop `agents/patterns/*` demonstrates. |
 
 **Rule of thumb when adding a new example agent:** start writing it as `create_agent` (tier 1).
 Only move to tier 2 if you can point at a concrete requirement — multiple domains with
 different tools/prompts, a workflow that can't be one ReAct loop, or a need for supervisor/swarm
 routing. Only reach for deepagents if the task is long-horizon and planning-first, not just
 "has several steps."
+
+### MCP server connections: MLflow's MCP Registry, not hardcoded launch commands
+
+`experiment-analysis-agent` was the repo's first agent to consume an MCP server at runtime
+(`mlflow-mcp`, via `langchain-mcp-adapters`). It initially hardcoded that server's stdio launch
+command, duplicating `.mcp.json`'s declaration of the same server for interactive Claude Code
+use. Fixing that duplication went through two passes:
+
+1. **First pass**: extract the shared stdio command/args into one Python constant both
+   `.mcp.json` and the agent could point at. Worked, but still a hardcoded launch command
+   somewhere.
+2. **Second pass** (current): resolve every MCP server connection dynamically via
+   [MLflow's MCP Registry](https://mlflow.org/docs/latest/genai/mcp-registry/) —
+   `mlflow.genai.search_mcp_access_endpoints` at runtime, `.mcp.json` and agent code both
+   pointing at the same registered endpoint instead of either hardcoding anything.
+
+This forced a real infrastructure change, confirmed against the installed `mlflow==3.15.1` API
+(not just its docs, which were incomplete on these points):
+
+- `mlflow.genai.create_mcp_access_endpoint`'s `transport_type` only accepts
+  `"streamable-http"`/`"sse"` — never `"stdio"`.
+- `mlflow mcp run` (the CLI `.mcp.json` used) only speaks stdio, no transport flag.
+- `mcp-server-milvus`'s own `--streamable-http` CLI mode hard-codes `host="localhost"` with no
+  override — unreachable from any other container.
+- The registry's REST API is pure catalog metadata; it doesn't proxy or host live MCP traffic.
+  Registering a server doesn't make it reachable — it only catalogs a pointer to wherever it
+  already is reachable.
+
+So both `mlflow-mcp` and `milvus-mcp` needed converting into persistent streamable-http services
+first (`packages/mlflow-server/mlflow_mcp_server.py`, `packages/milvus/milvus_mcp_server.py` —
+each bypasses its respective CLI, calling the underlying `FastMCP` instance directly with
+`host="0.0.0.0"`), each its own docker-compose service, before `packages/mlflow-server/scripts/
+provision_mcp_registry.py` had anything connectable to register. `docs-langchain`/
+`reference-langchain` needed no such conversion — already remote, third-party-hosted HTTP
+servers; registering them is pure cataloging.
+
+All four of `.mcp.json`'s servers are registered this way, not just the one `experiment-
+analysis-agent` currently consumes — so the next agent that needs one (e.g. the planned
+RAG-pattern agent using Milvus) resolves a connection instead of reintroducing a hardcoded
+launch command on day one. See `agents_common.mcp_servers` for the resolver and
+`provision_mcp_registry.py`'s docstring for the registered server list and the
+host/container-reachability known-gap this setup still has.
 
 ## Language, packaging, monorepo layout
 

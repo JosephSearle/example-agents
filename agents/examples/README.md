@@ -1,10 +1,19 @@
 # agents/examples/
 
-Applied, end-to-end demonstrations that compose one or more
-[`agents/patterns/*`](../patterns/README.md) packages into a concrete use case — the "how do I
-actually use this" counterpart to the patterns' "how does this technique work in isolation."
+Applied, end-to-end demonstrations — either composing one or more
+[`agents/patterns/*`](../patterns/README.md) packages into a concrete use case, or a standalone
+applied use of a framework tier that doesn't (yet) have its own `agents/patterns/` entry. The
+"how do I actually use this" counterpart to the patterns' "how does this technique work in
+isolation."
 
-No examples yet. This directory holds the convention for when the first one lands.
+| Example | Framework tier | Path |
+|---|---|---|
+| MLflow AI Issue Discovery | Tier 3 — `deepagents` | `agents/examples/experiment-analysis-agent` |
+
+`experiment-analysis-agent` doesn't compose an existing `agents/patterns/*` package — it's this
+repo's first applied use of `deepagents` (Tier 3 in the framework-tiering table), analyzing the
+other agents' MLflow traces rather than building on their code. See its own README for what it
+demonstrates.
 
 ## Convention
 

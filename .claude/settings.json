@@ -13,7 +13,12 @@
       "Bash(docker compose logs*)",
       "Bash(uv run pytest*)",
       "Bash(uv run ruff*)",
-      "Bash(uv run mypy*)"
+      "Bash(uv run mypy*)",
+      "Bash(make analyze-experiment *)",
+      "mcp__docs-langchain__search_docs_by_lang_chain",
+      "mcp__docs-langchain__query_docs_filesystem_docs_by_lang_chain",
+      "mcp__reference-langchain__search_api",
+      "mcp__reference-langchain__get_symbol"
     ],
     "deny": [
       "Read(**/.env)"

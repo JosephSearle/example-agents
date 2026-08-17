@@ -44,7 +44,9 @@ members = ["agents/patterns/*", "agents/examples/*", "packages/*"]
 # requirements.txt` inside its own image, not this workspace's venv) — not a uv package.
 # milvus is off-the-shelf images wired into docker-compose.yml plus documentation — no Python
 # package of its own at all.
-exclude = ["packages/mlflow-server", "packages/milvus"]
+# atlassian is a plain Dockerfile wrapping the off-the-shelf mcp-atlassian PyPI package — same
+# shape as milvus, no Python package of its own.
+exclude = ["packages/mlflow-server", "packages/milvus", "packages/atlassian"]
 
 # ---------------------------------------------------------------------------
 # Ruff — single config, applies to every workspace member
