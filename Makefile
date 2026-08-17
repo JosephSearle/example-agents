@@ -1,4 +1,4 @@
-.PHONY: sync lint format typecheck test test-unit test-integration test-eval up up-agents down reset logs demo demo-all provision-gateway provision-datasets provision-prompts provision-monitors provision-mcp-registry analyze-experiment
+.PHONY: sync lint format typecheck test test-unit test-integration test-eval up up-agents down reset logs demo demo-all provision-gateway provision-datasets provision-prompts provision-monitors provision-mcp-registry analyze-experiment tekton-mcp-up tekton-mcp-down
 
 sync:
 	uv sync --all-packages
@@ -24,7 +24,7 @@ test-eval:
 test: test-unit test-integration
 
 up:
-	docker compose up -d --wait postgres pgadmin mlflow mlflow-mcp milvus-etcd milvus-minio milvus-standalone milvus-mcp attu
+	docker compose up -d --wait postgres pgadmin mlflow mlflow-mcp milvus-etcd milvus-minio milvus-standalone milvus-mcp atlassian-mcp attu
 	$(MAKE) provision-gateway
 	$(MAKE) provision-prompts
 	$(MAKE) provision-datasets
@@ -104,6 +104,34 @@ provision-monitors:
 # to function at all, not an opt-in like `provision-monitors`.
 provision-mcp-registry:
 	uv run --with 'mlflow[mcp]>=3.5.1' python packages/mlflow-server/scripts/provision_mcp_registry.py
+
+# tekton-mcp-server (TEKTON_MCP_BINARY) is a native macOS binary from a separate repo
+# (github.com/tektoncd/mcp-server, not part of this uv workspace) — it can't be containerized
+# here, so unlike atlassian-mcp/milvus-mcp/mlflow-mcp it isn't a compose service. This runs it
+# directly on the host over HTTP instead, so provision-mcp-registry has something reachable to
+# register — you start/stop it yourself, same host-reachable-URL caveat this repo already
+# documents for the compose-managed MCP services. Override TEKTON_MCP_BINARY if yours lives
+# somewhere other than the default below.
+TEKTON_MCP_BINARY ?= /Users/josephsearle/Documents/Projects/mcp-server/bin/tekton-mcp-server
+TEKTON_MCP_PORT ?= 8080
+TEKTON_MCP_PIDFILE := /tmp/tekton-mcp-server.pid
+tekton-mcp-up:
+	@if [ -f $(TEKTON_MCP_PIDFILE) ] && kill -0 $$(cat $(TEKTON_MCP_PIDFILE)) 2>/dev/null; then \
+		echo "tekton-mcp-server already running (pid $$(cat $(TEKTON_MCP_PIDFILE)))"; \
+	else \
+		$(TEKTON_MCP_BINARY) -transport http -address :$(TEKTON_MCP_PORT) & \
+		echo $$! > $(TEKTON_MCP_PIDFILE); \
+		echo "tekton-mcp-server started (pid $$!) on :$(TEKTON_MCP_PORT)"; \
+	fi
+
+tekton-mcp-down:
+	@if [ -f $(TEKTON_MCP_PIDFILE) ]; then \
+		kill $$(cat $(TEKTON_MCP_PIDFILE)) 2>/dev/null || true; \
+		rm -f $(TEKTON_MCP_PIDFILE); \
+		echo "tekton-mcp-server stopped"; \
+	else \
+		echo "tekton-mcp-server not running"; \
+	fi
 
 # Runs MLflow AI Issue Discovery against one agent's experiment via
 # agents/examples/experiment-analysis-agent — this repo's Tier 3 (`deepagents`) pattern,

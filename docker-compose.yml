@@ -197,6 +197,26 @@ services:
       timeout: 5s
       retries: 10
 
+  # Jira/Confluence as MCP tools (mcp-atlassian), exposed over streamable-http so it's resolvable
+  # via MLflow's MCP Registry the same way mlflow-mcp/milvus-mcp are — see
+  # packages/mlflow-server/scripts/provision_mcp_registry.py. Not consumed by any agent yet
+  # (registered ahead of need, same as milvus-mcp/docs-langchain).
+  atlassian-mcp:
+    build:
+      context: ./packages/atlassian
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    environment:
+      JIRA_URL: ${JIRA_URL:-}
+      JIRA_USERNAME: ${JIRA_USERNAME:-}
+      JIRA_API_TOKEN: ${JIRA_API_TOKEN:-}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8003), timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   attu:
     container_name: milvus-attu
     image: zilliz/attu:v2.5.6

@@ -11,6 +11,12 @@
     },
     "reference-langchain": {
       "url": "https://reference.langchain.com/mcp"
+    },
+    "tekton-mcp": {
+      "url": "http://localhost:8080/"
+    },
+    "mcp-atlassian": {
+      "url": "http://localhost:8003/mcp"
     }
   }
 }
