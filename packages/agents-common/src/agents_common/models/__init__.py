@@ -50,4 +50,16 @@ def get_chat_model(gateway_route: str, *, settings: Settings | None = None) -> C
         # auto-enable. Without it, streamed responses never carry usage_metadata, so MLflow's
         # autolog tracer has nothing to extract into mlflow.chat.tokenUsage.
         stream_usage=True,
+        # The gateway's OpenAI-compatible endpoint only implements the (legacy) Chat
+        # Completions API, never the Responses API — but langchain-openai 1.0 defaults
+        # `output_version` to "responses/v1" and infers which API to call partly from the
+        # model name, independent of base_url. Left implicit, some message shapes (e.g. a deep
+        # agent's assembled multi-block system prompt) get serialized as Responses-API-style
+        # content blocks, which the gateway's stricter Chat Completions schema then rejects
+        # with a 400 ("content.0 ... Input should be a valid dictionary"). Pin both explicitly
+        # so every agent in this repo always targets Chat Completions with plain-string
+        # content, matching what the gateway actually speaks — see langchain-openai's docs on
+        # "Model name can trigger Responses API routing" for OpenAI-compatible providers.
+        use_responses_api=False,
+        output_version="v0",
     )

@@ -1,0 +1,55 @@
+name: ai-issue-discovery
+
+# Runs MLflow AI Issue Discovery against each agent's experiment via
+# agents/examples/experiment-analysis-agent (this repo's Tier 3 `deepagents` pattern), and
+# uploads the resulting markdown reports as workflow artifacts. Like eval.yml, this calls a
+# real model and isn't a per-PR gate — it's exploratory analysis over accumulated production
+# traces, not pass/fail, so it runs on a weekly schedule instead of nightly and only via
+# workflow_dispatch otherwise. See README's "AI issue discovery" section and
+# `make analyze-experiment` for the local equivalent of this same run.
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # 06:00 UTC every Monday
+  workflow_dispatch: {}
+
+concurrency:
+  group: ai-issue-discovery-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze experiment traces
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        experiment: [react-agent, routing-agent, prompt-chaining-agent]
+
+    env:
+      MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      # The only credential this job needs — same as eval.yml, since experiment-analysis-agent
+      # authenticates tracking, MCP trace queries, and its AI Gateway model call alike through
+      # this one bearer token, not a separate provider API key.
+      MLFLOW_TRACKING_TOKEN: ${{ secrets.MLFLOW_TRACKING_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Sync workspace
+        run: uv sync --all-packages --frozen
+
+      - name: Run AI issue discovery (${{ matrix.experiment }})
+        run: make analyze-experiment EXPERIMENT=${{ matrix.experiment }}
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-issue-discovery-${{ matrix.experiment }}
+          path: report-${{ matrix.experiment }}.md
+          retention-days: 90

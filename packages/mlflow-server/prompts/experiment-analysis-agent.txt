@@ -1,0 +1,31 @@
+You are analyzing traces in the MLflow experiment "{{target_experiment}}" to find operational issues, quality issues, and success patterns — MLflow's "AI Issue Discovery" workflow, run autonomously (no human available to answer questions, so proceed without asking).
+
+## 1. Understand the agent under analysis
+
+First call `search_experiments` (or `get_experiment`) to resolve "{{target_experiment}}" to its numeric `experiment_id` — every `search_traces` call below must pass that id in `experiment_ids` (a list), since `search_traces` errors out if both `experiment_ids` and `locations` are omitted. Keep `max_results` at 50 or less on every `search_traces` call — larger values have been observed to fail with an `INVALID_PARAMETER_VALUE` error against this server. `filter_string` attribute keys are `status`, `timestamp`, `name`, `execution_time_ms`, `request_id`, `run_id`, `text`, and a few others — not `state` or `execution_duration_ms`, which don't exist here despite being common MLflow terminology elsewhere. Don't pass an `offset` argument to `search_traces` — it isn't supported; use `page_token` if you need to page through more results than one call returns.
+
+Use `search_traces` to pull a sample (up to 50) of recent traces from "{{target_experiment}}", then `get_trace` on a few of the successful ones (`status = 'OK'`) to see their structure. From the trace inputs/outputs and any TOOL-type spans, work out: what task the agent performs, what tools/data sources it has access to, and what kinds of questions it's asked. Call `list_scorers` with only `experiment_id=<the id from step 1>` (not `builtin` — passing both `builtin` and `experiment_id` together is rejected) to see what `PRODUCTION_SCORERS` (if any) are already being tracked, so you don't just restate what a continuous scorer already reports.
+
+## 2. Operational issues (hypothesis-driven)
+
+Search for failed traces (`search_traces` with `experiment_ids=[<the id from step 1>]` and `filter_string="status = 'ERROR'"`, `max_results` ≤ 50). For each pattern you find repeating across multiple traces — tool/API failures, timeouts (compare `execution_time_ms`), rate limiting, auth failures, slow responses — form a hypothesis, then confirm or refute it against more traces before including it in the report. Cite specific trace IDs and durations/error messages as evidence.
+
+## 3. Quality issues (hypothesis-driven)
+
+Across OK-state traces, look for verbosity, repetition, inconsistent answers to similar questions, or responses in the wrong format. Same standard as above: a pattern needs multiple corroborating trace examples before it goes in the report, not a single anecdote.
+
+## 4. Success patterns
+
+Note what's working well — effective tool usage, consistently high-quality responses — briefly; this isn't just a bug list.
+
+## 5. Write the report
+
+You MUST call `write_file` before finishing — do not give a final chat answer without having written the report first; a final answer with no `write_file` call is treated as a failed run. Write your findings to `{{report_path}}` as markdown, structured as:
+- A one-paragraph summary of what the agent does (from step 1)
+- Quantitative overview: traces examined, OK vs ERROR counts, rough latency shape
+- Confirmed operational issues, each with a problem statement, 2-3 example trace IDs, and a root-cause guess
+- Confirmed quality issues, same structure
+- Success patterns
+- Prioritized recommendations
+
+Only include findings you actually confirmed against multiple traces — an exploratory report with three well-evidenced findings is more useful than ten speculative ones.

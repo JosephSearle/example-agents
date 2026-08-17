@@ -56,7 +56,8 @@ Reference implementations of the agent patterns this team uses — real, running
   Hypothesis, split into `unit` / `integration` / `eval` markers.
 - **CI/CD:** GitHub Actions — `ci.yml` (lint/type/unit, every PR), `integration.yml`
   (Postgres-backed tests, every PR), `eval.yml` (MLflow eval suite, nightly/manual/labelled —
-  not blocking, since it spends tokens).
+  not blocking, since it spends tokens), `ai-issue-discovery.yml` (MLflow AI Issue Discovery,
+  weekly/manual — same non-blocking posture).
 - **Containers:** root `docker-compose.yml` — Postgres + pgAdmin, MLflow, Milvus + Attu, and
   each agent as its own service/image.
 
@@ -150,6 +151,39 @@ and [`provision_monitors.py`](packages/mlflow-server/scripts/provision_monitors.
 up under each agent's experiment in the MLflow UI as trace assessments, not as a pass/fail
 eval run.
 
+### AI issue discovery
+
+`PRODUCTION_SCORERS` tells you *whether* quality regressed against a fixed set of guidelines.
+[MLflow AI Issue Discovery](https://mlflow.org/docs/latest/genai/eval-monitor/ai-insights/ai-issue-discovery/)
+answers *why*: hypothesis-driven analysis over an experiment's existing traces that surfaces
+operational issues (errors, timeouts, latency), quality issues (verbosity, inconsistency, bad
+formatting) and success patterns, with example trace IDs and prioritized recommendations —
+root-cause analysis over trace history, not continuous scoring. Implemented as
+[`agents/examples/experiment-analysis-agent`](agents/examples/experiment-analysis-agent) — this
+repo's first **Tier 3 (`deepagents`)** pattern, since the batched, hypothesis-driven analysis
+(search traces, form/refine hypotheses over successive batches, write a report) is exactly the
+long-horizon, planning-heavy shape that tier exists for.
+
+Needs traces already in the target experiment (run `make demo`/`make demo-all` and/or let
+`make provision-monitors` run for a while first). Two ways to run it, both on the same
+self-hosted MLflow AI Gateway model every other agent in this repo uses — no separate API key:
+
+```bash
+make analyze-experiment EXPERIMENT=react-agent   # writes report-react-agent.md
+```
+
+- **Local, on demand**: `make analyze-experiment` as above (or
+  `uv run --package experiment-analysis-agent experiment-analysis-agent <experiment>` directly).
+- **Scheduled**: [`.github/workflows/ai-issue-discovery.yml`](.github/workflows/ai-issue-discovery.yml)
+  runs the same command weekly (and on `workflow_dispatch`) for every implemented agent,
+  uploading each report as a workflow artifact. Needs only the `MLFLOW_TRACKING_URI`/
+  `MLFLOW_TRACKING_TOKEN` secrets `eval.yml` already uses.
+
+Reach for this after a `PRODUCTION_SCORERS` metric regresses and you need to know why, before
+writing a new eval dataset case, or just read the weekly scheduled report as a standing
+spot-check. Like `eval.yml`, it's not a required PR check — it spends tokens and its output is
+for a human to read, not a pass/fail signal.
+
 ### Run everything containerized
 
 ```bash
@@ -230,6 +264,7 @@ example-agents/
 │   │   ├── swarm-agent/                # tier 2 — stub
 │   │   └── ...                         # 7 more workflow-pattern stubs
 │   └── examples/                       # applied demos composing patterns above
+│       └── experiment-analysis-agent/  # tier 3 (deepagents) — MLflow AI Issue Discovery
 ├── packages/
 │   ├── agents-common/                  # shared checkpointing/observability/config
 │   ├── mlflow-server/                  # self-hosted MLflow tracking server image
@@ -251,6 +286,8 @@ example-agents/
       orchestrator-workers,evaluator-optimizer,map-reduce,network-mesh}-agent`)
 - [ ] First RAG-pattern agent using `packages/milvus` — `Settings.milvus_uri` is already wired
       up in `agents-common`, waiting on an agent to use it
+- [x] First Tier 3 (`deepagents`) usage — `agents/examples/experiment-analysis-agent`, backing
+      `make analyze-experiment` / MLflow AI Issue Discovery
 
 ## Contributing
 

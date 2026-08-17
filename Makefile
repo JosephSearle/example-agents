@@ -1,4 +1,4 @@
-.PHONY: sync lint format typecheck test test-unit test-integration test-eval up up-agents down reset logs demo demo-all provision-gateway provision-datasets provision-prompts provision-monitors
+.PHONY: sync lint format typecheck test test-unit test-integration test-eval up up-agents down reset logs demo demo-all provision-gateway provision-datasets provision-prompts provision-monitors analyze-experiment
 
 sync:
 	uv sync --all-packages
@@ -25,7 +25,10 @@ test: test-unit test-integration
 
 up:
 	docker compose up -d --wait postgres pgadmin mlflow milvus-etcd milvus-minio milvus-standalone attu
+	$(MAKE) provision-gateway
 	$(MAKE) provision-prompts
+	$(MAKE) provision-datasets
+	$(MAKE) provision-monitors
 
 up-agents:
 	docker compose --profile agents up --build
@@ -88,3 +91,18 @@ provision-prompts:
 # PRODUCTION_SCORERS entry to push the update.
 provision-monitors:
 	uv run python packages/mlflow-server/scripts/provision_monitors.py
+
+# Runs MLflow AI Issue Discovery against one agent's experiment via
+# agents/examples/experiment-analysis-agent — this repo's Tier 3 (`deepagents`) pattern,
+# producing a markdown report of operational/quality issues found in its traces. Complements
+# `provision-monitors`'s continuous PRODUCTION_SCORERS with root-cause analysis over historical
+# traces instead of live per-trace scoring. Needs traces to already exist in the experiment
+# (run `make demo`/`make demo-all` and/or `make provision-monitors` first). EXPERIMENT defaults
+# to react-agent; override e.g. `make analyze-experiment EXPERIMENT=routing-agent`. Runs on the
+# same self-hosted MLflow AI Gateway model as every other agent (see
+# experiment-analysis-agent's GATEWAY_ROUTE) — no separate API key needed, unattended or not,
+# which is also what lets `ai-issue-discovery.yml` run this on a schedule without its own
+# credential. See agents/examples/experiment-analysis-agent/README.md.
+EXPERIMENT ?= react-agent
+analyze-experiment:
+	uv run --package experiment-analysis-agent experiment-analysis-agent $(EXPERIMENT)
