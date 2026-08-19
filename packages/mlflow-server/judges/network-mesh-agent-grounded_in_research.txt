@@ -1,0 +1,4 @@
+The final answer should be grounded in the researcher's finding (and, when present, the critic's
+review) rather than introducing claims no peer in the transcript actually made. If the critic
+raised a gap or an unsupported claim, the final answer should not simply repeat that same
+unsupported claim as fact.

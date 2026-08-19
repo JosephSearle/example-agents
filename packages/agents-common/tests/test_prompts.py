@@ -8,6 +8,15 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+class _RaisingMlflowClient:
+    """Stands in for `mlflow.MlflowClient`, always raising — simulates the trace-not-yet-flushed
+    race `link_prompts_to_trace` is meant to survive (see its own docstring)."""
+
+    def link_prompt_versions_to_trace(self, **_kwargs: object) -> None:
+        msg = "RESOURCE_DOES_NOT_EXIST: Trace with ID 'tr-fake' not found."
+        raise RuntimeError(msg)
+
+
 class _FakePromptVersion:
     def __init__(self, template: object, name: str = "some-prompt") -> None:
         self.template = template
@@ -31,3 +40,13 @@ def test_link_prompts_to_trace_is_a_noop_without_a_trace_id() -> None:
     # No trace_id (e.g. autologging produced nothing to link against) shouldn't raise or attempt
     # any MLflow call — exercised without a live MLflow instance, unlike the "real" linking path.
     link_prompts_to_trace([object(), object()], trace_id=None)  # type: ignore[list-item]
+
+
+def test_link_prompts_to_trace_swallows_a_backend_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # A trace export race (backend hasn't flushed the trace yet) must not crash the caller —
+    # every __main__.py calls this before printing its actual result.
+    monkeypatch.setattr("agents_common.prompts.MlflowClient", _RaisingMlflowClient)
+
+    link_prompts_to_trace([object()], trace_id="tr-fake")  # type: ignore[list-item]

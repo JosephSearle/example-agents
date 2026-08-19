@@ -1,0 +1,5 @@
+{"inputs": {"message": "What's the amount on invoice INV-1001?"}, "expectations": {"expected_active_agent": "billing"}}
+{"inputs": {"message": "I'd like a refund for invoice INV-1002."}, "expectations": {"expected_active_agent": "billing"}}
+{"inputs": {"message": "Can you check the status of invoice INV-1001 and then refund it?"}, "expectations": {"expected_active_agent": "billing"}}
+{"inputs": {"message": "What are your support hours?"}, "expectations": {"expected_active_agent": "triage"}}
+{"inputs": {"message": "Do you offer student discounts?"}, "expectations": {"expected_active_agent": "triage"}}

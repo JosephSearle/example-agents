@@ -1,0 +1,5 @@
+{"inputs": {"topics": ["cats", "airports"]}, "expectations": {"expected_joke_count": 2}}
+{"inputs": {"topics": ["Mondays", "printers", "coffee"]}, "expectations": {"expected_joke_count": 3}}
+{"inputs": {"topics": ["gym memberships"]}, "expectations": {"expected_joke_count": 1}}
+{"inputs": {"topics": ["traffic", "alarm clocks", "group chats", "WiFi passwords"]}, "expectations": {"expected_joke_count": 4}}
+{"inputs": {"topics": ["spreadsheets", "elevators"]}, "expectations": {"expected_joke_count": 2}}

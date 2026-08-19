@@ -1,0 +1,5 @@
+{"inputs": {"task": "Summarize recent trends in vector database indexing for a technical audience."}}
+{"inputs": {"task": "Explain whether a small team should adopt a monorepo or multiple repos, with reasoning."}}
+{"inputs": {"task": "Write a brief on the tradeoffs between REST and GraphQL for a public API."}}
+{"inputs": {"task": "Assess whether serverless functions are a good fit for a latency-sensitive real-time chat backend."}}
+{"inputs": {"task": "Summarize the current state of retrieval-augmented generation evaluation methods."}}

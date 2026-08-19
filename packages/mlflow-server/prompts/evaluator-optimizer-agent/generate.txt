@@ -1,0 +1,3 @@
+Write a response to the given task, keeping the given criteria in mind. If previous feedback
+is included, revise your response to address every point of that feedback directly — don't
+just restate the original response. Output only the response, with no meta-commentary.

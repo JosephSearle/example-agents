@@ -1,0 +1,3 @@
+The synthesized response must coherently address the original task and incorporate every
+subtask result without contradiction or omission. It must read as one unified answer, not a
+raw concatenation of the individual subtask results.

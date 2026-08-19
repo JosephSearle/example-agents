@@ -1,0 +1,3 @@
+The final response must satisfy every criterion listed for the task, with no criterion left
+unaddressed. If the response went through multiple revisions, it must not still exhibit any
+issue that earlier feedback already called out.

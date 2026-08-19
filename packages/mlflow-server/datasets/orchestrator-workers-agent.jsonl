@@ -1,0 +1,5 @@
+{"inputs": {"task": "Plan a small birthday party for a coworker who likes board games and doesn't drink alcohol."}, "expectations": {"min_subtasks": 2}}
+{"inputs": {"task": "Draft an onboarding checklist for a new backend engineer joining a Python microservices team."}, "expectations": {"min_subtasks": 2}}
+{"inputs": {"task": "Add rate limiting to a public API — figure out what needs to change across the codebase."}, "expectations": {"min_subtasks": 2}}
+{"inputs": {"task": "Write a short trip itinerary for a 3-day weekend in Kyoto for someone interested in food and temples."}, "expectations": {"min_subtasks": 2}}
+{"inputs": {"task": "Prepare a launch checklist for a new internal Slack bot, covering rollout, docs, and support."}, "expectations": {"min_subtasks": 2}}

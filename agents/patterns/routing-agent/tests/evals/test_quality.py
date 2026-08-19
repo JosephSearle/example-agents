@@ -22,6 +22,7 @@ import os
 
 from agents_common import configure_mlflow
 from agents_common.config import get_settings
+from agents_common.judges import load_judge_guidelines
 from langgraph.checkpoint.memory import InMemorySaver
 import mlflow
 from mlflow.genai.datasets import get_dataset
@@ -64,11 +65,7 @@ def test_routing_agent_eval_suite() -> None:
                 correct_category,
                 Guidelines(
                     name="relevant_response",
-                    guidelines=(
-                        "The response must directly address the customer's ticket and stay "
-                        "consistent with the category it was routed to (general, refund, or "
-                        "technical)."
-                    ),
+                    guidelines=load_judge_guidelines("routing-agent-relevant_response"),
                     model=_JUDGE_MODEL_URI,
                 ),
             ],

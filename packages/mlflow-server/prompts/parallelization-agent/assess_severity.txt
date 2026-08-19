@@ -1,0 +1,3 @@
+Assess the severity of the following incident as low, medium, high, or critical, based on
+customer impact and scope. Consider how many users or systems are affected and whether the
+issue is ongoing.

@@ -11,9 +11,12 @@ import operator
 from typing import TYPE_CHECKING
 
 from langchain_core.tools import tool
+import structlog
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+_logger = structlog.get_logger(__name__)
 
 _BINARY_OPERATORS: dict[type[ast.operator], Callable[[float, float], float]] = {
     ast.Add: operator.add,
@@ -65,8 +68,11 @@ def calculator(expression: str) -> str:
         tree = ast.parse(expression, mode="eval")
         result = _eval_node(tree.body)
     except (SyntaxError, ValueError, ZeroDivisionError) as exc:
+        _logger.warning("calculator_failed", expression=expression, error=str(exc))
         return f"Could not evaluate '{expression}': {exc}"
-    return str(int(result) if result.is_integer() else result)
+    result_str = str(int(result) if result.is_integer() else result)
+    _logger.info("calculator_evaluated", expression=expression, result=result_str)
+    return result_str
 
 
 @tool
@@ -79,7 +85,9 @@ def lookup_glossary_term(term: str) -> str:
     Returns:
         The glossary definition, or a not-found message.
     """
-    return _GLOSSARY.get(term.strip(), f"No glossary entry found for '{term}'.")
+    result = _GLOSSARY.get(term.strip(), f"No glossary entry found for '{term}'.")
+    _logger.info("glossary_looked_up", term=term, found=term.strip() in _GLOSSARY)
+    return result
 
 
 TOOLS = [calculator, lookup_glossary_term]

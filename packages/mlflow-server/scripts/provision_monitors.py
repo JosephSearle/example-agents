@@ -30,22 +30,26 @@ provisioned against that instance separately. Not solved here.
 
 from __future__ import annotations
 
-from agents_common import register_production_monitors
+from agents_common import configure_logging, register_production_monitors
+import structlog
 
 _AGENTS = ["react_agent", "routing_agent", "prompt_chaining_agent"]
+
+_logger = structlog.get_logger(__name__)
 
 
 def main() -> None:
     """Register + start `PRODUCTION_SCORERS` for every agent package that defines them."""
+    configure_logging()
     for module_name in _AGENTS:
         module = __import__(f"{module_name}.graph", fromlist=["graph"])
         experiment_name = module.EXPERIMENT_NAME
         scorers = module.PRODUCTION_SCORERS
 
-        print(f"Provisioning {len(scorers)} monitor(s) for '{experiment_name}'...")
+        _logger.info("provisioning_monitors", experiment=experiment_name, scorer_count=len(scorers))
         register_production_monitors(experiment_name, scorers)
 
-    print("\nDone.")
+    _logger.info("done")
 
 
 if __name__ == "__main__":

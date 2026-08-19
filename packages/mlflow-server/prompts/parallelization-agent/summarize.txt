@@ -1,0 +1,2 @@
+Summarize the following incident in one plain-language paragraph, for an audience unfamiliar
+with the technical details. Output only the summary.

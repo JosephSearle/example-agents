@@ -24,6 +24,11 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/agents/patterns/react-agent /app/agents/patterns/react-agent
 COPY --from=builder /app/packages/agents-common /app/packages/agents-common
+# Only this agent's own judge text file, not the rest of packages/mlflow-server (datasets,
+# prompts, scripts) — read at import time by react_agent.graph's PRODUCTION_SCORERS via
+# agents_common.judges.load_judge_guidelines. See that module's docstring for why this is a
+# plain file copy rather than an MLflow prompt-registry fetch.
+COPY packages/mlflow-server/judges/react-agent-concise_answer.txt ./packages/mlflow-server/judges/react-agent-concise_answer.txt
 
 ENV PATH="/app/.venv/bin:${PATH}"
 

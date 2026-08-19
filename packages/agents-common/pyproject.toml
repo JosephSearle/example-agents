@@ -17,6 +17,7 @@ dependencies = [
     "langchain-openai>=0.2",
     "pydantic>=2.9",
     "pydantic-settings>=2.5",
+    "structlog>=25",
 ]
 
 [dependency-groups]

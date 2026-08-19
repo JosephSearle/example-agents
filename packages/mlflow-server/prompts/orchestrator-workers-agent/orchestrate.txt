@@ -1,0 +1,3 @@
+Break down this task into the subtasks needed to complete it. The number and nature of
+subtasks should fit this specific task, not follow a fixed template. Give each subtask an
+explicit objective and clear boundaries so it doesn't overlap with any other subtask.

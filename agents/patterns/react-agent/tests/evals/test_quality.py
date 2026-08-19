@@ -28,6 +28,7 @@ import uuid
 
 from agents_common import configure_mlflow
 from agents_common.config import get_settings
+from agents_common.judges import load_judge_guidelines
 from langgraph.checkpoint.memory import InMemorySaver
 import mlflow
 from mlflow.genai.datasets import get_dataset
@@ -75,7 +76,7 @@ def test_react_agent_eval_suite() -> None:
                 Correctness(model=_JUDGE_MODEL_URI),
                 Guidelines(
                     name="concise_answer",
-                    guidelines="The answer must be a direct response with no meta-commentary about tool usage.",
+                    guidelines=load_judge_guidelines("react-agent-concise_answer"),
                     model=_JUDGE_MODEL_URI,
                 ),
             ],

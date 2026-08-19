@@ -1,0 +1,4 @@
+Evaluate whether the response meets every criterion listed for the task. Approve only if all
+criteria are clearly and fully met. If not, do not approve, and give specific, actionable
+feedback describing exactly what needs to change — vague feedback like "make it better" is
+not acceptable.

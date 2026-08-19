@@ -1,0 +1,2 @@
+Extract concrete follow-up action items from the following incident, as a short bullet list.
+Focus on specific, actionable next steps rather than general observations.

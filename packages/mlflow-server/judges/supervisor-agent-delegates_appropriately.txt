@@ -1,0 +1,4 @@
+The supervisor's final answer must correctly reflect delegating every arithmetic request to
+the math sub-agent and every word-counting or text-reversal request to the text sub-agent,
+never computing or manipulating text directly itself. A request spanning both domains must be
+fully addressed by combining both sub-agents' results into one coherent answer.

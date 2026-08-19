@@ -6,19 +6,26 @@ from typing import TYPE_CHECKING
 
 import mlflow
 from mlflow.genai.scorers import ScorerSamplingConfig
+import structlog
 
 from agents_common.config import Settings, get_settings
+from agents_common.logging import configure_logging
 
 if TYPE_CHECKING:
     from mlflow.genai.scorers import Scorer
 
+_logger = structlog.get_logger(__name__)
+
 
 def configure_mlflow(experiment_name: str, *, settings: Settings | None = None) -> None:
-    """Point MLflow at the tracking server and enable LangChain/LangGraph autologging.
+    """Configure structured logging, then MLflow tracking/autologging.
 
     Call once at process startup (agent CLI entrypoint, API server startup, or the top of a
-    test session). After this, every `create_agent`/graph invocation is traced automatically —
-    no manual span instrumentation required in agent code.
+    test session). Calls `agents_common.logging.configure_logging` first — this is the one
+    startup hook every `__main__.py` in the repo already calls, so it's also where structured
+    logging gets wired up repo-wide, with no separate call needed at each entrypoint. After this,
+    every `create_agent`/graph invocation is traced automatically — no manual span
+    instrumentation required in agent code.
 
     Each pattern gets its own MLflow experiment rather than sharing one repo-wide experiment —
     `react-agent`, `supervisor-agent`, etc. are meaningfully different systems, and a shared
@@ -32,6 +39,7 @@ def configure_mlflow(experiment_name: str, *, settings: Settings | None = None) 
         settings: Override settings; defaults to `get_settings()`.
     """
     settings = settings or get_settings()
+    configure_logging(settings=settings)
     mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
     mlflow.set_experiment(experiment_name)
     mlflow.langchain.autolog()
@@ -81,4 +89,9 @@ def register_production_monitors(
     for scorer, sample_rate in scorers:
         registered = scorer.register(experiment_id=experiment.experiment_id)
         registered.start(sampling_config=ScorerSamplingConfig(sample_rate=sample_rate))
-        print(f"  registered + started monitor '{scorer.name}' (sample_rate={sample_rate})")
+        _logger.info(
+            "monitor_registered",
+            scorer=scorer.name,
+            sample_rate=sample_rate,
+            experiment=experiment_name,
+        )

@@ -1,0 +1,2 @@
+The aggregated incident report must be internally consistent: the summary, severity, and
+action items must all describe the same incident and not contradict one another.

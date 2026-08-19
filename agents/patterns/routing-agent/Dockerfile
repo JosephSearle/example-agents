@@ -24,6 +24,11 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/agents/patterns/routing-agent /app/agents/patterns/routing-agent
 COPY --from=builder /app/packages/agents-common /app/packages/agents-common
+# Only this agent's own judge text file, not the rest of packages/mlflow-server (datasets,
+# prompts, scripts) — read at import time by routing_agent.graph's PRODUCTION_SCORERS via
+# agents_common.judges.load_judge_guidelines. See that module's docstring for why this is a
+# plain file copy rather than an MLflow prompt-registry fetch.
+COPY packages/mlflow-server/judges/routing-agent-relevant_response.txt ./packages/mlflow-server/judges/routing-agent-relevant_response.txt
 
 ENV PATH="/app/.venv/bin:${PATH}"
 

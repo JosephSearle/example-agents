@@ -1,0 +1,4 @@
+Once a conversation has been handed off to the billing specialist, the response must directly
+and completely address the user's billing request (invoice lookup or refund) rather than
+deflecting back to triage unnecessarily. The response must never expose internal handoff
+mechanics (tool names, transfer mechanics) to the user.

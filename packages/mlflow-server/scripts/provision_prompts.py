@@ -38,12 +38,16 @@ from __future__ import annotations
 from pathlib import Path
 
 from agents_common.config import get_settings
+from agents_common.logging import configure_logging
 import mlflow
 from mlflow.genai.prompts import load_prompt, register_prompt, set_prompt_alias
+import structlog
 
 PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
 
 _PRODUCTION_ALIAS = "production"
+
+_logger = structlog.get_logger(__name__)
 
 
 def _current_production_template(name: str) -> str | None:
@@ -53,10 +57,10 @@ def _current_production_template(name: str) -> str | None:
 
 def _provision_one(name: str, text: str, *, source: str) -> None:
     if _current_production_template(name) == text:
-        print(f"Prompt '{name}' unchanged, skipping.")
+        _logger.info("prompt_unchanged", name=name)
         return
 
-    print(f"Provisioning prompt '{name}' from {source}...")
+    _logger.info("provisioning_prompt", name=name, source=source)
     version = register_prompt(
         name=name,
         template=text,
@@ -64,11 +68,12 @@ def _provision_one(name: str, text: str, *, source: str) -> None:
         tags={"source": "seed-file"},
     )
     set_prompt_alias(name, _PRODUCTION_ALIAS, version.version)
-    print(f"  registered version {version.version}, aliased '{_PRODUCTION_ALIAS}' -> it")
+    _logger.info("prompt_registered", name=name, version=version.version, alias=_PRODUCTION_ALIAS)
 
 
 def main() -> None:
     """Sync every prompt text file in PROMPTS_DIR into MLflow's prompt registry."""
+    configure_logging()
     settings = get_settings()
     mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
 
@@ -93,7 +98,7 @@ def main() -> None:
                 source=f"prompts/{agent_dir.name}/{prompt_path.name}",
             )
 
-    print("\nDone.")
+    _logger.info("done")
 
 
 if __name__ == "__main__":

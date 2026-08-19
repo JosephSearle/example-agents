@@ -1,4 +1,12 @@
-.PHONY: sync lint format typecheck test test-unit test-integration test-eval up up-agents down reset logs demo demo-all provision-gateway provision-datasets provision-prompts provision-monitors provision-mcp-registry analyze-experiment tekton-mcp-up tekton-mcp-down
+.PHONY: sync lint format typecheck test test-unit test-integration test-eval up endpoints up-agents down reset logs demo demo-agent demo-all provision-gateway provision-datasets provision-prompts provision-monitors provision-mcp-registry analyze-experiment tekton-mcp-up tekton-mcp-down
+
+# ANSI color helpers for the banner/progress lines below — `$(shell printf ...)` bakes the raw
+# escape bytes into the variable once, so recipe lines can just interpolate $(CYAN)/$(RESET)
+# through plain `@echo` without relying on a particular shell's echo supporting `-e`.
+BOLD    := $(shell printf '\033[1m')
+CYAN    := $(shell printf '\033[1;36m')
+GREEN   := $(shell printf '\033[1;32m')
+RESET   := $(shell printf '\033[0m')
 
 sync:
 	uv sync --all-packages
@@ -24,12 +32,38 @@ test-eval:
 test: test-unit test-integration
 
 up:
+	@echo "$(CYAN)$(BOLD)▶ Starting core services (postgres, pgadmin, mlflow, mlflow-mcp, milvus, attu)...$(RESET)"
 	docker compose up -d --wait postgres pgadmin mlflow mlflow-mcp milvus-etcd milvus-minio milvus-standalone milvus-mcp atlassian-mcp attu
-	$(MAKE) provision-gateway
-	$(MAKE) provision-prompts
-	$(MAKE) provision-datasets
-	$(MAKE) provision-monitors
-	$(MAKE) provision-mcp-registry
+	@echo "$(CYAN)$(BOLD)▶ Provisioning gateway route...$(RESET)"
+	@$(MAKE) provision-gateway
+	@echo "$(CYAN)$(BOLD)▶ Provisioning prompts...$(RESET)"
+	@$(MAKE) provision-prompts
+	@echo "$(CYAN)$(BOLD)▶ Provisioning datasets...$(RESET)"
+	@$(MAKE) provision-datasets
+	@echo "$(CYAN)$(BOLD)▶ Provisioning production monitors...$(RESET)"
+	@$(MAKE) provision-monitors
+	@echo "$(CYAN)$(BOLD)▶ Provisioning MCP registry...$(RESET)"
+	@$(MAKE) provision-mcp-registry
+	@echo "$(GREEN)$(BOLD)✓ Local infra is up.$(RESET)"
+	@$(MAKE) endpoints
+
+# Prints every compose service's host-reachable URL, run automatically at the end of `make up`
+# so there's no need to cross-reference docker-compose.yml's `ports:` blocks by hand. Ports are
+# hardcoded in docker-compose.yml (no env-var overrides), so this list is safe to keep static
+# rather than deriving it from `docker compose port` at runtime. MCP servers are listed too
+# (streamable-http, not a browser UI) since they're still host-reachable and worth confirming are
+# up, same as the web UIs.
+endpoints:
+	@echo ""
+	@echo "$(BOLD)Local infra endpoints:$(RESET)"
+	@echo "  $(CYAN)MLflow$(RESET) ......... http://localhost:5000"
+	@echo "  $(CYAN)pgAdmin$(RESET) ........ http://localhost:5050  (login: admin@example-agents.dev / admin)"
+	@echo "  $(CYAN)Attu (Milvus)$(RESET) .. http://localhost:3000"
+	@echo "  $(CYAN)MinIO console$(RESET) .. http://localhost:9001  (login: minioadmin / minioadmin)"
+	@echo "  $(CYAN)mlflow-mcp$(RESET) ..... http://localhost:8001/mcp"
+	@echo "  $(CYAN)milvus-mcp$(RESET) ..... http://localhost:8002/mcp"
+	@echo "  $(CYAN)atlassian-mcp$(RESET) .. http://localhost:8003/mcp"
+	@echo ""
 
 up-agents:
 	docker compose --profile agents up --build
@@ -49,19 +83,36 @@ logs:
 	docker compose logs -f
 
 demo:
-	cd agents/patterns/react-agent && uv run react-agent "What's 47 * 12, and does that number mean anything in dev slang?"
+	@scripts/demo_agent.sh react-agent
 
-# Runs every fully-implemented pattern (react-agent, routing-agent, prompt-chaining-agent —
-# evaluator-optimizer and the rest under agents/patterns/ are still stubs, see README's pattern
-# table) concurrently as background jobs, each against its own MLflow experiment/thread, so their
-# traces don't collide. `uv run --package <name> <entrypoint>` is used instead of `cd`ing into
-# each agent's directory, since backgrounding `cd X && ...; cd Y && ...` from one shell would
-# race; running from the repo root avoids that. Needs `make up` (+ `make provision-gateway` /
+# Demos exactly one agent pattern — scripts/demo_agent.sh is the single source of truth for the
+# agent list and each one's default query (also used by `demo` and `demo-all` below, so there's
+# nowhere else this table needs to stay in sync). AGENT is required; QUERY is optional and
+# overrides that agent's default (word-split on spaces, so an agent whose CLI takes more than one
+# positional arg — map-reduce-agent's topics, evaluator-optimizer-agent's task + criteria — can
+# still be driven by a multi-word QUERY). An unknown AGENT prints the available agent list and
+# exits nonzero instead of guessing.
+#
+#   make demo-agent AGENT=swarm-agent
+#   make demo-agent AGENT=swarm-agent QUERY="I'd like a refund for invoice INV-1003."
+demo-agent:
+	@if [ -z "$(AGENT)" ]; then \
+		echo "$(BOLD)Usage:$(RESET) make demo-agent AGENT=<name> [QUERY=\"...\"]"; \
+		exit 1; \
+	fi
+	@scripts/demo_agent.sh $(AGENT) $(QUERY)
+
+# Runs every fully-implemented pattern under agents/patterns/ (see README's pattern table)
+# concurrently as background jobs, each against its own MLflow experiment/thread (so their traces
+# don't collide) and its own colored, banner-wrapped output (via scripts/demo_agent.sh) so the
+# interleaved concurrent output stays legible. Needs `make up` (+ `make provision-gateway` /
 # `provision-prompts` / `provision-datasets` if not already run) first, same as `make demo`.
 demo-all:
-	uv run --package react-agent react-agent "What's 47 * 12, and does that number mean anything in dev slang?" & \
-	uv run --package routing-agent routing-agent "My last payment was charged twice, can I get a refund?" & \
-	uv run --package prompt-chaining-agent prompt-chaining-agent "The history of the semicolon in programming languages" & \
+	@for agent in react-agent routing-agent prompt-chaining-agent parallelization-agent \
+			map-reduce-agent orchestrator-workers-agent evaluator-optimizer-agent \
+			supervisor-agent swarm-agent network-mesh-agent; do \
+		scripts/demo_agent.sh "$$agent" & \
+	done; \
 	wait
 
 # One-off: provisions the MLflow AI Gateway route agent code calls (see .env.example's

@@ -29,13 +29,17 @@ from pathlib import Path
 import sys
 from typing import Any
 
+from agents_common.logging import configure_logging
 from dotenv import load_dotenv
 import requests
+import structlog
 
 # Plain `os.environ` reads, unlike `agents_common.config.Settings` (pydantic-settings' own
 # env_file loading), so .env has to be loaded explicitly here for `uv run python
 # packages/mlflow-server/scripts/provision_gateway_route.py` to pick up repo-root .env values.
 load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+
+_logger = structlog.get_logger(__name__)
 
 MLFLOW_TRACKING_URI = os.environ.get("MLFLOW_TRACKING_URI", "http://localhost:5000")
 MLFLOW_TRACKING_TOKEN = os.environ.get("MLFLOW_TRACKING_TOKEN", "")
@@ -57,16 +61,19 @@ def _post(path: str, body: dict[str, Any]) -> dict[str, Any]:
     url = f"{MLFLOW_TRACKING_URI}/api/3.0/mlflow/gateway/{path}"
     resp = _session.post(url, json=body, timeout=30)
     if resp.status_code == _HTTP_BAD_REQUEST and "RESOURCE_ALREADY_EXISTS" in resp.text:
-        print(
-            f"\n'{GATEWAY_ROUTE_NAME}' is already provisioned (POST {path} returned "
-            "RESOURCE_ALREADY_EXISTS). This script isn't idempotent — delete the existing "
-            "secret/model-definition/endpoint via the MLflow UI first if you need to "
-            "re-provision, or leave it as-is if it's already working.",
-            file=sys.stderr,
+        _logger.error(
+            "gateway_route_already_provisioned",
+            route=GATEWAY_ROUTE_NAME,
+            path=path,
+            hint=(
+                "This script isn't idempotent — delete the existing secret/model-definition/"
+                "endpoint via the MLflow UI first if you need to re-provision, or leave it "
+                "as-is if it's already working."
+            ),
         )
         sys.exit(1)
     if not resp.ok:
-        print(f"POST {url} failed ({resp.status_code}): {resp.text}", file=sys.stderr)
+        _logger.error("gateway_post_failed", url=url, status_code=resp.status_code, body=resp.text)
         resp.raise_for_status()
     result: dict[str, Any] = resp.json()
     return result
@@ -74,7 +81,8 @@ def _post(path: str, body: dict[str, Any]) -> dict[str, Any]:
 
 def main() -> None:
     """Create the gateway secret, model definition, and endpoint, in that order."""
-    print(f"Creating gateway secret for '{GATEWAY_ROUTE_NAME}'...")
+    configure_logging()
+    _logger.info("creating_gateway_secret", route=GATEWAY_ROUTE_NAME)
     secret = _post(
         "secrets/create",
         {
@@ -89,9 +97,9 @@ def main() -> None:
         },
     )
     secret_id = secret["secret"]["secret_id"]
-    print(f"  secret_id={secret_id}")
+    _logger.info("gateway_secret_created", secret_id=secret_id)
 
-    print(f"Creating gateway model definition '{GATEWAY_ROUTE_NAME}'...")
+    _logger.info("creating_gateway_model_definition", route=GATEWAY_ROUTE_NAME)
     model_definition = _post(
         "model-definitions/create",
         {
@@ -102,9 +110,9 @@ def main() -> None:
         },
     )
     model_definition_id = model_definition["model_definition"]["model_definition_id"]
-    print(f"  model_definition_id={model_definition_id}")
+    _logger.info("gateway_model_definition_created", model_definition_id=model_definition_id)
 
-    print(f"Creating gateway endpoint '{GATEWAY_ROUTE_NAME}'...")
+    _logger.info("creating_gateway_endpoint", route=GATEWAY_ROUTE_NAME)
     endpoint = _post(
         "endpoints/create",
         {
@@ -118,11 +126,12 @@ def main() -> None:
             ],
         },
     )
-    print(f"  endpoint_id={endpoint['endpoint']['endpoint_id']}")
+    _logger.info("gateway_endpoint_created", endpoint_id=endpoint["endpoint"]["endpoint_id"])
 
-    print(
-        f"\nDone. {GATEWAY_ROUTE_NAME} is now reachable at "
-        f"{MLFLOW_TRACKING_URI}/gateway/mlflow/v1/chat/completions (model={GATEWAY_ROUTE_NAME})."
+    _logger.info(
+        "done",
+        route=GATEWAY_ROUTE_NAME,
+        chat_completions_url=f"{MLFLOW_TRACKING_URI}/gateway/mlflow/v1/chat/completions",
     )
 
 

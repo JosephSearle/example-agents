@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, TypedDict
 
 from agents_common import get_chat_model
+from agents_common.judges import build_production_scorers
 from agents_common.prompts import (
     PRODUCTION_ALIAS,
     link_prompts_to_trace as _link_prompts_to_trace,
@@ -19,12 +20,14 @@ from agents_common.prompts import (
     prompt_text,
 )
 from langgraph.graph import END, START, StateGraph
-from mlflow.genai.scorers import Guidelines, Safety
+import structlog
 
 if TYPE_CHECKING:
     from langgraph.checkpoint.base import BaseCheckpointSaver
     from langgraph.graph.state import CompiledStateGraph
     from mlflow.entities.model_registry import PromptVersion
+
+_logger = structlog.get_logger(__name__)
 
 __all__ = [
     "PRODUCTION_SCORERS",
@@ -48,28 +51,17 @@ GATEWAY_ROUTE = "gpt-oss-120b"
 
 _JUDGE_MODEL_URI = f"openai:/{GATEWAY_ROUTE}"
 
-# `PRODUCTION_SCORERS`' judge model — see react_agent.graph's `_MONITOR_JUDGE_MODEL_URI` for why
-# `Scorer.start()` requires this `gateway:/<route>` form rather than `_JUDGE_MODEL_URI`'s
-# `openai:/<route>`.
-_MONITOR_JUDGE_MODEL_URI = f"gateway:/{GATEWAY_ROUTE}"
-
 # Scorers run continuously against a sampled slice of live production traces — see
 # agents_common.observability.register_production_monitors, provisioned via
-# packages/mlflow-server/scripts/provision_monitors.py. `well_formed_prose`'s guideline text is
-# reused from tests/evals/test_quality.py.
-PRODUCTION_SCORERS: list[tuple[Any, float]] = [
-    (
-        Guidelines(
-            name="well_formed_prose",
-            guidelines=(
-                "The response must be flowing prose paragraphs, not a bulleted or numbered outline."
-            ),
-            model=_MONITOR_JUDGE_MODEL_URI,
-        ),
-        0.2,
-    ),
-    (Safety(model=_MONITOR_JUDGE_MODEL_URI), 0.2),  # type: ignore[no-untyped-call]
-]
+# packages/mlflow-server/scripts/provision_monitors.py. `build_production_scorers` derives the
+# `gateway:/<route>` judge model `Scorer.start()` requires — see react_agent.graph's
+# PRODUCTION_SCORERS comment for why this differs from `_JUDGE_MODEL_URI`'s `openai:/<route>`
+# form. `well_formed_prose`'s guideline text is loaded from
+# packages/mlflow-server/judges/prompt-chaining-agent-well_formed_prose.txt, the same source that
+# eval suite loads it from — single source of truth, see agents_common.judges.
+PRODUCTION_SCORERS: list[tuple[Any, float]] = build_production_scorers(
+    GATEWAY_ROUTE, [("well_formed_prose", "prompt-chaining-agent-well_formed_prose")]
+)
 
 # The alias provisioning points at the "live" version of each step prompt — see
 # packages/mlflow-server/scripts/provision_prompts.py, which registers this agent's three step
@@ -144,7 +136,9 @@ def gate_check_outline(outline: str) -> None:
             f"Outline only has {len(sections)} section(s) — expected at least "
             f"{_MIN_OUTLINE_SECTIONS} before drafting."
         )
+        _logger.warning("outline_gate_failed", section_count=len(sections))
         raise ValueError(msg)
+    _logger.info("outline_gate_passed", section_count=len(sections))
 
 
 def build_chain(
@@ -180,6 +174,7 @@ def build_chain(
 
     def generate_outline(state: ChainState) -> dict[str, str]:
         response = model.invoke(f"{prompts['outline']}\n\n{state['topic']}")
+        _logger.info("step_completed", step="outline")
         return {"outline": str(response.content)}
 
     def check_outline(state: ChainState) -> dict[str, str]:
@@ -188,10 +183,12 @@ def build_chain(
 
     def write_draft(state: ChainState) -> dict[str, str]:
         response = model.invoke(f"{prompts['draft']}\n\n{state['outline']}")
+        _logger.info("step_completed", step="draft")
         return {"draft": str(response.content)}
 
     def polish_draft(state: ChainState) -> dict[str, str]:
         response = model.invoke(f"{prompts['polish']}\n\n{state['draft']}")
+        _logger.info("step_completed", step="polish")
         return {"final": str(response.content)}
 
     graph = StateGraph(ChainState)

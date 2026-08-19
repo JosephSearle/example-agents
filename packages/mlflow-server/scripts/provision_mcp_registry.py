@@ -51,6 +51,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from agents_common.config import get_settings
+from agents_common.logging import configure_logging
 import mlflow
 from mlflow.exceptions import MlflowException
 from mlflow.genai.mcp_servers import (
@@ -61,9 +62,12 @@ from mlflow.genai.mcp_servers import (
     search_mcp_access_endpoints,
     set_mcp_server_alias,
 )
+import structlog
 
 _PRODUCTION_ALIAS = "production"
 _SERVER_VERSION = "1.0.0"
+
+_logger = structlog.get_logger(__name__)
 
 
 @dataclass(frozen=True)
@@ -134,12 +138,12 @@ def _ensure_server_registered(spec: _ServerSpec) -> str:
     """
     try:
         version = get_mcp_server_version_by_alias(spec.name, _PRODUCTION_ALIAS)
-        print(f"'{spec.name}' already registered (version {version.version}), skipping.")
+        _logger.info("mcp_server_already_registered", name=spec.name, version=version.version)
         return version.version
     except MlflowException:
         pass
 
-    print(f"Registering '{spec.name}' version {_SERVER_VERSION}...")
+    _logger.info("registering_mcp_server", name=spec.name, version=_SERVER_VERSION)
     version = register_mcp_server(
         server_json={
             "name": spec.name,
@@ -154,7 +158,9 @@ def _ensure_server_registered(spec: _ServerSpec) -> str:
         tools=None,
     )
     set_mcp_server_alias(spec.name, _PRODUCTION_ALIAS, version.version)
-    print(f"  registered version {version.version}, aliased '{_PRODUCTION_ALIAS}' -> it")
+    _logger.info(
+        "mcp_server_registered", name=spec.name, version=version.version, alias=_PRODUCTION_ALIAS
+    )
     return version.version
 
 
@@ -162,17 +168,17 @@ def _ensure_access_endpoint(spec: _ServerSpec) -> None:
     """Create an alias-pinned access endpoint for `spec` if one doesn't already exist."""
     existing = search_mcp_access_endpoints(server_name=spec.name, server_alias=_PRODUCTION_ALIAS)
     if existing:
-        print(f"Access endpoint for '{spec.name}'@{_PRODUCTION_ALIAS} already exists, skipping.")
+        _logger.info("mcp_access_endpoint_already_exists", name=spec.name, alias=_PRODUCTION_ALIAS)
         return
 
-    print(f"Creating access endpoint for '{spec.name}'@{_PRODUCTION_ALIAS}...")
+    _logger.info("creating_mcp_access_endpoint", name=spec.name, alias=_PRODUCTION_ALIAS)
     endpoint = create_mcp_access_endpoint(
         server_name=spec.name,
         url=spec.url,
         transport_type=spec.transport_type,
         server_alias=_PRODUCTION_ALIAS,
     )
-    print(f"  endpoint id={endpoint.id} -> {endpoint.url}")
+    _logger.info("mcp_access_endpoint_created", endpoint_id=endpoint.id, url=endpoint.url)
 
 
 def _refresh_tools(spec: _ServerSpec, version: str) -> None:
@@ -189,13 +195,14 @@ def _refresh_tools(spec: _ServerSpec, version: str) -> None:
     `tekton-mcp` not started via `make tekton-mcp-up`) without that meaning registration itself
     failed — the catalog entry and access endpoint are still worth having.
     """
-    print(f"Refreshing tools for '{spec.name}' version {version}...")
+    _logger.info("refreshing_mcp_tools", name=spec.name, version=version)
     updated = refresh_mcp_server_version_tools(name=spec.name, version=version)
-    print(f"  discovered {len(updated.tools or [])} tool(s)")
+    _logger.info("mcp_tools_refreshed", name=spec.name, tool_count=len(updated.tools or []))
 
 
 def main() -> None:
     """Register every server in `_SERVERS`, its access endpoint, and its tools snapshot."""
+    configure_logging()
     settings = get_settings()
     mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
 
@@ -205,14 +212,17 @@ def main() -> None:
         _ensure_access_endpoint(spec)
         try:
             _refresh_tools(spec, version)
-        except Exception as exc:
-            print(f"  WARNING: tool discovery failed for '{spec.name}': {exc}")
+        except Exception:
+            _logger.warning("mcp_tool_discovery_failed", name=spec.name, exc_info=True)
             failures.append(spec.name)
 
-    print("\nDone.")
-    if failures:
-        print(f"Registered, but tool discovery failed for: {', '.join(failures)}")
-        print("(catalog entry + access endpoint still created — re-run once reachable)")
+    _logger.info(
+        "done",
+        tool_discovery_failures=failures,
+        hint="catalog entry + access endpoint still created for failures — re-run once reachable"
+        if failures
+        else None,
+    )
 
 
 if __name__ == "__main__":

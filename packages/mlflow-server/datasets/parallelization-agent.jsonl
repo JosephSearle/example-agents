@@ -1,0 +1,6 @@
+{"inputs": {"incident_text": "A customer noticed the homepage loaded 200ms slower than usual during peak hours. No errors reported, no user complaints filed."}, "expectations": {"expected_severity": "low"}}
+{"inputs": {"incident_text": "The nightly batch export job failed silently last night and needs to be rerun manually; no downstream systems were affected since today's data hasn't been consumed yet."}, "expectations": {"expected_severity": "medium"}}
+{"inputs": {"incident_text": "The checkout API is returning 500 errors for roughly 15% of requests since 9am, and customers are unable to complete purchases intermittently."}, "expectations": {"expected_severity": "high"}}
+{"inputs": {"incident_text": "The primary database ran out of disk space and all writes across the platform are currently failing. Every customer-facing service is down."}, "expectations": {"expected_severity": "critical"}}
+{"inputs": {"incident_text": "A single internal admin dashboard is showing a stale cache from two hours ago. No customer impact, engineering is aware and monitoring."}, "expectations": {"expected_severity": "low"}}
+{"inputs": {"incident_text": "Authentication tokens are expiring 10 minutes early due to a clock drift on one server, causing some users to be logged out unexpectedly and needing to sign back in."}, "expectations": {"expected_severity": "medium"}}

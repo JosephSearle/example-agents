@@ -1,0 +1,2 @@
+The response must directly address the customer's ticket and stay consistent with the category
+it was routed to (general, refund, or technical).

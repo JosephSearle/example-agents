@@ -17,6 +17,7 @@ import os
 
 from agents_common import configure_mlflow
 from agents_common.config import get_settings
+from agents_common.judges import load_judge_guidelines
 from langgraph.checkpoint.memory import InMemorySaver
 import mlflow
 from mlflow.genai.datasets import get_dataset
@@ -52,10 +53,7 @@ def test_prompt_chaining_agent_eval_suite() -> None:
             scorers=[
                 Guidelines(
                     name="well_formed_prose",
-                    guidelines=(
-                        "The response must be flowing prose paragraphs, not a bulleted or "
-                        "numbered outline."
-                    ),
+                    guidelines=load_judge_guidelines("prompt-chaining-agent-well_formed_prose"),
                     model=_JUDGE_MODEL_URI,
                 ),
             ],

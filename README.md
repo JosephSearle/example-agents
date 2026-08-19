@@ -249,13 +249,13 @@ non-local.
 | Single ReAct agent | Tier 1 — `create_agent` | **Implemented** | `agents/patterns/react-agent` |
 | Prompt Chaining | workflow — raw `StateGraph` | Stub | `agents/patterns/prompt-chaining-agent` |
 | Routing | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/routing-agent` |
-| Parallelization | workflow — raw `StateGraph` | Stub | `agents/patterns/parallelization-agent` |
-| Orchestrator-Workers | workflow — raw `StateGraph` | Stub | `agents/patterns/orchestrator-workers-agent` |
-| Evaluator-Optimizer | workflow — raw `StateGraph` | Stub | `agents/patterns/evaluator-optimizer-agent` |
-| Map-Reduce | workflow — raw `StateGraph` | Stub | `agents/patterns/map-reduce-agent` |
-| Supervisor multi-agent | Tier 2 — LangGraph + `langgraph-supervisor` | Stub | `agents/patterns/supervisor-agent` |
-| Swarm multi-agent | Tier 2 — LangGraph + `langgraph-swarm` | Stub | `agents/patterns/swarm-agent` |
-| Network / Mesh | workflow — raw `StateGraph` | Stub | `agents/patterns/network-mesh-agent` |
+| Parallelization | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/parallelization-agent` |
+| Orchestrator-Workers | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/orchestrator-workers-agent` |
+| Evaluator-Optimizer | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/evaluator-optimizer-agent` |
+| Map-Reduce | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/map-reduce-agent` |
+| Supervisor multi-agent | Tier 2 — `create_agent` composed twice (sub-agents as delegate tools) | **Implemented** | `agents/patterns/supervisor-agent` |
+| Swarm multi-agent | Tier 2 — LangGraph + `langgraph-swarm` | **Implemented** | `agents/patterns/swarm-agent` |
+| Network / Mesh | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/network-mesh-agent` |
 
 Every pattern in this table has a full writeup under
 [`docs/patterns/agent/`](docs/patterns/agent/) — see

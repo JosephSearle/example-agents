@@ -1,0 +1,2 @@
+Every joke in the summary must clearly relate to its assigned topic and be appropriate for a
+general audience. The summary must report the correct number of jokes generated.

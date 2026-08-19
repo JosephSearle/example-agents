@@ -1,0 +1,2 @@
+Write a short, family-friendly joke about the given topic. Output only the joke, with no
+preamble or explanation.

@@ -26,11 +26,15 @@ from pathlib import Path
 from typing import Any
 
 from agents_common.config import get_settings
+from agents_common.logging import configure_logging
 import mlflow
 from mlflow.exceptions import MlflowException
 from mlflow.genai.datasets import EvaluationDataset, create_dataset, get_dataset
+import structlog
 
 DATASETS_DIR = Path(__file__).resolve().parent.parent / "datasets"
+
+_logger = structlog.get_logger(__name__)
 
 
 def _load_records(path: Path) -> list[dict[str, Any]]:
@@ -52,22 +56,25 @@ def _get_or_create_dataset(name: str, experiment_id: str) -> EvaluationDataset:
 
 def main() -> None:
     """Sync every dataset JSONL in DATASETS_DIR into MLflow's dataset registry."""
+    configure_logging()
     settings = get_settings()
     mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
 
     for jsonl_path in sorted(DATASETS_DIR.glob("*.jsonl")):
         agent_name = jsonl_path.stem
-        print(f"Provisioning dataset '{agent_name}' from {jsonl_path.name}...")
+        _logger.info("provisioning_dataset", agent=agent_name, source=jsonl_path.name)
         experiment = mlflow.set_experiment(agent_name)
         dataset = _get_or_create_dataset(agent_name, experiment.experiment_id)
         records = _load_records(jsonl_path)
         dataset.merge_records(records)
-        print(
-            f"  merged {len(records)} record(s) into dataset '{agent_name}' "
-            f"(experiment_id={experiment.experiment_id})"
+        _logger.info(
+            "dataset_merged",
+            agent=agent_name,
+            record_count=len(records),
+            experiment_id=experiment.experiment_id,
         )
 
-    print("\nDone.")
+    _logger.info("done")
 
 
 if __name__ == "__main__":

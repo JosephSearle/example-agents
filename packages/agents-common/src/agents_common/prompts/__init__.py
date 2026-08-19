@@ -15,8 +15,11 @@ from typing import TYPE_CHECKING
 import mlflow
 from mlflow import MlflowClient
 from mlflow.genai.prompts import load_prompt
+import structlog
 
 from agents_common.config import get_settings
+
+_logger = structlog.get_logger(__name__)
 
 if TYPE_CHECKING:
     from mlflow.entities.model_registry import PromptVersion
@@ -76,7 +79,19 @@ def link_prompts_to_trace(prompt_versions: list[PromptVersion], trace_id: str | 
     trace_id (autologging disabled, or nothing traced yet) is a no-op rather than an error, since
     linking is an enhancement to an already-successful invocation, not something that invocation
     should fail over.
+
+    For the same reason, any error the MLflow backend call raises is logged and swallowed rather
+    than propagated — most commonly a `RESOURCE_DOES_NOT_EXIST` `RestException`, since trace
+    export runs on `mlflow.tracing.export.async_export_queue`'s background thread and can still be
+    in flight when this is called right after `.invoke()` returns. Every `__main__.py` calls this
+    *before* printing the invocation's actual result, so letting that race crash the process would
+    throw away a result that already computed successfully.
     """
     if trace_id is None:
         return
-    MlflowClient().link_prompt_versions_to_trace(prompt_versions=prompt_versions, trace_id=trace_id)
+    try:
+        MlflowClient().link_prompt_versions_to_trace(
+            prompt_versions=prompt_versions, trace_id=trace_id
+        )
+    except Exception:
+        _logger.warning("link_prompt_versions_to_trace_failed", trace_id=trace_id, exc_info=True)
