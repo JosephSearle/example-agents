@@ -35,6 +35,7 @@ make typecheck          # mypy --strict
 make test-unit          # -m unit, no external services
 make test-integration   # -m integration, needs `make up` (real Postgres)
 make test-eval          # -m eval, needs `make provision-datasets`, calls a real model
+make test-regression    # -m regression, near-100%-pass code-based-grader suite, required in CI
 make test                # unit + integration
 make up / make down / make reset   # start / stop / nuke+restart local infra
 make demo                # runs react-agent end to end

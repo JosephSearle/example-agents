@@ -132,6 +132,7 @@ markers = [
     "unit: pure-function / mocked-LLM tests, no network, run on every push",
     "integration: exercises real Postgres checkpointing and/or MLflow tracking; needs docker compose",
     "eval: MLflow GenAI evaluation suite against a live model; slow, costs tokens, gated in CI",
+    "regression: small near-100%-pass, code-based-grader suite built from known-good cases; required on every PR",
 ]
 filterwarnings = [
     "error",

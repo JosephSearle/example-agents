@@ -30,14 +30,26 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from mlflow.genai.scorers import Guidelines, Safety
+from mlflow.genai.scorers import Guidelines, Safety, scorer
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Callable, Sequence
 
 _JUDGES_DIR = Path(__file__).resolve().parents[3] / "mlflow-server" / "judges"
 
 _DEFAULT_SAMPLE_RATE = 0.2
+
+# Re-exported so eval suites pull the safety scorer from the same module as everything else
+# eval-related, instead of reaching into `mlflow.genai.scorers` directly.
+__all__ = [
+    "Safety",
+    "build_production_scorers",
+    "load_judge_guidelines",
+    "pass_at_k",
+    "pass_hat_k",
+    "regression_subset",
+    "tool_calls_include",
+]
 
 
 def load_judge_guidelines(name: str) -> str:
@@ -86,3 +98,77 @@ def build_production_scorers(
     ]
     scorers.append((Safety(model=model_uri), sample_rate))  # type: ignore[no-untyped-call]
     return scorers
+
+
+def regression_subset(dataset: Any, *, tag: str = "regression") -> list[dict[str, Any]]:
+    """Filter an `EvaluationDataset` down to rows tagged `tag` in their source JSONL.
+
+    Regression suites reuse the same dataset/experiment as the capability eval suite rather than
+    provisioning a parallel one — see `docs/decisions/0002-eval-taxonomy.md`. Rows opt in via a
+    `"tags": ["regression"]` field on the JSONL record (`packages/mlflow-server/datasets/*.jsonl`),
+    merged in as-is by `provision_datasets.py`.
+    """
+    records: list[dict[str, Any]] = dataset.to_df().to_dict("records")
+    return [r for r in records if tag in (r.get("tags") or [])]
+
+
+def tool_calls_include(name: str, *, trajectory_key: str, expected_key: str) -> Any:
+    """Build a deterministic `@scorer` checking observed tool/agent calls against expectations.
+
+    Subset match, not exact match: an agent re-delegating or retrying is still correct as long
+    as every *required* name shows up somewhere in the trajectory. Generalizes the ad hoc
+    `delegated_to_the_required_sub_agents` (supervisor-agent) and `correct_active_agent`
+    (swarm-agent) scorers that previously reimplemented this per pattern.
+
+    Args:
+        name: The scorer's display name in MLflow eval results.
+        trajectory_key: Key in `predict_fn`'s output dict holding the observed names, e.g.
+            `"tool_calls"` or `"delegates"` — must be an iterable of strings.
+        expected_key: Key in the dataset row's `expectations` dict holding the required names,
+            e.g. `"expected_tool_calls"` — must be an iterable of strings.
+
+    Returns:
+        A `@scorer`-decorated function ready to pass into `mlflow.genai.evaluate(scorers=[...])`.
+    """
+
+    @scorer(name=name)
+    def _scorer(outputs: dict[str, object], expectations: dict[str, object]) -> bool:
+        observed = set(outputs[trajectory_key])  # type: ignore[call-overload]
+        required = set(expectations[expected_key])  # type: ignore[call-overload]
+        return bool(required.issubset(observed))
+
+    return _scorer
+
+
+def pass_at_k(
+    predict_fn: Callable[[str], dict[str, object]],
+    question: str,
+    *,
+    k: int,
+    is_success: Callable[[dict[str, object]], bool],
+) -> float:
+    """Run `predict_fn(question)` `k` times, return the fraction that succeeded (pass@k).
+
+    For flagging non-determinism in a single agent behavior (e.g. an LLM intermittently skipping
+    a tool call) — see `agents/patterns/react-agent/tests/evals/test_quality.py` for the one
+    worked example in this repo. Copy this only where a pattern has *observed* flakiness; it
+    isn't meant to run on every pattern by default.
+    """
+    trials = [predict_fn(question) for _ in range(k)]
+    return sum(1 for t in trials if is_success(t)) / k
+
+
+def pass_hat_k(
+    predict_fn: Callable[[str], dict[str, object]],
+    question: str,
+    *,
+    k: int,
+    is_success: Callable[[dict[str, object]], bool],
+) -> float:
+    """Run `predict_fn(question)` `k` times, return 1.0 only if *all* `k` trials succeeded (pass^k).
+
+    The stricter counterpart to `pass_at_k` — use when consistency across repeated runs matters
+    more than "got it right at least once."
+    """
+    trials = [predict_fn(question) for _ in range(k)]
+    return 1.0 if all(is_success(t) for t in trials) else 0.0

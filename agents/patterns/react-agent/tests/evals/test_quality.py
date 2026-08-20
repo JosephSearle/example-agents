@@ -28,7 +28,13 @@ import uuid
 
 from agents_common import configure_mlflow
 from agents_common.config import get_settings
-from agents_common.judges import load_judge_guidelines
+from agents_common.judges import (
+    Safety,
+    load_judge_guidelines,
+    pass_at_k,
+    regression_subset,
+    tool_calls_include,
+)
 from langgraph.checkpoint.memory import InMemorySaver
 import mlflow
 from mlflow.genai.datasets import get_dataset
@@ -45,21 +51,32 @@ from react_agent.graph import (
     prompt_text,
 )
 
-pytestmark = pytest.mark.eval
-
 _JUDGE_MODEL_URI = f"openai:/{GATEWAY_ROUTE}"
 
 
-def _predict_fn(question: str) -> str:
+def _predict_fn(question: str) -> dict[str, object]:
     prompt_version = load_system_prompt_version()
     checkpointer = InMemorySaver()
     agent = build_agent(checkpointer=checkpointer, system_prompt=prompt_text(prompt_version))
     config = invoke_config(str(uuid.uuid4()))
     result = agent.invoke({"messages": [{"role": "user", "content": question}]}, config=config)  # type: ignore[arg-type]
     link_prompt_to_trace(prompt_version, mlflow.get_last_active_trace_id())
-    return extract_response(result).answer
+    tool_calls = sorted(
+        {
+            tool_call["name"]
+            for message in result["messages"]
+            for tool_call in getattr(message, "tool_calls", [])
+        }
+    )
+    return {"answer": extract_response(result).answer, "tool_calls": tool_calls}
 
 
+_calculator_called = tool_calls_include(
+    "calls_calculator_when_needed", trajectory_key="tool_calls", expected_key="expected_tool_calls"
+)
+
+
+@pytest.mark.eval
 def test_react_agent_eval_suite() -> None:
     settings = get_settings()
     os.environ.setdefault("OPENAI_API_KEY", settings.mlflow_tracking_token or "unused")
@@ -79,17 +96,66 @@ def test_react_agent_eval_suite() -> None:
                     guidelines=load_judge_guidelines("react-agent-concise_answer"),
                     model=_JUDGE_MODEL_URI,
                 ),
+                _calculator_called,
+                Safety(model=_JUDGE_MODEL_URI),  # type: ignore[no-untyped-call]
             ],
         )
 
     # Threshold, not a hardcoded 100% — LLM-judged scores are noisy by nature. Tune once real
     # eval history exists in MLflow.
-    #
-    # Known open issue (not a wiring bug — dataset loading, structured-output extraction, and
-    # judge routing are all confirmed working): gpt-oss-120b intermittently fails to call
-    # `calculator` at all, returning `{}` or restating the question instead of computing an
-    # answer. Scores have bounced between 0.33 and 0.67 across runs on this 3-question dataset.
-    # Left failing deliberately as a signal — see the MLflow UI's evaluation-runs tab for this
-    # experiment (MLFLOW_TRACKING_URI + "/#/experiments/<id>/evaluation-runs") for judge
-    # rationale on each failure.
     assert results.metrics["correctness/mean"] >= 0.8
+
+
+@pytest.mark.eval
+def test_react_agent_calculator_pass_at_k() -> None:
+    """Known open issue (not a wiring bug — dataset loading, structured-output extraction, and
+    judge routing are all confirmed working): gpt-oss-120b intermittently fails to call
+    `calculator` at all, returning `{}` or restating the question instead of computing an answer.
+    `Correctness` scores on the full suite bounced between 0.33 and 0.67 across runs before this
+    was isolated to the single flaky question below.
+
+    Uses `agents_common.judges.pass_at_k` — the one worked example of pass@k/pass^k in this repo
+    (see docs/decisions/0002-eval-taxonomy.md). Copy this pattern into another pattern's suite
+    only if it has similarly *observed* non-determinism; it isn't applied blanket.
+    """
+    settings = get_settings()
+    os.environ.setdefault("OPENAI_API_KEY", settings.mlflow_tracking_token or "unused")
+    os.environ.setdefault("OPENAI_API_BASE", settings.mlflow_gateway_base_url)
+    configure_mlflow(EXPERIMENT_NAME)
+
+    with mlflow.start_run(run_name="react-agent-calculator-pass-at-k"):
+        rate = pass_at_k(
+            _predict_fn,
+            "What is 47 * 12?",
+            k=5,
+            is_success=lambda out: "calculator" in out["tool_calls"],  # type: ignore[operator]
+        )
+        mlflow.log_metric("calculator_pass_at_5", rate)
+
+    # Documented flake rate is ~0.33-0.67; assert the loose floor so this stays a real signal
+    # (not silently disabled) without flapping CI red on every run.
+    assert rate >= 0.2
+
+
+@pytest.mark.regression
+def test_react_agent_regression() -> None:
+    """Small, previously-verified-good subset (`tags: ["regression"]`); code-based-grader-first
+    and thresholded near 100%, unlike the noisier LLM-judge-heavy capability suite above. Required
+    on every PR — see docs/decisions/0002-eval-taxonomy.md.
+    """
+    settings = get_settings()
+    os.environ.setdefault("OPENAI_API_KEY", settings.mlflow_tracking_token or "unused")
+    os.environ.setdefault("OPENAI_API_BASE", settings.mlflow_gateway_base_url)
+
+    configure_mlflow(EXPERIMENT_NAME)
+    dataset = get_dataset(name=EXPERIMENT_NAME)
+    records = regression_subset(dataset)
+
+    with mlflow.start_run(run_name="react-agent-regression"):
+        results = mlflow.genai.evaluate(
+            data=records,
+            predict_fn=_predict_fn,
+            scorers=[_calculator_called],
+        )
+
+    assert results.metrics["calls_calculator_when_needed/mean"] >= 0.95

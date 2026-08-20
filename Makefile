@@ -29,6 +29,9 @@ test-integration:
 test-eval:
 	uv run pytest -m eval
 
+test-regression:
+	uv run pytest -m regression
+
 test: test-unit test-integration
 
 up:
