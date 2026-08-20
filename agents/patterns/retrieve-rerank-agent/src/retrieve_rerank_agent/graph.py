@@ -25,16 +25,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Protocol, TypedDict
 
-from agents_common import get_chat_model, get_embeddings, get_reranker, get_settings
+from agents_common import get_chat_model, get_reranker, get_settings
 from agents_common.judges import build_production_scorers
 from agents_common.prompts import (
     PRODUCTION_ALIAS,
     link_prompts_to_trace,
     load_prompt_version,
+    make_prompt_loaders,
     prompt_text,
 )
+from agents_common.retrieval import NO_CONTEXT_ANSWER, Retriever, build_milvus_retriever
 from basic_rag_agent.graph import COLLECTION_NAME
-from langchain_milvus import Milvus
 from langgraph.graph import END, START, StateGraph
 import structlog
 
@@ -79,28 +80,13 @@ DEFAULT_CANDIDATE_K = 20
 # How many reranked chunks actually reach the generation prompt.
 DEFAULT_TOP_N = 5
 
-NO_CONTEXT_ANSWER = "I don't have relevant context to answer that question."
-
 PRODUCTION_SCORERS: list[tuple[Any, float]] = build_production_scorers(
     GATEWAY_ROUTE, [("grounded_in_context", "retrieve-rerank-agent-grounded_in_context")]
 )
 
 _PROMPT_ALIAS = PRODUCTION_ALIAS
 
-
-class _Document(Protocol):
-    page_content: str
-
-
-class Retriever(Protocol):
-    """The shape `build_rag_graph`'s `retriever` override needs to satisfy.
-
-    See `basic_rag_agent.graph.Retriever`, which this mirrors exactly.
-    """
-
-    def invoke(self, query: str) -> list[_Document]:
-        """Return the candidate documents for `query`."""
-        ...
+_prompt_loaders = make_prompt_loaders(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME)
 
 
 class Reranker(Protocol):
@@ -131,6 +117,8 @@ class RerankRagState(TypedDict):
 
 def load_rag_prompt_version(*, alias: str = _PROMPT_ALIAS) -> PromptVersion:
     """Fetch this agent's generation prompt version from the MLflow prompt registry."""
+    if alias == _PROMPT_ALIAS:
+        return _prompt_loaders.load_version()
     return load_prompt_version(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME, alias=alias)
 
 
@@ -142,15 +130,6 @@ def load_rag_prompt(*, alias: str = _PROMPT_ALIAS) -> str:
 def link_prompt_to_trace(prompt_version: PromptVersion, trace_id: str | None) -> None:
     """Link the generation prompt version to a trace so the MLflow UI's trace view shows it."""
     link_prompts_to_trace([prompt_version], trace_id)
-
-
-def _build_default_retriever(embedding_gateway_route: str, milvus_uri: str, k: int) -> Retriever:
-    vector_store = Milvus(
-        embedding_function=get_embeddings(embedding_gateway_route),
-        collection_name=COLLECTION_NAME,
-        connection_args={"uri": milvus_uri},
-    )
-    return vector_store.as_retriever(search_kwargs={"k": k})  # type: ignore[return-value]
 
 
 def build_rag_graph(
@@ -190,8 +169,11 @@ def build_rag_graph(
     active_retriever = (
         retriever
         if retriever is not None
-        else _build_default_retriever(
-            embedding_gateway_route, milvus_uri or get_settings().milvus_uri, candidate_k
+        else build_milvus_retriever(
+            collection_name=COLLECTION_NAME,
+            embedding_gateway_route=embedding_gateway_route,
+            milvus_uri=milvus_uri or get_settings().milvus_uri,
+            k=candidate_k,
         )
     )
     active_reranker = reranker if reranker is not None else get_reranker()

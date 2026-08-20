@@ -27,14 +27,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from agents_common import get_chat_model
+from agents_common import get_chat_model, make_prompt_loaders
 from agents_common.judges import build_production_scorers
-from agents_common.prompts import (
-    PRODUCTION_ALIAS,
-    link_prompts_to_trace as _link_prompts_to_trace,
-    load_prompt_version,
-    prompt_text,
-)
+from agents_common.prompts import PRODUCTION_ALIAS, prompt_text
 from langchain.agents import create_agent
 from langchain_core.tools import tool
 import structlog
@@ -110,9 +105,10 @@ def load_agent_prompt_version(name: str, *, alias: str = _PROMPT_ALIAS) -> Promp
         name: One of "supervisor", "math", "text".
         alias: Prompt registry alias to load. Defaults to the production alias.
     """
-    return load_prompt_version(
+    loaders = make_prompt_loaders(
         f"{EXPERIMENT_NAME}-{name}", experiment_name=EXPERIMENT_NAME, alias=alias
     )
+    return loaders.load_version()
 
 
 def load_agent_prompt(name: str, *, alias: str = _PROMPT_ALIAS) -> str:
@@ -130,7 +126,9 @@ def link_prompts_to_trace(prompt_versions: dict[str, PromptVersion], trace_id: s
     Thin wrapper around `agents_common.prompts.link_prompts_to_trace` that accepts this agent's
     name-keyed dict shape — see that function's docstring for `trace_id` semantics.
     """
-    _link_prompts_to_trace(list(prompt_versions.values()), trace_id)
+    loaders = make_prompt_loaders(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME)
+    for prompt_version in prompt_versions.values():
+        loaders.link_to_trace(prompt_version, trace_id)
 
 
 def build_supervisor(

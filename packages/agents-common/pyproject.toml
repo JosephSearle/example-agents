@@ -15,6 +15,10 @@ dependencies = [
     # base_url is the client — no MLflow-specific LangChain integration needed. See
     # agents_common.models.get_chat_model.
     "langchain-openai>=0.2",
+    # Backs agents_common.retrieval.build_milvus_retriever, the shared retriever construction
+    # used by every RAG-family pattern (basic/adaptive/corrective/self/retrieve-rerank/
+    # query-decomposition-rag).
+    "langchain-milvus>=0.1",
     "pydantic>=2.9",
     "pydantic-settings>=2.5",
     "structlog>=25",

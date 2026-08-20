@@ -9,7 +9,7 @@ Centralising this here means a connection-pool or schema change happens once.
 from __future__ import annotations
 
 from contextlib import contextmanager
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.store.postgres import PostgresStore
@@ -33,6 +33,27 @@ _CHECKPOINTER_SETUP_LOCK_KEY = 727_401
 _STORE_SETUP_LOCK_KEY = 727_402
 
 
+class _SetsUp(Protocol):
+    def setup(self) -> None: ...
+
+
+def _setup_with_advisory_lock[T: _SetsUp](resource: T, uri: str, lock_key: int) -> T:
+    """Run `resource.setup()` inside a Postgres advisory lock, then return `resource`.
+
+    Shared by `get_checkpointer`/`get_store`: both do the identical "idempotent `.setup()`,
+    guarded by an advisory lock so concurrent first-time callers serialize on the migration
+    instead of racing it" dance (see `_CHECKPOINTER_SETUP_LOCK_KEY`'s comment above for why the
+    lock exists at all) — they differ only in which resource and which lock key.
+    """
+    with psycopg.connect(uri, autocommit=True) as lock_conn:
+        lock_conn.execute("SELECT pg_advisory_lock(%s)", (lock_key,))
+        try:
+            resource.setup()
+        finally:
+            lock_conn.execute("SELECT pg_advisory_unlock(%s)", (lock_key,))
+    return resource
+
+
 @contextmanager
 def get_checkpointer(postgres_uri: str | None = None) -> Iterator[PostgresSaver]:
     """Yield a `PostgresSaver`, running `.setup()` idempotently on first use.
@@ -49,13 +70,7 @@ def get_checkpointer(postgres_uri: str | None = None) -> Iterator[PostgresSaver]
     """
     uri = postgres_uri or get_settings().postgres_uri
     with PostgresSaver.from_conn_string(uri) as checkpointer:
-        with psycopg.connect(uri, autocommit=True) as lock_conn:
-            lock_conn.execute("SELECT pg_advisory_lock(%s)", (_CHECKPOINTER_SETUP_LOCK_KEY,))
-            try:
-                checkpointer.setup()
-            finally:
-                lock_conn.execute("SELECT pg_advisory_unlock(%s)", (_CHECKPOINTER_SETUP_LOCK_KEY,))
-        yield checkpointer
+        yield _setup_with_advisory_lock(checkpointer, uri, _CHECKPOINTER_SETUP_LOCK_KEY)
 
 
 @contextmanager
@@ -73,10 +88,4 @@ def get_store(postgres_uri: str | None = None) -> Iterator[PostgresStore]:
     """
     uri = postgres_uri or get_settings().postgres_uri
     with PostgresStore.from_conn_string(uri) as store:
-        with psycopg.connect(uri, autocommit=True) as lock_conn:
-            lock_conn.execute("SELECT pg_advisory_lock(%s)", (_STORE_SETUP_LOCK_KEY,))
-            try:
-                store.setup()
-            finally:
-                lock_conn.execute("SELECT pg_advisory_unlock(%s)", (_STORE_SETUP_LOCK_KEY,))
-        yield store
+        yield _setup_with_advisory_lock(store, uri, _STORE_SETUP_LOCK_KEY)

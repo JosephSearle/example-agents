@@ -29,14 +29,9 @@ from __future__ import annotations
 import operator
 from typing import TYPE_CHECKING, Annotated, Any, TypedDict
 
-from agents_common import get_chat_model
+from agents_common import get_chat_model, make_prompt_loaders
 from agents_common.judges import build_production_scorers
-from agents_common.prompts import (
-    PRODUCTION_ALIAS,
-    link_prompts_to_trace as _link_prompts_to_trace,
-    load_prompt_version,
-    prompt_text,
-)
+from agents_common.prompts import PRODUCTION_ALIAS, prompt_text
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send
 from pydantic import BaseModel, Field
@@ -155,9 +150,10 @@ def load_step_prompt_version(step: str, *, alias: str = _PROMPT_ALIAS) -> Prompt
         step: One of "orchestrate", "worker", "synthesize".
         alias: Prompt registry alias to load. Defaults to the production alias.
     """
-    return load_prompt_version(
+    loaders = make_prompt_loaders(
         f"{EXPERIMENT_NAME}-{step}", experiment_name=EXPERIMENT_NAME, alias=alias
     )
+    return loaders.load_version()
 
 
 def load_step_prompt(step: str, *, alias: str = _PROMPT_ALIAS) -> str:
@@ -176,7 +172,9 @@ def link_prompts_to_trace(prompt_versions: dict[str, PromptVersion], trace_id: s
     Thin wrapper around `agents_common.prompts.link_prompts_to_trace` that accepts this agent's
     step-keyed dict shape — see that function's docstring for `trace_id` semantics.
     """
-    _link_prompts_to_trace(list(prompt_versions.values()), trace_id)
+    loaders = make_prompt_loaders(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME)
+    for prompt_version in prompt_versions.values():
+        loaders.link_to_trace(prompt_version, trace_id)
 
 
 def build_orchestrator_graph(

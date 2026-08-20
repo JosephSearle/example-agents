@@ -20,14 +20,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, TypedDict
 
-from agents_common import get_chat_model
+from agents_common import get_chat_model, make_prompt_loaders
 from agents_common.judges import build_production_scorers
-from agents_common.prompts import (
-    PRODUCTION_ALIAS,
-    link_prompts_to_trace as _link_prompts_to_trace,
-    load_prompt_version,
-    prompt_text,
-)
+from agents_common.prompts import PRODUCTION_ALIAS, prompt_text
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 import structlog
@@ -114,12 +109,23 @@ class OptimizerState(TypedDict):
     iteration: int
 
 
+# One `PromptLoaders` bundle per step, each bound to this agent's per-step registry name
+# (`<EXPERIMENT_NAME>-<step>`) and the production alias — see provision_prompts.py's
+# per-subdirectory provisioning.
+_step_loaders = {
+    step: make_prompt_loaders(
+        f"{EXPERIMENT_NAME}-{step}", experiment_name=EXPERIMENT_NAME, alias=_PROMPT_ALIAS
+    )
+    for step in STEPS
+}
+
+
 def load_step_prompt_version(step: str, *, alias: str = _PROMPT_ALIAS) -> PromptVersion:
     """Fetch one step's prompt version from the MLflow prompt registry.
 
-    Thin wrapper around `agents_common.prompts.load_prompt_version`, binding this agent's
-    per-step registry name (`<EXPERIMENT_NAME>-<step>`) and experiment — each step is registered
-    as its own prompt name under this agent's single experiment; see provision_prompts.py's
+    Thin wrapper around `agents_common.make_prompt_loaders`, binding this agent's per-step
+    registry name (`<EXPERIMENT_NAME>-<step>`) and experiment — each step is registered as its
+    own prompt name under this agent's single experiment; see provision_prompts.py's
     per-subdirectory provisioning.
 
     Returns the full `PromptVersion` (not just its text) so a caller can pass it to
@@ -130,9 +136,11 @@ def load_step_prompt_version(step: str, *, alias: str = _PROMPT_ALIAS) -> Prompt
         step: One of "generate", "evaluate".
         alias: Prompt registry alias to load. Defaults to the production alias.
     """
-    return load_prompt_version(
+    if alias == _PROMPT_ALIAS:
+        return _step_loaders[step].load_version()
+    return make_prompt_loaders(
         f"{EXPERIMENT_NAME}-{step}", experiment_name=EXPERIMENT_NAME, alias=alias
-    )
+    ).load_version()
 
 
 def load_step_prompt(step: str, *, alias: str = _PROMPT_ALIAS) -> str:
@@ -148,10 +156,12 @@ def load_step_prompt(step: str, *, alias: str = _PROMPT_ALIAS) -> str:
 def link_prompts_to_trace(prompt_versions: dict[str, PromptVersion], trace_id: str | None) -> None:
     """Link this invocation's step prompt versions to a trace.
 
-    Thin wrapper around `agents_common.prompts.link_prompts_to_trace` that accepts this agent's
-    step-keyed dict shape — see that function's docstring for `trace_id` semantics.
+    Thin wrapper around `agents_common.make_prompt_loaders`'s per-step `link_to_trace` that
+    accepts this agent's step-keyed dict shape — see that function's docstring for `trace_id`
+    semantics.
     """
-    _link_prompts_to_trace(list(prompt_versions.values()), trace_id)
+    for step, prompt_version in prompt_versions.items():
+        _step_loaders[step].link_to_trace(prompt_version, trace_id)
 
 
 def build_evaluator_optimizer_graph(

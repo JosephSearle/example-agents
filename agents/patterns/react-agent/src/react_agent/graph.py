@@ -10,14 +10,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from agents_common import get_chat_model
+from agents_common import get_chat_model, make_prompt_loaders
 from agents_common.judges import build_production_scorers
-from agents_common.prompts import (
-    PRODUCTION_ALIAS,
-    link_prompts_to_trace,
-    load_prompt_version,
-    prompt_text,
-)
+from agents_common.prompts import PRODUCTION_ALIAS, prompt_text
 from langchain.agents import create_agent
 from pydantic import BaseModel, Field, ValidationError
 
@@ -103,7 +98,8 @@ def load_system_prompt_version(*, alias: str = _PROMPT_ALIAS) -> PromptVersion:
     Returns the full `PromptVersion` (not just its text) so a caller running the agent can pass
     it to `link_prompt_to_trace` afterwards — see `react_agent.__main__` for the intended usage.
     """
-    return load_prompt_version(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME, alias=alias)
+    loaders = make_prompt_loaders(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME, alias=alias)
+    return loaders.load_version()
 
 
 def load_system_prompt(*, alias: str = _PROMPT_ALIAS) -> str:
@@ -121,7 +117,8 @@ def link_prompt_to_trace(prompt_version: PromptVersion, trace_id: str | None) ->
     Thin wrapper around `agents_common.prompts.link_prompts_to_trace` for this agent's single
     system prompt — see that function's docstring for `trace_id` semantics.
     """
-    link_prompts_to_trace([prompt_version], trace_id)
+    loaders = make_prompt_loaders(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME)
+    loaders.link_to_trace(prompt_version, trace_id)
 
 
 def build_agent(

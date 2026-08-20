@@ -25,6 +25,19 @@ import requests
 
 from agents_common.config import Settings, get_settings
 
+# Placeholder passed to a client's api_key when the gateway/reranker has no auth enabled — several
+# HTTP clients in this module reject an empty-string/None api_key at construction time, and this
+# same convention is used gateway-side for its own upstream secret in provision_gateway_route.py.
+# Centralised so every "is auth actually enabled" check agrees on what "disabled" looks like.
+_UNAUTHENTICATED_PLACEHOLDER = "unused"
+
+
+def _bearer_headers(api_key: str) -> dict[str, str]:
+    """Build an Authorization header, or none, from a possibly-placeholder api_key."""
+    if api_key and api_key != _UNAUTHENTICATED_PLACEHOLDER:
+        return {"Authorization": f"Bearer {api_key}"}
+    return {}
+
 
 def get_chat_model(gateway_route: str, *, settings: Settings | None = None) -> ChatOpenAI:
     """Build a chat model bound to a named route on the self-hosted MLflow AI Gateway.
@@ -46,7 +59,7 @@ def get_chat_model(gateway_route: str, *, settings: Settings | None = None) -> C
         # OpenAIError before any request is made) — fall back to a placeholder when the
         # gateway has no auth enabled, same convention used for the gateway's own upstream
         # secret in provision_gateway_route.py.
-        api_key=settings.mlflow_tracking_token or "unused",  # type: ignore[arg-type]
+        api_key=settings.mlflow_tracking_token or _UNAUTHENTICATED_PLACEHOLDER,  # type: ignore[arg-type]
         model=gateway_route,
         base_url=settings.mlflow_gateway_base_url,
         # langchain_openai only auto-enables stream_usage when the client uses the default
@@ -91,8 +104,7 @@ class _GatewayEmbeddings(Embeddings):
     def __init__(self, *, gateway_route: str, tracking_uri: str, api_key: str) -> None:
         self._invocations_url = f"{tracking_uri}/gateway/{gateway_route}/mlflow/invocations"
         self._session = requests.Session()
-        if api_key and api_key != "unused":
-            self._session.headers["Authorization"] = f"Bearer {api_key}"
+        self._session.headers.update(_bearer_headers(api_key))
 
     def _embed(self, input_: list[str]) -> list[list[float]]:
         response = self._session.post(self._invocations_url, json={"input": input_}, timeout=60)
@@ -130,7 +142,7 @@ def get_embeddings(gateway_route: str, *, settings: Settings | None = None) -> E
     return _GatewayEmbeddings(
         gateway_route=gateway_route,
         tracking_uri=settings.mlflow_tracking_uri,
-        api_key=settings.mlflow_tracking_token or "unused",
+        api_key=settings.mlflow_tracking_token or _UNAUTHENTICATED_PLACEHOLDER,
     )
 
 
@@ -173,8 +185,7 @@ class _Reranker:
         self._rerank_url = f"{base_url.rstrip('/')}/rerank"
         self._model = model
         self._session = requests.Session()
-        if api_key and api_key != "unused":
-            self._session.headers["Authorization"] = f"Bearer {api_key}"
+        self._session.headers.update(_bearer_headers(api_key))
 
     def rerank(self, query: str, documents: list[str], *, top_n: int) -> list[RerankResult]:
         response = self._session.post(
@@ -202,6 +213,6 @@ def get_reranker(*, settings: Settings | None = None) -> _Reranker:
     settings = settings or get_settings()
     return _Reranker(
         base_url=settings.reranker_model_base_url,
-        api_key=settings.reranker_model_api_key or "unused",
+        api_key=settings.reranker_model_api_key or _UNAUTHENTICATED_PLACEHOLDER,
         model=settings.reranker_model_name,
     )

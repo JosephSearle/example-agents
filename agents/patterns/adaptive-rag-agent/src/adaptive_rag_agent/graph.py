@@ -33,18 +33,18 @@ without opening two other packages.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, Protocol, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, TypedDict
 
-from agents_common import get_chat_model, get_embeddings, get_settings
+from agents_common import get_chat_model, get_settings
 from agents_common.judges import build_production_scorers
 from agents_common.prompts import (
     PRODUCTION_ALIAS,
     link_prompts_to_trace as _link_prompts_to_trace,
-    load_prompt_version,
+    make_prompt_loaders,
     prompt_text,
 )
+from agents_common.retrieval import NO_CONTEXT_ANSWER, Retriever, build_milvus_retriever
 from basic_rag_agent.graph import COLLECTION_NAME
-from langchain_milvus import Milvus
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 import structlog
@@ -58,6 +58,7 @@ _logger = structlog.get_logger(__name__)
 
 __all__ = [
     "COLLECTION_NAME",
+    "DEFAULT_K",
     "EMBEDDING_GATEWAY_ROUTE",
     "GATEWAY_ROUTE",
     "MAX_RETRIES",
@@ -82,6 +83,10 @@ EMBEDDING_GATEWAY_ROUTE = "text-embedding"
 MAX_RETRIES = 2
 MAX_SUB_QUESTIONS = 4
 
+# Retrieval k — see basic-rag.md's own note on the k tradeoff (too low misses context, too high
+# floods the prompt with noise). Same convention as basic_rag_agent.graph.DEFAULT_K.
+DEFAULT_K = 4
+
 PROMPT_NAMES = (
     "route",
     "generate_direct",
@@ -92,8 +97,6 @@ PROMPT_NAMES = (
     "synthesize",
 )
 
-NO_CONTEXT_ANSWER = "I don't have relevant context to answer that question."
-
 PRODUCTION_SCORERS: list[tuple[Any, float]] = build_production_scorers(
     GATEWAY_ROUTE,
     [
@@ -102,22 +105,12 @@ PRODUCTION_SCORERS: list[tuple[Any, float]] = build_production_scorers(
     ],
 )
 
-_PROMPT_ALIAS = PRODUCTION_ALIAS
-
-
-class _Document(Protocol):
-    page_content: str
-
-
-class Retriever(Protocol):
-    """The shape `build_rag_graph`'s `retriever` override needs to satisfy.
-
-    See `basic_rag_agent.graph.Retriever`, which this mirrors exactly.
-    """
-
-    def invoke(self, query: str) -> list[_Document]:
-        """Return the retrieved documents for `query`."""
-        ...
+# One `PromptLoaders` per step, keyed the same way each step's registry name is built
+# (f"{EXPERIMENT_NAME}-{step}") — see `load_rag_prompt_version`/`load_rag_prompt` below.
+_prompt_loaders = {
+    step: make_prompt_loaders(f"{EXPERIMENT_NAME}-{step}", experiment_name=EXPERIMENT_NAME)
+    for step in PROMPT_NAMES
+}
 
 
 class ComplexityRoute(BaseModel):
@@ -173,19 +166,22 @@ class AdaptiveRagState(TypedDict):
     answer: str
 
 
-def load_rag_prompt_version(step: str, *, alias: str = _PROMPT_ALIAS) -> PromptVersion:
+def load_rag_prompt_version(step: str, *, alias: str = PRODUCTION_ALIAS) -> PromptVersion:
     """Fetch one step's prompt version from the MLflow prompt registry.
 
     Args:
         step: One of `PROMPT_NAMES`.
-        alias: Prompt registry alias to load. Defaults to the production alias.
+        alias: Prompt registry alias to load. Defaults to the production alias; only builds a
+            fresh loader when a non-default alias is requested.
     """
-    return load_prompt_version(
+    if alias == PRODUCTION_ALIAS:
+        return _prompt_loaders[step].load_version()
+    return make_prompt_loaders(
         f"{EXPERIMENT_NAME}-{step}", experiment_name=EXPERIMENT_NAME, alias=alias
-    )
+    ).load_version()
 
 
-def load_rag_prompt(step: str, *, alias: str = _PROMPT_ALIAS) -> str:
+def load_rag_prompt(step: str, *, alias: str = PRODUCTION_ALIAS) -> str:
     """Fetch one step's prompt text from the MLflow prompt registry."""
     return prompt_text(load_rag_prompt_version(step, alias=alias))
 
@@ -196,15 +192,6 @@ def link_prompts_to_trace(prompt_versions: dict[str, PromptVersion], trace_id: s
     Only the prompt versions actually supplied (typically whichever branch ran) need to be passed.
     """
     _link_prompts_to_trace(list(prompt_versions.values()), trace_id)
-
-
-def _build_default_retriever(embedding_gateway_route: str, milvus_uri: str, k: int) -> Retriever:
-    vector_store = Milvus(
-        embedding_function=get_embeddings(embedding_gateway_route),
-        collection_name=COLLECTION_NAME,
-        connection_args={"uri": milvus_uri},
-    )
-    return vector_store.as_retriever(search_kwargs={"k": k})  # type: ignore[return-value]
 
 
 def _build_single_step_nodes(
@@ -334,7 +321,7 @@ def build_rag_graph(
     gateway_route: str = GATEWAY_ROUTE,
     embedding_gateway_route: str = EMBEDDING_GATEWAY_ROUTE,
     milvus_uri: str | None = None,
-    k: int = 4,
+    k: int = DEFAULT_K,
     max_retries: int = MAX_RETRIES,
     prompts: dict[str, str] | None = None,
     retriever: Retriever | None = None,
@@ -370,8 +357,11 @@ def build_rag_graph(
     active_retriever = (
         retriever
         if retriever is not None
-        else _build_default_retriever(
-            embedding_gateway_route, milvus_uri or get_settings().milvus_uri, k
+        else build_milvus_retriever(
+            collection_name=COLLECTION_NAME,
+            embedding_gateway_route=embedding_gateway_route,
+            milvus_uri=milvus_uri or get_settings().milvus_uri,
+            k=k,
         )
     )
 

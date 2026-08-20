@@ -26,17 +26,12 @@ instead of an honest "I don't know."
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict
 
-from agents_common import get_chat_model, get_embeddings, get_settings
+from agents_common import get_chat_model, get_settings
 from agents_common.judges import build_production_scorers
-from agents_common.prompts import (
-    PRODUCTION_ALIAS,
-    link_prompts_to_trace,
-    load_prompt_version,
-    prompt_text,
-)
-from langchain_milvus import Milvus
+from agents_common.prompts import PRODUCTION_ALIAS, make_prompt_loaders, prompt_text
+from agents_common.retrieval import NO_CONTEXT_ANSWER, Retriever, build_milvus_retriever
 from langgraph.graph import END, START, StateGraph
 import structlog
 
@@ -89,10 +84,6 @@ COLLECTION_NAME = "basic_rag_agent"
 # floods the prompt with noise).
 DEFAULT_K = 4
 
-# Returned by `generate` instead of calling the model at all when retrieval comes back empty —
-# see this module's docstring on basic-rag.md's "silent failure on empty retrieval" warning.
-NO_CONTEXT_ANSWER = "I don't have relevant context to answer that question."
-
 # Scorers run continuously against a sampled slice of live production traces — see
 # agents_common.observability.register_production_monitors, provisioned via
 # packages/mlflow-server/scripts/provision_monitors.py. `grounded_in_context`'s guideline text is
@@ -108,23 +99,11 @@ PRODUCTION_SCORERS: list[tuple[Any, float]] = build_production_scorers(
 # generation step) — retrieval has no prompt of its own, it's a vector search.
 _PROMPT_ALIAS = PRODUCTION_ALIAS
 
-
-class _Document(Protocol):
-    page_content: str
-
-
-class Retriever(Protocol):
-    """The shape `build_rag_graph`'s `retriever` override needs to satisfy.
-
-    Matches `langchain_core.retrievers.BaseRetriever`'s `.invoke()` signature structurally
-    (Protocol, not a subclass requirement) — a real `langchain_milvus.Milvus(...).as_retriever()`
-    satisfies this automatically; tests pass a lightweight fake instead. See `build_rag_graph`'s
-    `retriever` parameter.
-    """
-
-    def invoke(self, query: str) -> list[_Document]:
-        """Return the retrieved documents for `query`."""
-        ...
+# Prebuilt load_version/load_text/link_to_trace trio for this agent's single generation prompt,
+# bound to the default alias — see `load_rag_prompt_version` for the non-default-alias path.
+_prompt_loaders = make_prompt_loaders(
+    EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME, alias=_PROMPT_ALIAS
+)
 
 
 class RagState(TypedDict):
@@ -143,42 +122,22 @@ class RagState(TypedDict):
 def load_rag_prompt_version(*, alias: str = _PROMPT_ALIAS) -> PromptVersion:
     """Fetch this agent's generation prompt version from the MLflow prompt registry.
 
-    Thin wrapper around `agents_common.prompts.load_prompt_version` binding this agent's own
-    registry name and experiment. See packages/mlflow-server/scripts/provision_prompts.py, which
-    registers `EXPERIMENT_NAME`'s prompt from packages/mlflow-server/prompts/basic-rag-agent.txt.
-
-    Returns the full `PromptVersion` (not just its text) so a caller running the agent can pass
-    it to `link_prompt_to_trace` afterwards — see `basic_rag_agent.__main__` for the intended
-    usage.
+    Thin wrapper around `_prompt_loaders` binding this agent's own registry name and experiment;
+    only builds a fresh loader when a non-default `alias` is requested.
     """
-    return load_prompt_version(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME, alias=alias)
+    if alias == _PROMPT_ALIAS:
+        return _prompt_loaders.load_version()
+    return make_prompt_loaders(
+        EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME, alias=alias
+    ).load_version()
 
 
 def load_rag_prompt(*, alias: str = _PROMPT_ALIAS) -> str:
-    """Fetch this agent's generation prompt text from the MLflow prompt registry.
-
-    Thin wrapper around `load_rag_prompt_version` for callers that only need the text (e.g.
-    `build_rag_graph`'s default path) and don't need to link the version to a trace afterwards.
-    """
+    """Fetch this agent's generation prompt text from the MLflow prompt registry."""
     return prompt_text(load_rag_prompt_version(alias=alias))
 
 
-def link_prompt_to_trace(prompt_version: PromptVersion, trace_id: str | None) -> None:
-    """Link the generation prompt version to a trace so the MLflow UI's trace view shows it.
-
-    Thin wrapper around `agents_common.prompts.link_prompts_to_trace` for this agent's single
-    prompt — see that function's docstring for `trace_id` semantics.
-    """
-    link_prompts_to_trace([prompt_version], trace_id)
-
-
-def _build_default_retriever(embedding_gateway_route: str, milvus_uri: str, k: int) -> Retriever:
-    vector_store = Milvus(
-        embedding_function=get_embeddings(embedding_gateway_route),
-        collection_name=COLLECTION_NAME,
-        connection_args={"uri": milvus_uri},
-    )
-    return vector_store.as_retriever(search_kwargs={"k": k})  # type: ignore[return-value]
+link_prompt_to_trace = _prompt_loaders.link_to_trace
 
 
 def build_rag_graph(
@@ -225,8 +184,11 @@ def build_rag_graph(
     active_retriever = (
         retriever
         if retriever is not None
-        else _build_default_retriever(
-            embedding_gateway_route, milvus_uri or get_settings().milvus_uri, k
+        else build_milvus_retriever(
+            collection_name=COLLECTION_NAME,
+            embedding_gateway_route=embedding_gateway_route,
+            milvus_uri=milvus_uri or get_settings().milvus_uri,
+            k=k,
         )
     )
 

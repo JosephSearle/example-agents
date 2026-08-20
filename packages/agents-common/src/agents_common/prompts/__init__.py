@@ -10,6 +10,7 @@ duplicated it verbatim, per the Rule of Three trade-off of not extracting on the
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import mlflow
@@ -22,6 +23,8 @@ from agents_common.config import get_settings
 _logger = structlog.get_logger(__name__)
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from mlflow.entities.model_registry import PromptVersion
 
 PRODUCTION_ALIAS = "production"
@@ -95,3 +98,50 @@ def link_prompts_to_trace(prompt_versions: list[PromptVersion], trace_id: str | 
         )
     except Exception:
         _logger.warning("link_prompt_versions_to_trace_failed", trace_id=trace_id, exc_info=True)
+
+
+@dataclass(frozen=True)
+class PromptLoaders:
+    """One registry name's `load_version`/`load_text`/`link_to_trace` trio, pre-bound.
+
+    Returned by `make_prompt_loaders` — see that function's docstring for why this exists.
+    """
+
+    load_version: Callable[[], PromptVersion]
+    load_text: Callable[[], str]
+    link_to_trace: Callable[[PromptVersion, str | None], None]
+
+
+def make_prompt_loaders(
+    registry_name: str, *, experiment_name: str, alias: str = PRODUCTION_ALIAS
+) -> PromptLoaders:
+    """Bind `load_prompt_version`/`prompt_text`/`link_prompts_to_trace` to one registry name.
+
+    Every agent in this repo re-declared the same three-function wrapper (fetch this agent's
+    prompt version, narrow it to text, link it to a trace) around the generic helpers above,
+    binding only its own `registry_name`/`experiment_name`. This factory replaces that
+    hand-written trio with one call, e.g.:
+
+        _prompt = make_prompt_loaders(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME)
+        load_rag_prompt_version = _prompt.load_version
+        load_rag_prompt = _prompt.load_text
+        link_prompt_to_trace = _prompt.link_to_trace
+
+    Args:
+        registry_name: The prompt's registered name — see `load_prompt_version`.
+        experiment_name: The MLflow experiment to make active before loading.
+        alias: Prompt registry alias to load. Defaults to the production alias.
+    """
+
+    def load_version() -> PromptVersion:
+        return load_prompt_version(registry_name, experiment_name=experiment_name, alias=alias)
+
+    def load_text() -> str:
+        return prompt_text(load_version())
+
+    def link_to_trace(prompt_version: PromptVersion, trace_id: str | None) -> None:
+        link_prompts_to_trace([prompt_version], trace_id)
+
+    return PromptLoaders(
+        load_version=load_version, load_text=load_text, link_to_trace=link_to_trace
+    )

@@ -47,4 +47,4 @@ def test_thread_state_persists_across_graph_rebuilds(
 
     assert state.values["final_answer"] == "a canned final answer"
     assert state.values["research_rounds"] == 1
-    assert any(m.startswith("[researcher]") for m in state.values["messages"])
+    assert any(m["role"] == "researcher" for m in state.values["messages"])

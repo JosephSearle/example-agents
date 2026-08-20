@@ -36,14 +36,9 @@ from __future__ import annotations
 import operator
 from typing import TYPE_CHECKING, Annotated, Any, Literal, TypedDict
 
-from agents_common import get_chat_model
+from agents_common import get_chat_model, make_prompt_loaders
 from agents_common.judges import build_production_scorers
-from agents_common.prompts import (
-    PRODUCTION_ALIAS,
-    link_prompts_to_trace as _link_prompts_to_trace,
-    load_prompt_version,
-    prompt_text,
-)
+from agents_common.prompts import PRODUCTION_ALIAS, prompt_text
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 import structlog
@@ -61,6 +56,7 @@ __all__ = [
     "GATEWAY_ROUTE",
     "PRODUCTION_SCORERS",
     "Critique",
+    "MeshMessage",
     "MeshState",
     "ResearchFinding",
     "build_mesh_graph",
@@ -133,6 +129,18 @@ class Critique(BaseModel):
     )
 
 
+class MeshMessage(TypedDict):
+    """One peer's contribution to the mesh transcript.
+
+    Replaces the earlier `f"[role] text"`-prefixed plain-string convention: peers used to be
+    recovered by prefix-matching (`m.startswith("[critic]")`), which is a representation smell —
+    this makes the author an explicit, typed field instead of text baked into the string.
+    """
+
+    role: str
+    content: str
+
+
 class MeshState(TypedDict):
     """State threaded through the mesh.
 
@@ -144,7 +152,7 @@ class MeshState(TypedDict):
     """
 
     task: str
-    messages: Annotated[list[str], operator.add]
+    messages: Annotated[list[MeshMessage], operator.add]
     needs_critique: bool
     needs_more_research: bool
     research_rounds: int
@@ -166,9 +174,10 @@ def load_agent_prompt_version(name: str, *, alias: str = _PROMPT_ALIAS) -> Promp
         name: One of "researcher", "critic", "writer".
         alias: Prompt registry alias to load. Defaults to the production alias.
     """
-    return load_prompt_version(
+    loaders = make_prompt_loaders(
         f"{EXPERIMENT_NAME}-{name}", experiment_name=EXPERIMENT_NAME, alias=alias
     )
+    return loaders.load_version()
 
 
 def load_agent_prompt(name: str, *, alias: str = _PROMPT_ALIAS) -> str:
@@ -186,7 +195,9 @@ def link_prompts_to_trace(prompt_versions: dict[str, PromptVersion], trace_id: s
     Thin wrapper around `agents_common.prompts.link_prompts_to_trace` that accepts this agent's
     name-keyed dict shape — see that function's docstring for `trace_id` semantics.
     """
-    _link_prompts_to_trace(list(prompt_versions.values()), trace_id)
+    loaders = make_prompt_loaders(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME)
+    for prompt_version in prompt_versions.values():
+        loaders.link_to_trace(prompt_version, trace_id)
 
 
 def build_mesh_graph(
@@ -225,7 +236,7 @@ def build_mesh_graph(
 
     def researcher(state: MeshState) -> dict[str, Any]:
         prior_critique = next(
-            (m for m in reversed(state["messages"]) if m.startswith("[critic]")), None
+            (m["content"] for m in reversed(state["messages"]) if m["role"] == "critic"), None
         )
         context = f"\n\nPrior critique to address:\n{prior_critique}" if prior_critique else ""
         # Bound fresh per call (not once at graph-build time): across a researcher<->critic loop
@@ -240,7 +251,7 @@ def build_mesh_graph(
             "researched", research_rounds=research_rounds, needs_critique=result.needs_critique
         )
         return {
-            "messages": [f"[researcher] {result.finding}"],
+            "messages": [{"role": "researcher", "content": result.finding}],
             "needs_critique": result.needs_critique,
             "research_rounds": research_rounds,
         }
@@ -255,14 +266,16 @@ def build_mesh_graph(
         return decision
 
     def critic(state: MeshState) -> dict[str, Any]:
-        last_finding = next(m for m in reversed(state["messages"]) if m.startswith("[researcher]"))
+        last_finding = next(
+            m["content"] for m in reversed(state["messages"]) if m["role"] == "researcher"
+        )
         result = model.with_structured_output(Critique).invoke(
             f"{prompts['critic']}\n\nTask: {state['task']}\n\n{last_finding}"
         )
         assert isinstance(result, Critique)
         _logger.info("critiqued", needs_more_research=result.needs_more_research)
         return {
-            "messages": [f"[critic] {result.critique}"],
+            "messages": [{"role": "critic", "content": result.critique}],
             "needs_more_research": result.needs_more_research,
         }
 
@@ -280,12 +293,15 @@ def build_mesh_graph(
         )
         return decision
 
-    def writer(state: MeshState) -> dict[str, str | list[str]]:
-        transcript = "\n\n".join(state["messages"])
+    def writer(state: MeshState) -> dict[str, str | list[MeshMessage]]:
+        transcript = "\n\n".join(f"[{m['role']}] {m['content']}" for m in state["messages"])
         response = model.invoke(f"{prompts['writer']}\n\nTask: {state['task']}\n\n{transcript}")
         answer = str(response.content)
         _logger.info("written", transcript_message_count=len(state["messages"]))
-        return {"messages": [f"[writer] {answer}"], "final_answer": answer}
+        return {
+            "messages": [{"role": "writer", "content": answer}],
+            "final_answer": answer,
+        }
 
     graph = StateGraph(MeshState)
     graph.add_node("researcher", researcher)

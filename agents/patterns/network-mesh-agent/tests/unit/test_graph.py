@@ -94,7 +94,7 @@ def test_researcher_goes_straight_to_writer_when_no_critique_needed(
 
     assert result["final_answer"] == "the final answer"
     assert len(fake_model.writer_calls) == 1
-    assert not any(m.startswith("[critic]") for m in result["messages"])
+    assert not any(m["role"] == "critic" for m in result["messages"])
 
 
 def test_researcher_routes_to_critic_when_critique_needed(
@@ -109,7 +109,7 @@ def test_researcher_routes_to_critic_when_critique_needed(
     graph = build_mesh_graph(checkpointer=in_memory_checkpointer, agent_prompts=_AGENT_PROMPTS)
     result = graph.invoke(_initial_state("some task"), config=invoke_config("thread-critique"))
 
-    assert any(m == "[critic] looks fine" for m in result["messages"])
+    assert any(m == {"role": "critic", "content": "looks fine"} for m in result["messages"])
     assert result["final_answer"] == "the final answer"
 
 
@@ -133,11 +133,11 @@ def test_critic_routes_back_to_researcher_when_more_research_needed(
     # Two researcher rounds, one critic round, then straight to the writer — the route-back edge
     # actually fired, and the mesh still converged.
     assert result["research_rounds"] == 2
-    assert [m.split("]")[0] for m in result["messages"]] == [
-        "[researcher",
-        "[critic",
-        "[researcher",
-        "[writer",
+    assert [m["role"] for m in result["messages"]] == [
+        "researcher",
+        "critic",
+        "researcher",
+        "writer",
     ]
 
 

@@ -30,14 +30,9 @@ from __future__ import annotations
 import operator
 from typing import TYPE_CHECKING, Annotated, Any, Literal, TypedDict
 
-from agents_common import get_chat_model
+from agents_common import get_chat_model, make_prompt_loaders
 from agents_common.judges import build_production_scorers
-from agents_common.prompts import (
-    PRODUCTION_ALIAS,
-    link_prompts_to_trace as _link_prompts_to_trace,
-    load_prompt_version,
-    prompt_text,
-)
+from agents_common.prompts import PRODUCTION_ALIAS, prompt_text
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 import structlog
@@ -134,13 +129,24 @@ class VoteState(TypedDict):
     verdict: str
 
 
+# One `PromptLoaders` bundle per section, each bound to this agent's per-section registry name
+# (`<EXPERIMENT_NAME>-<section>`) and the production alias — see provision_prompts.py's
+# per-subdirectory provisioning.
+_section_loaders = {
+    section: make_prompt_loaders(
+        f"{EXPERIMENT_NAME}-{section}", experiment_name=EXPERIMENT_NAME, alias=_PROMPT_ALIAS
+    )
+    for section in SECTIONS
+}
+
+
 def load_section_prompt_version(section: str, *, alias: str = _PROMPT_ALIAS) -> PromptVersion:
     """Fetch one section's instruction prompt version from the MLflow prompt registry.
 
-    Thin wrapper around `agents_common.prompts.load_prompt_version`, binding this agent's
-    per-section registry name (`<EXPERIMENT_NAME>-<section>`) and experiment — each section is
-    registered as its own prompt name under this agent's single experiment; see
-    provision_prompts.py's per-subdirectory provisioning.
+    Thin wrapper around `agents_common.make_prompt_loaders`, binding this agent's per-section
+    registry name (`<EXPERIMENT_NAME>-<section>`) and experiment — each section is registered as
+    its own prompt name under this agent's single experiment; see provision_prompts.py's
+    per-subdirectory provisioning.
 
     Returns the full `PromptVersion` (not just its text) so a caller can pass it to
     `link_prompts_to_trace` afterwards — see `parallelization_agent.__main__` for the intended
@@ -150,9 +156,11 @@ def load_section_prompt_version(section: str, *, alias: str = _PROMPT_ALIAS) -> 
         section: One of "summarize", "assess_severity", "extract_action_items".
         alias: Prompt registry alias to load. Defaults to the production alias.
     """
-    return load_prompt_version(
+    if alias == _PROMPT_ALIAS:
+        return _section_loaders[section].load_version()
+    return make_prompt_loaders(
         f"{EXPERIMENT_NAME}-{section}", experiment_name=EXPERIMENT_NAME, alias=alias
-    )
+    ).load_version()
 
 
 def load_section_prompt(section: str, *, alias: str = _PROMPT_ALIAS) -> str:
@@ -168,10 +176,12 @@ def load_section_prompt(section: str, *, alias: str = _PROMPT_ALIAS) -> str:
 def link_prompts_to_trace(prompt_versions: dict[str, PromptVersion], trace_id: str | None) -> None:
     """Link this invocation's section prompt version(s) to a trace.
 
-    Thin wrapper around `agents_common.prompts.link_prompts_to_trace` that accepts this agent's
-    section-keyed dict shape — see that function's docstring for `trace_id` semantics.
+    Thin wrapper around `agents_common.make_prompt_loaders`'s per-section `link_to_trace` that
+    accepts this agent's section-keyed dict shape — see that function's docstring for `trace_id`
+    semantics.
     """
-    _link_prompts_to_trace(list(prompt_versions.values()), trace_id)
+    for section, prompt_version in prompt_versions.items():
+        _section_loaders[section].link_to_trace(prompt_version, trace_id)
 
 
 def build_sectioning_graph(

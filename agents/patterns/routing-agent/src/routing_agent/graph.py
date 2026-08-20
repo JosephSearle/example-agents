@@ -15,14 +15,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, TypedDict
 
-from agents_common import get_chat_model
+from agents_common import get_chat_model, make_prompt_loaders
 from agents_common.judges import build_production_scorers
-from agents_common.prompts import (
-    PRODUCTION_ALIAS,
-    link_prompts_to_trace as _link_prompts_to_trace,
-    load_prompt_version,
-    prompt_text,
-)
+from agents_common.prompts import PRODUCTION_ALIAS, prompt_text
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 import structlog
@@ -114,9 +109,10 @@ def load_route_prompt_version(category: str, *, alias: str = _PROMPT_ALIAS) -> P
         category: One of "general", "refund", "technical".
         alias: Prompt registry alias to load. Defaults to the production alias.
     """
-    return load_prompt_version(
+    loaders = make_prompt_loaders(
         f"{EXPERIMENT_NAME}-{category}", experiment_name=EXPERIMENT_NAME, alias=alias
     )
+    return loaders.load_version()
 
 
 def load_route_prompt(category: str, *, alias: str = _PROMPT_ALIAS) -> str:
@@ -136,7 +132,9 @@ def link_prompts_to_trace(prompt_versions: dict[str, PromptVersion], trace_id: s
     prompt versions actually dictionary-supplied (typically just the one category that fired)
     need to be passed in.
     """
-    _link_prompts_to_trace(list(prompt_versions.values()), trace_id)
+    loaders = make_prompt_loaders(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME)
+    for prompt_version in prompt_versions.values():
+        loaders.link_to_trace(prompt_version, trace_id)
 
 
 def build_router(

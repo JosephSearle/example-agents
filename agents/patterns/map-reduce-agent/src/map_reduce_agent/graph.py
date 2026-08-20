@@ -20,14 +20,9 @@ from __future__ import annotations
 import operator
 from typing import TYPE_CHECKING, Annotated, Any, TypedDict
 
-from agents_common import get_chat_model
+from agents_common import get_chat_model, make_prompt_loaders
 from agents_common.judges import build_production_scorers
-from agents_common.prompts import (
-    PRODUCTION_ALIAS,
-    link_prompts_to_trace,
-    load_prompt_version,
-    prompt_text,
-)
+from agents_common.prompts import PRODUCTION_ALIAS, prompt_text
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send
 import structlog
@@ -103,18 +98,30 @@ class JokeState(TypedDict):
     topic: str
 
 
+# Bound to this agent's own registry name and experiment. See
+# packages/mlflow-server/scripts/provision_prompts.py, which registers `EXPERIMENT_NAME`'s prompt
+# from packages/mlflow-server/prompts/map-reduce-agent.txt.
+_prompt_loaders = make_prompt_loaders(
+    EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME, alias=_PROMPT_ALIAS
+)
+
+
 def load_joke_prompt_version(*, alias: str = _PROMPT_ALIAS) -> PromptVersion:
     """Fetch this agent's worker prompt version from the MLflow prompt registry.
 
-    Thin wrapper around `agents_common.prompts.load_prompt_version` binding this agent's own
-    registry name and experiment. See packages/mlflow-server/scripts/provision_prompts.py, which
-    registers `EXPERIMENT_NAME`'s prompt from packages/mlflow-server/prompts/map-reduce-agent.txt.
+    Thin wrapper around `agents_common.make_prompt_loaders` binding this agent's own registry name
+    and experiment. See packages/mlflow-server/scripts/provision_prompts.py, which registers
+    `EXPERIMENT_NAME`'s prompt from packages/mlflow-server/prompts/map-reduce-agent.txt.
 
     Returns the full `PromptVersion` (not just its text) so a caller running the agent can pass
     it to `link_prompt_to_trace` afterwards — see `map_reduce_agent.__main__` for the intended
     usage.
     """
-    return load_prompt_version(EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME, alias=alias)
+    if alias == _PROMPT_ALIAS:
+        return _prompt_loaders.load_version()
+    return make_prompt_loaders(
+        EXPERIMENT_NAME, experiment_name=EXPERIMENT_NAME, alias=alias
+    ).load_version()
 
 
 def load_joke_prompt(*, alias: str = _PROMPT_ALIAS) -> str:
@@ -130,10 +137,10 @@ def load_joke_prompt(*, alias: str = _PROMPT_ALIAS) -> str:
 def link_prompt_to_trace(prompt_version: PromptVersion, trace_id: str | None) -> None:
     """Link the worker prompt version to a trace so the MLflow UI's trace view shows it.
 
-    Thin wrapper around `agents_common.prompts.link_prompts_to_trace` for this agent's single
-    worker prompt — see that function's docstring for `trace_id` semantics.
+    Thin wrapper around `agents_common.make_prompt_loaders`'s `link_to_trace` for this agent's
+    single worker prompt — see that function's docstring for `trace_id` semantics.
     """
-    link_prompts_to_trace([prompt_version], trace_id)
+    _prompt_loaders.link_to_trace(prompt_version, trace_id)
 
 
 def build_map_reduce_graph(

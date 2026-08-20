@@ -74,6 +74,7 @@ name = "agents-common"
 version = "0.1.0"
 source = { editable = "packages/agents-common" }
 dependencies = [
+    { name = "langchain-milvus" },
     { name = "langchain-openai" },
     { name = "langgraph" },
     { name = "langgraph-checkpoint-postgres" },
@@ -92,6 +93,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "langchain-milvus", specifier = ">=0.1" },
     { name = "langchain-openai", specifier = ">=0.2" },
     { name = "langgraph", specifier = ">=0.6" },
     { name = "langgraph-checkpoint-postgres", specifier = ">=2.0" },
