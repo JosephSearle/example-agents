@@ -233,7 +233,14 @@ configured this way.
 | `SELFHOSTED_MODEL_API_KEY` | *(empty)* | **Yes** | Credential the *gateway* uses to call that model — distinct from `MLFLOW_TRACKING_TOKEN`. Only read by `make provision-gateway` |
 | `SELFHOSTED_MODEL_NAME` | `gpt-oss-120b` | No | Model name sent to the self-hosted endpoint. Only read by `make provision-gateway` |
 | `GATEWAY_ROUTE_NAME` | `gpt-oss-120b` | No | Gateway route name agent code calls via `get_chat_model(...)` — must match `react_agent.GATEWAY_ROUTE`. Only read by `make provision-gateway` |
-| `MILVUS_URI` | `http://localhost:19530` | No | No example agent uses this yet — see `packages/milvus/README.md` |
+| `SELFHOSTED_EMBEDDING_MODEL_BASE_URL` | *(empty)* | No | Base URL of an embeddings-capable self-hosted endpoint — a *second* gateway route, provisioned alongside the chat one. Only read by `make provision-gateway`; unset skips this route entirely (with a warning), so it's optional until you have `basic-rag-agent`'s embeddings collection to provision |
+| `SELFHOSTED_EMBEDDING_MODEL_API_KEY` | *(empty)* | No | Same idea as `SELFHOSTED_MODEL_API_KEY`, for the embeddings endpoint |
+| `SELFHOSTED_EMBEDDING_MODEL_NAME` | *(empty)* | No | Model name sent to the self-hosted embeddings endpoint |
+| `EMBEDDING_GATEWAY_ROUTE_NAME` | *(empty)* | No | Gateway route name `get_embeddings(...)` calls — must match `basic_rag_agent.EMBEDDING_GATEWAY_ROUTE` |
+| `MILVUS_URI` | `http://localhost:19530` | No | Overridden to `http://milvus-standalone:19530` for containerized services — used by every RAG-pattern agent and `packages/milvus/scripts/provision_collections.py` |
+| `RERANKER_MODEL_BASE_URL` | *(empty)* | No | Base URL of a self-hosted cross-encoder reranker, called directly (not gateway-provisioned — see `agents_common.models.get_reranker`). Only needed for `retrieve-rerank-agent` |
+| `RERANKER_MODEL_API_KEY` | *(empty)* | No | Credential for the reranker endpoint above, if it requires one |
+| `RERANKER_MODEL_NAME` | *(empty)* | No | Model name sent in the reranker request body |
 | `LOG_LEVEL` | `INFO` | No | — |
 
 pgAdmin's own login (`admin@example-agents.dev` / `admin`) is hardcoded in `docker-compose.yml`
@@ -256,8 +263,18 @@ non-local.
 | Supervisor multi-agent | Tier 2 — `create_agent` composed twice (sub-agents as delegate tools) | **Implemented** | `agents/patterns/supervisor-agent` |
 | Swarm multi-agent | Tier 2 — LangGraph + `langgraph-swarm` | **Implemented** | `agents/patterns/swarm-agent` |
 | Network / Mesh | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/network-mesh-agent` |
+| Basic RAG | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/basic-rag-agent` |
+| Retrieve & Rerank | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/retrieve-rerank-agent` |
+| Corrective RAG (CRAG) | workflow — raw `StateGraph`, conditional edges | **Implemented** | `agents/patterns/corrective-rag-agent` |
+| Query Decomposition | workflow — raw `StateGraph` | **Implemented** | `agents/patterns/query-decomposition-agent` |
+| Self-RAG | workflow — raw `StateGraph`, cyclic | **Implemented** | `agents/patterns/self-rag-agent` |
+| Adaptive RAG | workflow — raw `StateGraph`, conditional entry point | **Implemented** | `agents/patterns/adaptive-rag-agent` |
 
-Every pattern in this table has a full writeup under
+All six patterns from the separate [`docs/patterns/rag/`](docs/patterns/rag/) series are now
+implemented: retrieve-then-generate over a Milvus collection, a cross-encoder reranking pass, a
+document-grading corrective loop, sub-question decomposition, self-correcting generation, and a
+complexity router that dispatches to the others. Every pattern in this table has a full writeup
+under
 [`docs/patterns/agent/`](docs/patterns/agent/) — see
 **[agents/patterns/README.md](agents/patterns/README.md)** for the doc-to-package index. See
 **[docs/decisions/0001-tech-stack.md](docs/decisions/0001-tech-stack.md)** for the full
@@ -291,7 +308,9 @@ example-agents/
 │   │   │                               # provision_monitors.py, provision_mcp_registry.py
 │   │   └── datasets/                   # git-tracked eval dataset seed JSONL, one per agent
 │   └── milvus/                         # self-hosted Milvus standalone + Attu (compose wiring)
-│       └── milvus_mcp_server.py         # milvus-mcp over streamable-http (its own compose service)
+│       ├── milvus_mcp_server.py         # milvus-mcp over streamable-http (its own compose service)
+│       ├── scripts/                    # provision_collections.py
+│       └── collections/                # git-tracked seed JSONL, one per Milvus collection
 └── infra/postgres/
     ├── init.sql                        # creates the second (mlflow) logical database
     └── servers.json                    # pre-registers postgres with pgAdmin on first boot
@@ -304,8 +323,14 @@ example-agents/
 - [ ] Swarm multi-agent (`agents/patterns/swarm-agent`)
 - [ ] Remaining workflow-pattern stubs (`agents/patterns/{prompt-chaining,routing,parallelization,
       orchestrator-workers,evaluator-optimizer,map-reduce,network-mesh}-agent`)
-- [ ] First RAG-pattern agent using `packages/milvus` — `Settings.milvus_uri` is already wired
-      up in `agents-common`, waiting on an agent to use it
+- [x] First RAG-pattern agent using `packages/milvus` — `agents/patterns/basic-rag-agent`
+      (retrieve-then-generate)
+- [x] Retrieve & Rerank — `agents/patterns/retrieve-rerank-agent`
+- [x] Corrective RAG (CRAG) — `agents/patterns/corrective-rag-agent`
+- [x] Query Decomposition — `agents/patterns/query-decomposition-agent`
+- [x] Self-RAG — `agents/patterns/self-rag-agent`
+- [x] Adaptive RAG — `agents/patterns/adaptive-rag-agent`; the full `docs/patterns/rag/` series is
+      now implemented
 - [x] First Tier 3 (`deepagents`) usage — `agents/examples/experiment-analysis-agent`, backing
       `make analyze-experiment` / MLflow AI Issue Discovery
 

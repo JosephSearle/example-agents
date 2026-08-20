@@ -29,6 +29,12 @@ AGENTS=(
   supervisor-agent
   swarm-agent
   network-mesh-agent
+  basic-rag-agent
+  retrieve-rerank-agent
+  corrective-rag-agent
+  query-decomposition-agent
+  self-rag-agent
+  adaptive-rag-agent
 )
 
 usage() {
@@ -68,6 +74,18 @@ set_default_args() {
       set -- "I'd like a refund for invoice INV-1002." ;;
     network-mesh-agent)
       set -- "Summarize recent trends in vector database indexing." ;;
+    basic-rag-agent)
+      set -- "What's the difference between supervisor and swarm/handoffs in this repo?" ;;
+    retrieve-rerank-agent)
+      set -- "What's the difference between supervisor and swarm/handoffs in this repo?" ;;
+    corrective-rag-agent)
+      set -- "What framework tier does react-agent use?" ;;
+    query-decomposition-agent)
+      set -- "What framework tier does react-agent use, and what tier does swarm-agent use?" ;;
+    self-rag-agent)
+      set -- "What framework tier does react-agent use?" ;;
+    adaptive-rag-agent)
+      set -- "What framework tier does react-agent use?" ;;
   esac
   printf '%s\0' "$@"
 }

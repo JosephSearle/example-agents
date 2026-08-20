@@ -6,6 +6,8 @@ the piece is polished. See
 [docs/patterns/agent/evaluator-optimizer.md](../../../docs/patterns/agent/evaluator-optimizer.md)
 for the full writeup.
 
+![Evaluator-Optimizer workflow: a Task goes to a Generator producing a Draft, which an Evaluator judges; if it needs refinement, feedback loops back to the Generator for another iteration, and once it meets criteria it proceeds to Output](../../../public/images/agent/evaluator-optimizer.svg)
+
 **Reach for this when:** there are clear evaluation criteria and iterative refinement provides
 measurable value — specifically when LLM responses can be demonstrably improved by feedback, and
 the LLM can meaningfully provide that feedback on its own output. If neither holds, this pattern

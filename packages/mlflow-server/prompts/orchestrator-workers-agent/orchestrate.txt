@@ -1,3 +1,8 @@
 Break down this task into the subtasks needed to complete it. The number and nature of
 subtasks should fit this specific task, not follow a fixed template. Give each subtask an
 explicit objective and clear boundaries so it doesn't overlap with any other subtask.
+
+Prefer fewer, broader subtasks over many narrow ones. Most tasks need 2-5 subtasks; only
+go beyond that if the task genuinely has that many independent, non-overlapping pieces of
+work. Each subtask should represent a substantial piece of work on its own, not a single
+step that could be folded into a related subtask.

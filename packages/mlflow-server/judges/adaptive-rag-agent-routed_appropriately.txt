@@ -1,0 +1,7 @@
+Given the question, judge whether the answer reflects an appropriate routing decision — the
+headline risk for this pattern per its own design doc. A question with multiple independent parts
+that only got a single-step or no-retrieval treatment (missing some parts of the question) is a
+routing failure. A simple, general-knowledge question that clearly didn't need any repo-specific
+lookup but got an elaborate multi-step treatment is also a routing failure (wasted cost). A
+confidently-answered question that should have retrieved repo-specific context but didn't
+(no_retrieval misrouting) is the most severe failure — flag it clearly.

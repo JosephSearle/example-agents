@@ -1,0 +1,3 @@
+The answer should be grounded in the retrieved (and relevance-graded) context rather than
+introducing claims that context doesn't support. If the context is empty or insufficient even
+after a corrective retry, the answer should say so explicitly instead of confidently guessing.

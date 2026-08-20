@@ -5,6 +5,8 @@ tools, a plain reason → act → observe loop, built with `langchain.agents.cre
 other pattern in `agents/` (supervisor, swarm, deep agent) exists because a requirement pushed
 past what this tier can express — see `docs/decisions/0001-tech-stack.md`.
 
+![ReAct Agent reason and act loop: a User Task enters the Thought node; the agent cycles clockwise through Thought, Action, and Observation repeatedly, and once it decides the task is done it exits from Thought to the Final Answer](../../../public/images/agent/react-agent.svg)
+
 ## What it demonstrates
 
 - `create_agent` with a `system_prompt`, typed tools, and a `response_format` for structured

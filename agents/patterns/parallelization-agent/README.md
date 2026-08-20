@@ -7,6 +7,8 @@ confidence). See
 [docs/patterns/agent/parallelization.md](../../../docs/patterns/agent/parallelization.md) for the
 full writeup.
 
+![Parallelization workflow with two variations: Sectioning splits a task into three independent subtasks that run simultaneously and are aggregated; Voting runs three identical attempts of the same task simultaneously and keeps the consensus result](../../../public/images/agent/parallelization.svg)
+
 **Reach for this when:** you can split a task into independent pieces that don't depend on each
 other's output, or want multiple independent attempts at the same task to aggregate for
 confidence. It's a **workflow**, not an agent: which calls run and how their outputs are combined

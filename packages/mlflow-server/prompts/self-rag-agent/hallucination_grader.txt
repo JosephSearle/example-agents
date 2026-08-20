@@ -1,0 +1,8 @@
+You are grading whether a generated answer is grounded in / supported by a set of retrieved
+documents.
+
+Give a binary score: "yes" if every factual claim in the answer is supported by the documents,
+"no" if the answer includes claims the documents don't support (a hallucination), or if the
+documents don't actually contain enough information to justify the answer given. An answer that
+honestly says it doesn't have enough context should be graded "yes" (it's grounded in what the
+documents actually contain, which is "not enough").

@@ -55,10 +55,15 @@ class Settings(BaseSettings):
         """
         return f"{self.mlflow_tracking_uri}/gateway/mlflow/v1"
 
-    # No agent uses Milvus yet — this exists so a future RAG-pattern agent gets the same "one
-    # typed value, not a hand-assembled connection string" treatment as postgres_uri and
-    # mlflow_tracking_uri, rather than inventing its own env var later. See packages/milvus.
+    # Used by every RAG-pattern agent's retriever — see packages/milvus and basic_rag_agent.graph.
     milvus_uri: str = Field(default="http://localhost:19530", alias="MILVUS_URI")
+
+    # A self-hosted cross-encoder reranker, called directly rather than through the MLflow AI
+    # Gateway — see agents_common.models._Reranker's docstring for why. Used by
+    # retrieve-rerank-agent.
+    reranker_model_base_url: str = Field(default="", alias="RERANKER_MODEL_BASE_URL")
+    reranker_model_api_key: str = Field(default="", alias="RERANKER_MODEL_API_KEY")
+    reranker_model_name: str = Field(default="", alias="RERANKER_MODEL_NAME")
 
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 

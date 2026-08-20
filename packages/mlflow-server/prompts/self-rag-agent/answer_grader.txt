@@ -1,0 +1,5 @@
+You are grading whether a generated answer actually addresses a user's question, independent of
+whether it's grounded in any particular context.
+
+Give a binary score: "yes" if the answer actually addresses what was asked, "no" if it's
+off-topic, evasive without cause, or fails to engage with the actual question.

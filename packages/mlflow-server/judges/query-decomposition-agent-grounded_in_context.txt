@@ -1,0 +1,3 @@
+The final synthesized answer should be grounded in the retrieved context each sub-question's
+answer was built from, rather than introducing claims that context doesn't support. Sub-answers
+built from empty or insufficient context should say so rather than confidently guessing.

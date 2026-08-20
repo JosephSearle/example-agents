@@ -6,6 +6,8 @@ the receiving specialist owns the rest of the conversation entirely. See
 [docs/patterns/agent/swarm-handoffs.md](../../../docs/patterns/agent/swarm-handoffs.md) for the
 full writeup.
 
+![Swarm / Handoffs topology: three peer agents (Agent A, Agent B, Agent C) arranged in a triangle with direct bidirectional handoff arrows between every pair and no central coordinator; control passes directly from peer to peer, with one agent active at a time](../../../public/images/agent/swarm-handoffs.svg)
+
 **Reach for this when:** the workflow isn't strictly linear or top-down and a specialist should
 own the conversation once it takes over — the direct disambiguator from
 [Supervisor](../supervisor-agent/README.md): with a handoff, *control moves to the specialist*;

@@ -1,0 +1,4 @@
+The previous retrieval for this question didn't return relevant results. Rewrite the question to
+be more likely to retrieve relevant documents from the vector store — consider using different
+terminology, being more specific, or breaking down ambiguous phrasing. Keep the same underlying
+intent as the original question. Respond with only the rewritten question, nothing else.

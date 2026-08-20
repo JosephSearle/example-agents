@@ -1,0 +1,11 @@
+Classify the question below into exactly one complexity tier:
+
+- "no_retrieval": you can answer confidently from general world knowledge, with no need to look
+  anything up in this repo's own documentation (e.g. general programming/ML concepts).
+- "single_step": answering needs a single retrieval pass against this repo's own documentation —
+  one focused lookup is enough.
+- "multi_step": the question has multiple independent parts, each needing its own retrieval
+  against this repo's own documentation, before the parts can be combined into one answer.
+
+Be conservative about "no_retrieval" — if there's any real chance this repo's own docs contain a
+more accurate or specific answer than your general knowledge, don't pick it.

@@ -1,0 +1,3 @@
+Break the question below into 2-4 independent, self-contained sub-questions that together cover
+everything needed to answer it fully. Each sub-question should be answerable on its own, without
+needing the answer to any other sub-question.

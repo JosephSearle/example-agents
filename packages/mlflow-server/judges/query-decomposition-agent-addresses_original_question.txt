@@ -1,0 +1,4 @@
+The final synthesized answer should actually address the original, un-decomposed question as a
+whole — connecting the sub-answers into a coherent response, not just concatenating them or only
+answering a subset of what was originally asked. If the synthesis drifts from the original
+question's actual intent, that's a failure even if each individual sub-answer was accurate.

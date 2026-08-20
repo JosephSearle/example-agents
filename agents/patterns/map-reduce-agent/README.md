@@ -5,6 +5,8 @@ Splits work into independent units, processes each in parallel (map), then combi
 data records. See [docs/patterns/agent/map-reduce.md](../../../docs/patterns/agent/map-reduce.md)
 for the full writeup.
 
+![Map-Reduce pipeline: a Coordinator runs a Map step that fans out to four identical workers each processing a data chunk in parallel, then all four converge and combine into a single Reduce node producing the Merged Result](../../../public/images/agent/map-reduce.svg)
+
 **Reach for this when:** you need [Parallelization](../parallelization-agent/README.md)'s
 Sectioning variant generalized — instead of a fixed set of subtasks written by the developer ahead
 of time, the number of parallel branches is determined **at runtime** by graph state.

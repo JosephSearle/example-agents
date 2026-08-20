@@ -1,0 +1,4 @@
+For single_step and multi_step routed answers, the answer should be grounded in the retrieved
+context rather than introducing claims that context doesn't support. no_retrieval-routed answers
+aren't gradable against retrieved context by construction — judge those only on whether they
+honestly reflect general knowledge rather than fabricating specifics that would need a lookup.

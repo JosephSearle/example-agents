@@ -1,0 +1,6 @@
+{"inputs": {"question": "What framework tier does react-agent use, and why is it the default choice?"}}
+{"inputs": {"question": "What's the difference between supervisor and swarm/handoffs in terms of who owns the final reply?"}}
+{"inputs": {"question": "How does map-reduce decide how many workers to spawn?"}}
+{"inputs": {"question": "What does the evaluator-optimizer pattern's loop terminate on?"}}
+{"inputs": {"question": "What credential does this repo need to call its chat models, and how are models actually accessed?"}}
+{"inputs": {"question": "How does this repo avoid an unbounded refund policy loophole?"}}

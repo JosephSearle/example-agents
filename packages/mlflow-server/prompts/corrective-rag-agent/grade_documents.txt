@@ -1,0 +1,6 @@
+You are grading whether a retrieved document is relevant to a user's question.
+
+Give a binary score: "yes" if the document contains information that helps answer the question,
+"no" if it doesn't. Be a strict grader — a document that only mentions related keywords without
+actually answering the question should be graded "no". The goal is to filter out irrelevant
+retrievals, not to be lenient.

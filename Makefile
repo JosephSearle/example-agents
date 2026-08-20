@@ -1,4 +1,4 @@
-.PHONY: sync lint format typecheck test test-unit test-integration test-eval up endpoints up-agents down reset logs demo demo-agent demo-all provision-gateway provision-datasets provision-prompts provision-monitors provision-mcp-registry analyze-experiment tekton-mcp-up tekton-mcp-down
+.PHONY: sync lint format typecheck test test-unit test-integration test-eval up endpoints up-agents down reset logs demo demo-agent demo-all provision-gateway provision-datasets provision-prompts provision-monitors provision-mcp-registry provision-milvus-collections analyze-experiment tekton-mcp-up tekton-mcp-down
 
 # ANSI color helpers for the banner/progress lines below — `$(shell printf ...)` bakes the raw
 # escape bytes into the variable once, so recipe lines can just interpolate $(CYAN)/$(RESET)
@@ -44,6 +44,8 @@ up:
 	@$(MAKE) provision-monitors
 	@echo "$(CYAN)$(BOLD)▶ Provisioning MCP registry...$(RESET)"
 	@$(MAKE) provision-mcp-registry
+	@echo "$(CYAN)$(BOLD)▶ Provisioning Milvus collections...$(RESET)"
+	@$(MAKE) provision-milvus-collections
 	@echo "$(GREEN)$(BOLD)✓ Local infra is up.$(RESET)"
 	@$(MAKE) endpoints
 
@@ -110,7 +112,9 @@ demo-agent:
 demo-all:
 	@for agent in react-agent routing-agent prompt-chaining-agent parallelization-agent \
 			map-reduce-agent orchestrator-workers-agent evaluator-optimizer-agent \
-			supervisor-agent swarm-agent network-mesh-agent; do \
+			supervisor-agent swarm-agent network-mesh-agent basic-rag-agent \
+			retrieve-rerank-agent corrective-rag-agent query-decomposition-agent \
+			self-rag-agent adaptive-rag-agent; do \
 		scripts/demo_agent.sh "$$agent" & \
 	done; \
 	wait
@@ -155,6 +159,17 @@ provision-monitors:
 # to function at all, not an opt-in like `provision-monitors`.
 provision-mcp-registry:
 	uv run --with 'mlflow[mcp]>=3.5.1' python packages/mlflow-server/scripts/provision_mcp_registry.py
+
+# Idempotent (drop-if-exists + recreate, see the script's own docstring for why that's simpler
+# than provision-prompts'/provision-datasets' diff-based idempotency): seeds every Milvus
+# collection from packages/milvus/collections/*.jsonl — currently just basic-rag-agent's own
+# collection, chunks of this repo's own docs/patterns/{agent,rag}/*.md. Runs automatically as
+# part of `make up` (needs a live milvus-standalone, hence chained after `docker compose up
+# --wait`, and an embeddings gateway route, hence chained after `provision-gateway`). Needs
+# basic-rag-agent synced into the workspace venv (its pyproject.toml owns the
+# langchain-milvus/pymilvus dependency, not agents-common — see packages/milvus/README.md).
+provision-milvus-collections:
+	uv run python packages/milvus/scripts/provision_collections.py
 
 # tekton-mcp-server (TEKTON_MCP_BINARY) is a native macOS binary from a separate repo
 # (github.com/tektoncd/mcp-server, not part of this uv workspace) — it can't be containerized

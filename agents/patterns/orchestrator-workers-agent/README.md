@@ -5,6 +5,8 @@ a worker LLM, and synthesizes their results into a final answer. See
 [docs/patterns/agent/orchestrator-workers.md](../../../docs/patterns/agent/orchestrator-workers.md)
 for the full writeup.
 
+![Orchestrator-Workers workflow: a Task goes to a central Orchestrator that dynamically decides how many workers to spawn, delegates to a variable set of workers (Worker 1, Worker 2, and further ghosted workers), which feed back into Orchestrator Synthesize and then Output](../../../public/images/agent/orchestrator-workers.svg)
+
 **Reach for this when:** you need multiple perspectives on the same task but can't predict in
 advance which perspectives would be most valuable. It's a boundary case in Anthropic's own
 taxonomy — orchestrate → workers → synthesize is a fixed high-level shape, so it's still framed

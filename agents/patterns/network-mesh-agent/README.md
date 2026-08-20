@@ -8,6 +8,8 @@ dedicated, actively-maintained first-party doc page or standalone library — re
 only once [Supervisor](../supervisor-agent/README.md)'s hierarchy and
 [Swarm / Handoffs](../swarm-agent/README.md)'s peer-handoff both genuinely don't fit.
 
+![Network / Mesh topology: five agents (Planner, Executor, Reviewer, Researcher, Validator) scattered in a loose non-symmetric layout with non-uniform connections including a route-back edge; any agent can route to any other, and the traversal path is decided at runtime rather than by a fixed graph shape](../../../public/images/agent/network-mesh.svg)
+
 **Reach for this when:** there's genuinely no natural hierarchy (Supervisor) and no natural
 handoff chain where one specialist should own the rest of the conversation (Swarm) — e.g. a small
 set of peers that may need to go back and forth with each other before converging on an answer.

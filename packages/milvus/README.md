@@ -68,12 +68,29 @@ substituted for a stable `v2.x` release — worth revisiting once Milvus 3.0 rea
 beta tag can move or be pulled upstream without the usual stability guarantees of a versioned
 release.
 
-## No agent uses this yet
+## `basic-rag-agent` uses this
 
-`agents_common.config.Settings` now exposes `milvus_uri` (default `http://localhost:19530`, or
-`http://milvus-standalone:19530` inside docker-compose) so a future RAG-pattern agent can pick it
-up the same way `postgres_uri` and `mlflow_tracking_uri` already work — typed, one place to change
-it, no agent hand-assembling a connection string. No example agent in this repo talks to Milvus
-yet; when one does, it'll depend on `pymilvus` and/or `langchain-milvus` in its own
-`pyproject.toml`, not in `agents-common` (same reasoning as `agents-common` not depending on
-`langchain-anthropic` — provider/store-specific clients live with the code that uses them).
+`agents_common.config.Settings` exposes `milvus_uri` (default `http://localhost:19530`, or
+`http://milvus-standalone:19530` inside docker-compose), the same way `postgres_uri` and
+`mlflow_tracking_uri` already work — typed, one place to change it, no agent hand-assembling a
+connection string. [`agents/patterns/basic-rag-agent`](../../agents/patterns/basic-rag-agent/README.md)
+is the first (and so far only) agent that talks to Milvus — it depends on `pymilvus` and
+`langchain-milvus` in its own `pyproject.toml`, not in `agents-common` (same reasoning as
+`agents-common` not depending on `langchain-anthropic` — provider/store-specific clients live with
+the code that uses them).
+
+## `collections/` and `scripts/provision_collections.py`
+
+`collections/*.jsonl` are git-tracked seed corpora, one file per Milvus collection — the same
+"versioned seed file, one per thing being provisioned" convention
+`packages/mlflow-server/prompts/`/`datasets/` already use. `scripts/provision_collections.py`
+syncs each one into a same-named (hyphens → underscores, since Milvus collection names can't
+contain hyphens) Milvus collection: drop-if-exists, then recreate and embed via
+`agents_common.models.get_embeddings` — simpler than `provision-prompts`'/`provision-datasets`'
+diff-based idempotency, since these are demo/test seed collections rather than versioned
+production data. Wired into `make up` as `make provision-milvus-collections`. Depends on an
+embeddings-capable MLflow AI Gateway route already being provisioned (see
+`packages/mlflow-server/scripts/provision_gateway_route.py`'s embeddings-route provisioning) and
+on `basic-rag-agent` being synced into the workspace venv, since this package has no
+`pyproject.toml` of its own and rides on `basic-rag-agent`'s `langchain-milvus`/`pymilvus`
+dependency the same way `mlflow-server`'s provisioning scripts ride on `agents-common`'s.

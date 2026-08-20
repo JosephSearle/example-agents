@@ -1,0 +1,6 @@
+{"inputs": {"question": "What is a ReAct loop, in general terms?"}}
+{"inputs": {"question": "What does 'idempotent' mean?"}}
+{"inputs": {"question": "What framework tier does react-agent use in this repo?"}}
+{"inputs": {"question": "How does map-reduce-agent decide how many workers to spawn?"}}
+{"inputs": {"question": "What framework tier does react-agent use, and separately, what tier does swarm-agent use, and how do those tiers differ?"}}
+{"inputs": {"question": "How does the supervisor pattern route work versus how does the routing-agent pattern route work, and what's the key difference?"}}

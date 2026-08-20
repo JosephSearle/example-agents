@@ -6,6 +6,8 @@ sub-agents as tools and coordinates the overall response. See
 [docs/patterns/agent/supervisor.md](../../../docs/patterns/agent/supervisor.md) for the full
 writeup.
 
+![Supervisor topology: a central Supervisor coordinator connected by bidirectional arrows to three workers (Researcher, Analyst, Writer), with no direct links between the workers; all control flow returns through the Supervisor before reaching Output](../../../public/images/agent/supervisor.svg)
+
 **Reach for this when:** you have multiple distinct domains, each with multiple tools or complex
 logic, you want centralized workflow control, and sub-agents don't need to converse with users
 directly. For simpler cases with just a few tools, a single agent (`react-agent`) is enough. If

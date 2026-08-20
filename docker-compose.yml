@@ -454,6 +454,155 @@ services:
     profiles:
       - agents  # `docker compose --profile agents up` — not started by a plain `docker compose up`
 
+  basic-rag-agent:
+    build:
+      context: .
+      dockerfile: agents/patterns/basic-rag-agent/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+      milvus-standalone:
+        condition: service_healthy
+    environment:
+      # Settings.postgres_uri is built from these components — only POSTGRES_HOST changes
+      # from .env's "localhost" default, since containers reach Postgres over the compose
+      # network rather than the published host port.
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-agents}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      # The only credential this agent needs — authenticates tracking, evals, and AI Gateway
+      # model calls alike. See agents_common.models.get_chat_model.
+      MLFLOW_TRACKING_TOKEN: ${MLFLOW_TRACKING_TOKEN:-}
+      # Same host/container duality as MLFLOW_TRACKING_URI above — this agent is the first to
+      # actually read Settings.milvus_uri at runtime (see basic_rag_agent.graph.build_rag_graph).
+      MILVUS_URI: http://milvus-standalone:19530
+    profiles:
+      - agents  # `docker compose --profile agents up` — not started by a plain `docker compose up`
+
+  retrieve-rerank-agent:
+    build:
+      context: .
+      dockerfile: agents/patterns/retrieve-rerank-agent/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+      milvus-standalone:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-agents}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_TRACKING_TOKEN: ${MLFLOW_TRACKING_TOKEN:-}
+      MILVUS_URI: http://milvus-standalone:19530
+      # Not gateway-provisioned — a directly-configured HTTP endpoint, see
+      # agents_common.models.get_reranker's docstring.
+      RERANKER_MODEL_BASE_URL: ${RERANKER_MODEL_BASE_URL:-}
+      RERANKER_MODEL_API_KEY: ${RERANKER_MODEL_API_KEY:-}
+    profiles:
+      - agents  # `docker compose --profile agents up` — not started by a plain `docker compose up`
+
+  corrective-rag-agent:
+    build:
+      context: .
+      dockerfile: agents/patterns/corrective-rag-agent/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+      milvus-standalone:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-agents}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_TRACKING_TOKEN: ${MLFLOW_TRACKING_TOKEN:-}
+      MILVUS_URI: http://milvus-standalone:19530
+    profiles:
+      - agents  # `docker compose --profile agents up` — not started by a plain `docker compose up`
+
+  query-decomposition-agent:
+    build:
+      context: .
+      dockerfile: agents/patterns/query-decomposition-agent/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+      milvus-standalone:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-agents}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_TRACKING_TOKEN: ${MLFLOW_TRACKING_TOKEN:-}
+      MILVUS_URI: http://milvus-standalone:19530
+    profiles:
+      - agents  # `docker compose --profile agents up` — not started by a plain `docker compose up`
+
+  self-rag-agent:
+    build:
+      context: .
+      dockerfile: agents/patterns/self-rag-agent/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+      milvus-standalone:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-agents}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_TRACKING_TOKEN: ${MLFLOW_TRACKING_TOKEN:-}
+      MILVUS_URI: http://milvus-standalone:19530
+    profiles:
+      - agents  # `docker compose --profile agents up` — not started by a plain `docker compose up`
+
+  adaptive-rag-agent:
+    build:
+      context: .
+      dockerfile: agents/patterns/adaptive-rag-agent/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+      milvus-standalone:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-agents}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_TRACKING_TOKEN: ${MLFLOW_TRACKING_TOKEN:-}
+      MILVUS_URI: http://milvus-standalone:19530
+    profiles:
+      - agents  # `docker compose --profile agents up` — not started by a plain `docker compose up`
+
 volumes:
   postgres-data:
   pgadmin-data:

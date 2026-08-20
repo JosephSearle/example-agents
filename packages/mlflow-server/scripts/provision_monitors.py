@@ -33,7 +33,24 @@ from __future__ import annotations
 from agents_common import configure_logging, register_production_monitors
 import structlog
 
-_AGENTS = ["react_agent", "routing_agent", "prompt_chaining_agent"]
+_AGENTS = [
+    "react_agent",
+    "routing_agent",
+    "prompt_chaining_agent",
+    "parallelization_agent",
+    "orchestrator_workers_agent",
+    "evaluator_optimizer_agent",
+    "map_reduce_agent",
+    "supervisor_agent",
+    "swarm_agent",
+    "network_mesh_agent",
+    "basic_rag_agent",
+    "retrieve_rerank_agent",
+    "corrective_rag_agent",
+    "query_decomposition_agent",
+    "self_rag_agent",
+    "adaptive_rag_agent",
+]
 
 _logger = structlog.get_logger(__name__)
 
